@@ -9,7 +9,7 @@ validate_boolean <- function(param, param_name){
   if(is.null(param) | length(param) != 1){
     stop(sprintf("Invalid argument: %s. %s must be TRUE or FALSE", param_name, param_name))
   }
-  if (is.na(param) | (param != TRUE & param != FALSE)){
+  if (is.na(param) | !is.logical(param)){
     stop(sprintf("Invalid argument: %s. %s must be TRUE or FALSE", param_name, param_name))
   }
 }
@@ -109,7 +109,7 @@ validate_df_binary <- function(param, param_name){
   }
   binary <- sapply(param, is_binary)
   if (FALSE %in% unique(binary)){
-    stop(sprintf("Invalid argument: main_data_missing_field_indicators_data. All variables must be binary or logical"))
+    stop(sprintf("Invalid argument: %s. All variables must be binary or logical", param_name))
   }
 }
 

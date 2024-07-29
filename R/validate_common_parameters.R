@@ -34,9 +34,7 @@ validate_common_parameters <- function(data = NULL,
   }
 
   if (!is.null(output_format)){
-    if (length(output_format) != 1) {
-      stop("Invalid argument: output_format. Options: 'pdf' or 'docx'")
-    }
+    validate_string(output_format)
     if (output_format != "pdf" & output_format != "docx"){
       stop("Invalid argument: output_format. Options: 'pdf' or 'docx'")
     }
