@@ -1,4 +1,4 @@
-test_that("boolean helper function validates logical parameter", {
+test_that("Testing boolean helper function validates logical parameter", {
   # valid inputs
   expect_no_error(validate_boolean(TRUE, "b"))
   expect_no_error(validate_boolean(FALSE, "b"))
@@ -26,7 +26,7 @@ test_that("boolean helper function validates logical parameter", {
                "Invalid argument: b. b must be TRUE or FALSE")
 })
 
-test_that("string helper function validates string parameter", {
+test_that("Testing string helper function validates string parameter", {
   # valid input
   expect_no_error(validate_string("hello", "s"))
 
@@ -53,7 +53,7 @@ test_that("string helper function validates string parameter", {
                "Invalid argument: s. s must be a single character string")
 })
 
-test_that("numeric helper function validates numeric parameter", {
+test_that("Testing numeric helper function validates numeric parameter", {
   # valid inputs
   expect_no_error(validate_number(333, "n"))
   expect_no_error(validate_number(-5.8, "n"))
@@ -83,7 +83,7 @@ test_that("numeric helper function validates numeric parameter", {
                "Invalid argument: n. n must be a single numeric value")
 })
 
-test_that("string vector helper function validates string vector parameter", {
+test_that("Testing string vector helper function validates string vector parameter", {
   # valid inputs
   expect_no_error(validate_string_vector("me", "v"))
   expect_no_error(validate_string_vector(c("me"), "v"))
@@ -110,7 +110,7 @@ test_that("string vector helper function validates string vector parameter", {
                "Invalid argument: v. v must be a character string vector")
 })
 
-test_that("dataframe helper function validates dataframe parameter", {
+test_that("Testing dataframe helper function validates dataframe parameter", {
   # valid inputs
   expect_no_error(validate_df(data.frame(var1 = "var", var2 = TRUE, var3 = 77), "d"))
   expect_no_error(validate_df(data.table(a = c(9,3,2,1)), "d"))
@@ -144,7 +144,7 @@ test_that("dataframe helper function validates dataframe parameter", {
                "Invalid argument: d. d cannot be empty")
 })
 
-test_that("var in dataframe helper function validates variable parameter is in the data parameter", {
+test_that("Testing var in dataframe helper function validates variable parameter is in the data parameter", {
   # valid inputs
   expect_no_error(validate_var_in_data("Species", iris, "type", "data"))
   expect_no_error(validate_var_in_data("air", data.table(air = 22), "type", "data"))
@@ -154,7 +154,7 @@ test_that("var in dataframe helper function validates variable parameter is in t
   expect_error(validate_var_in_data("eyes", iris, "type", "data"))
 })
 
-test_that("binary/logical dataframe helper function validates binary/logical dataframe parameter", {
+test_that("Testing binary/logical dataframe helper function validates binary/logical dataframe parameter", {
   # valid inputs
   expect_no_error(validate_df_binary(data.frame(bin = c(0,1,0,0,0,1)), "bl"))
   expect_no_error(validate_df_binary(data.frame(a = 1, b = 0), "bl"))
@@ -168,4 +168,30 @@ test_that("binary/logical dataframe helper function validates binary/logical dat
                "Invalid argument: bl. All variables must be binary or logical")
   expect_error(validate_df_binary(data.frame(bin = c(TRUE, FALSE), bin2 = c(0,1), not = c("hi", 0)), "bl"),
                "Invalid argument: bl. All variables must be binary or logical")
+})
+
+
+test_that("Testing flextable helper function validates flextable object parameter", {
+  # valid inputs
+  expect_no_error(validate_flextable(flextable(mtcars), "tbl"))
+
+  # invalid inputs
+  expect_error(validate_flextable(mtcars, "tbl"),
+               "Invalid argument: tbl. tbl must be a flextable object")
+  expect_error(validate_flextable("flextable", "tbl"),
+               "Invalid argument: tbl. tbl must be a flextable object")
+  expect_error(validate_flextable(39, "tbl"),
+               "Invalid argument: tbl. tbl must be a flextable object")
+  expect_error(validate_flextable(FALSE, "tbl"),
+               "Invalid argument: tbl. tbl must be a flextable object")
+  expect_error(validate_flextable(gtsummary::tbl_summary(iris), "tbl"),
+               "Invalid argument: tbl. tbl must be a flextable object")
+  expect_error(validate_flextable(NA, "tbl"),
+               "Invalid argument: tbl. tbl must be a flextable object")
+  expect_error(validate_flextable(NULL, "tbl"),
+               "Invalid argument: tbl. tbl must be a flextable object")
+  expect_error(validate_flextable(list(tbl = list()), "tbl"),
+               "Invalid argument: tbl. tbl must be a flextable object")
+  expect_error(validate_flextable(factor(), "tbl"),
+               "Invalid argument: tbl. tbl must be a flextable object")
 })

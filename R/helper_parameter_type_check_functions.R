@@ -113,3 +113,15 @@ validate_df_binary <- function(param, param_name){
   }
 }
 
+
+#' Validate Parameter is a `flextable`
+#'
+#' @param ft The `flextable` to check.
+#' @param param_name The name of the parameter to be used in potential error messages.
+#'
+validate_flextable <- function(ft, param_name){
+  if (!('flextable' %in% unique(class(ft)))){
+    stop(sprintf("Invalid argument: %s. %s must be a flextable object", param_name, param_name))
+  }
+}
+
