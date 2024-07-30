@@ -10,7 +10,7 @@ set_table_width(flextable)
 \item{flextable}{A `flextable` object.}
 }
 \value{
-The `flextable` adjusted to the desired width
+The `flextable` adjusted to the desired width.
 }
 \description{
 Sets the width of the table based on its desired width (\code{\link{dim_pretty}})

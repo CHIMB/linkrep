@@ -6,7 +6,7 @@
 #'
 #' @param flextable A `flextable` object.
 #'
-#' @return The `flextable` adjusted to the desired width
+#' @return The `flextable` adjusted to the desired width.
 #' @import flextable
 #'
 set_table_width <- function(flextable){
@@ -14,7 +14,7 @@ set_table_width <- function(flextable){
   LANDSCAPE_WIDTH <- 9
   MIN_COL_WIDTH <- 0.8
 
-  validate_flextable(flextable)
+  validate_flextable(flextable, "flextable")
 
   desired_dims <- dim_pretty(flextable)
   curr_width <- sum(desired_dims$widths)
