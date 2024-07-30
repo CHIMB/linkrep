@@ -3,4 +3,6 @@
 import(flextable)
 importFrom(data.table,data.table)
 importFrom(data.table,is.data.table)
+importFrom(flextable,border_remove)
+importFrom(flextable,delete_part)
 importFrom(systemfonts,system_fonts)
