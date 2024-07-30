@@ -1,4 +1,4 @@
-test_that("Testing boolean helper function validates logical parameter", {
+test_that("Testing validate_boolean function", {
   # valid inputs
   expect_no_error(validate_boolean(TRUE, "b"))
   expect_no_error(validate_boolean(FALSE, "b"))
@@ -26,7 +26,7 @@ test_that("Testing boolean helper function validates logical parameter", {
                "Invalid argument: b. b must be TRUE or FALSE")
 })
 
-test_that("Testing string helper function validates string parameter", {
+test_that("Testing validate_string function", {
   # valid input
   expect_no_error(validate_string("hello", "s"))
 
@@ -53,7 +53,7 @@ test_that("Testing string helper function validates string parameter", {
                "Invalid argument: s. s must be a single character string")
 })
 
-test_that("Testing numeric helper function validates numeric parameter", {
+test_that("Testing validate_number function", {
   # valid inputs
   expect_no_error(validate_number(333, "n"))
   expect_no_error(validate_number(-5.8, "n"))
@@ -83,7 +83,7 @@ test_that("Testing numeric helper function validates numeric parameter", {
                "Invalid argument: n. n must be a single numeric value")
 })
 
-test_that("Testing string vector helper function validates string vector parameter", {
+test_that("Testing validate_string_vector function", {
   # valid inputs
   expect_no_error(validate_string_vector("me", "v"))
   expect_no_error(validate_string_vector(c("me"), "v"))
@@ -110,7 +110,7 @@ test_that("Testing string vector helper function validates string vector paramet
                "Invalid argument: v. v must be a character string vector")
 })
 
-test_that("Testing dataframe helper function validates dataframe parameter", {
+test_that("Testing validate_df function", {
   # valid inputs
   expect_no_error(validate_df(data.frame(var1 = "var", var2 = TRUE, var3 = 77), "d"))
   expect_no_error(validate_df(data.table(a = c(9,3,2,1)), "d"))
@@ -144,7 +144,7 @@ test_that("Testing dataframe helper function validates dataframe parameter", {
                "Invalid argument: d. d cannot be empty")
 })
 
-test_that("Testing var in dataframe helper function validates variable parameter is in the data parameter", {
+test_that("Testing validate_var_in_data function", {
   # valid inputs
   expect_no_error(validate_var_in_data("Species", iris, "type", "data"))
   expect_no_error(validate_var_in_data("air", data.table(air = 22), "type", "data"))
@@ -154,7 +154,7 @@ test_that("Testing var in dataframe helper function validates variable parameter
   expect_error(validate_var_in_data("eyes", iris, "type", "data"))
 })
 
-test_that("Testing binary/logical dataframe helper function validates binary/logical dataframe parameter", {
+test_that("Testing validate_df_binary function", {
   # valid inputs
   expect_no_error(validate_df_binary(data.frame(bin = c(0,1,0,0,0,1)), "bl"))
   expect_no_error(validate_df_binary(data.frame(a = 1, b = 0), "bl"))
@@ -171,7 +171,7 @@ test_that("Testing binary/logical dataframe helper function validates binary/log
 })
 
 
-test_that("Testing flextable helper function validates flextable object parameter", {
+test_that("Testing validate_flextable function", {
   # valid inputs
   expect_no_error(validate_flextable(flextable(mtcars), "tbl"))
 
@@ -195,3 +195,85 @@ test_that("Testing flextable helper function validates flextable object paramete
   expect_error(validate_flextable(factor(), "tbl"),
                "Invalid argument: tbl. tbl must be a flextable object")
 })
+
+
+test_that("Testing extra conditions for validate_common_parameters function", {
+  # output_format parameter checks:
+  # valid inputs
+  expect_no_error(validate_common_parameters(output_format = "pdf"))
+  expect_no_error(validate_common_parameters(output_format = "docx"))
+
+  # edge cases
+  expect_error(validate_common_parameters(output_format = "not correct"),
+               "Invalid argument: output_format. Options: 'pdf' or 'docx'")
+  expect_error(validate_common_parameters(output_format = "pdff"),
+               "Invalid argument: output_format. Options: 'pdf' or 'docx'")
+  expect_error(validate_common_parameters(output_format = "docxdocx"),
+               "Invalid argument: output_format. Options: 'pdf' or 'docx'")
+
+  # num_decimal_places parameter checks:
+  # valid inputs
+  expect_no_error(validate_common_parameters(num_decimal_places = 0))
+  expect_no_error(validate_common_parameters(num_decimal_places = 10.0))
+
+  # edge cases
+  expect_error(validate_common_parameters(num_decimal_places = -1),
+               "Invalid argument: num_decimal_places must be >= 0.")
+  expect_error(validate_common_parameters(num_decimal_places = -3),
+               "Invalid argument: num_decimal_places must be >= 0.")
+
+  # font_size parameter checks:
+  # valid inputs
+  expect_no_error(validate_common_parameters(font_size = 1))
+  expect_no_error(validate_common_parameters(font_size = 50))
+
+  # edge cases
+  expect_error(validate_common_parameters(font_size = 0),
+               "Invalid argument: font_size. font_size must be > 0.")
+  expect_error(validate_common_parameters(font_size = -45),
+               "Invalid argument: font_size. font_size must be > 0.")
+
+  # font_style parameter checks:
+  # valid inputs
+  expect_no_error(validate_common_parameters(font_style = system_fonts()$family[3]))
+  expect_no_error(validate_common_parameters(font_style = system_fonts()$name[15]))
+
+  # edge cases
+  expect_error(validate_common_parameters(font_style = "fonty1"))
+  expect_error(validate_common_parameters(font_style = "i hope this isn't the name of a font"))
+})
+
+# test_that("testing extra conditions for num_decimal_places parameter", {
+#   # valid inputs
+#   expect_no_error(validate_common_parameters(num_decimal_places = 0))
+#   expect_no_error(validate_common_parameters(num_decimal_places = 10.0))
+#
+#   # edge cases
+#   expect_error(validate_common_parameters(num_decimal_places = -1),
+#                "Invalid argument: num_decimal_places must be >= 0.")
+#   expect_error(validate_common_parameters(num_decimal_places = -3),
+#                "Invalid argument: num_decimal_places must be >= 0.")
+# })
+
+# test_that("testing extra conditions for font_size parameter", {
+#   # valid inputs
+#   expect_no_error(validate_common_parameters(font_size = 1))
+#   expect_no_error(validate_common_parameters(font_size = 50))
+#
+#   # edge cases
+#   expect_error(validate_common_parameters(font_size = 0),
+#                "Invalid argument: font_size. font_size must be > 0.")
+#   expect_error(validate_common_parameters(font_size = -45),
+#                "Invalid argument: font_size. font_size must be > 0.")
+# })
+
+# test_that("testing extra conditions for font_style parameter", {
+#   # valid inputs
+#   expect_no_error(validate_common_parameters(font_style = system_fonts()$family[3]))
+#   expect_no_error(validate_common_parameters(font_style = system_fonts()$name[15]))
+#
+#   # edge cases
+#   expect_error(validate_common_parameters(font_style = "fonty1"))
+#   expect_error(validate_common_parameters(font_style = "i hope this isn't the name of a font"))
+# })
+
