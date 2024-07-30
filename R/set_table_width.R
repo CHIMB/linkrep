@@ -7,6 +7,7 @@
 #' @param flextable A `flextable` object.
 #'
 #' @return The `flextable` adjusted to the desired width.
+#'
 #' @import flextable
 #'
 set_table_width <- function(flextable){

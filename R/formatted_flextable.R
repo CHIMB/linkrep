@@ -12,6 +12,7 @@
 #' @param body_align A character string specifying the alignment of the body, must be one of "`right`", "`left`" or "`center`".
 #'
 #' @return A `flextable`
+#'
 #' @import flextable
 #'
 formatted_flextable <- function(data,
@@ -81,17 +82,23 @@ formatted_flextable <- function(data,
   table <- font(table, fontname = font_style, part = "all")
 
   if(!is.null(footnotes)) {
-    table <- add_footer_lines(table, value = paste(footnotes, collapse = "\n"))
+    table <- add_footer_lines(table, values = paste(footnotes, collapse = "\n"))
   }
 
   # format the numbers in the table
-  if (!is.null(thousands_separator) & !is.null(decimal_mark) & !is.null(num_decimal_places)){
+  if (!is.null(thousands_separator)){
     table <- colformat_double(table,
-                              big.mark = thousands_separator,
-                              decimal.mark = decimal_mark,
-                              digits = num_decimal_places)
+                              big.mark = thousands_separator)
     table <- colformat_int(table,
                            big.mark = thousands_separator)
+  }
+
+  if (!is.null(decimal_mark)){
+    table <- colformat_double(table, decimal.mark = decimal_mark)
+  }
+
+  if (!is.null(num_decimal_places)){
+    table <- colformat_double(table, digits = num_decimal_places)
   }
 
   if (!is.null(header_align)){

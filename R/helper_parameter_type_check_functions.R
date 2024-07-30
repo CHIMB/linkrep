@@ -33,21 +33,6 @@ validate_boolean <- function(param, param_name){
 }
 
 
-#' Validate Numeric Parameters
-#'
-#' Check if parameter is a numeric value.
-#'
-#' @param param The numeric parameter to check.
-#' @param param_name The name of the parameter to be used in potential error messages.
-#'
-validate_number <- function(param, param_name){
-  validate_string(param_name, "param_name")
-  if ((!is.numeric(param) & !is.integer(param)) | length(param) != 1){
-    stop(sprintf("Invalid argument: %s. %s must be a single numeric value", param_name, param_name))
-  }
-}
-
-
 #' Validate String Vector Parameters
 #'
 #' Check if parameter is a string vector.
@@ -61,6 +46,37 @@ validate_string_vector <- function(param, param_name){
     stop(sprintf("Invalid argument: %s. %s must be a character string vector", param_name, param_name))
   }
 }
+
+
+#' Validate Numeric Parameters
+#'
+#' Check if parameter is a numeric value.
+#'
+#' @param param The numeric parameter to check.
+#' @param param_name The name of the parameter to be used in potential error messages.
+#'
+validate_numeric <- function(param, param_name){
+  validate_string(param_name, "param_name")
+  if ((!is.numeric(param) & !is.integer(param)) | length(param) != 1){
+    stop(sprintf("Invalid argument: %s. %s must be a single numeric value", param_name, param_name))
+  }
+}
+
+
+#' Validate Numeric Vector Parameters
+#'
+#' Check if parameter is a numeric vector.
+#'
+#' @param param The numeric parameter to check.
+#' @param param_name The name of the parameter to be used in potential error messages.
+#'
+validate_numeric_vector <- function(param, param_name){
+  validate_string(param_name, "param_name")
+  if ((!is.numeric(param) & !is.integer(param))){
+    stop(sprintf("Invalid argument: %s. %s must be a numeric vector", param_name, param_name))
+  }
+}
+
 
 
 #' Validate Dataframe Parameters
@@ -191,7 +207,7 @@ validate_common_parameters <- function(data = NULL,
   }
 
   if (!is.null(num_decimal_places)){
-    validate_number(num_decimal_places, "num_decimal_places")
+    validate_numeric(num_decimal_places, "num_decimal_places")
     if (num_decimal_places < 0){
       stop("Invalid argument: num_decimal_places must be >= 0.")
     }
@@ -202,7 +218,7 @@ validate_common_parameters <- function(data = NULL,
   }
 
   if (!is.null(font_size)){
-    validate_number(font_size, "font_size")
+    validate_numeric(font_size, "font_size")
     if (font_size <= 0){
       stop("Invalid argument: font_size. font_size must be > 0.")
     }
@@ -215,5 +231,4 @@ validate_common_parameters <- function(data = NULL,
     }
   }
 }
-
 

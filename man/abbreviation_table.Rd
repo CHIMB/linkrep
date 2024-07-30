@@ -24,8 +24,8 @@ abbreviation_table(
 \item{display_headers}{A logical indicating whether to display the headers in the table. Default is `TRUE`.}
 }
 \value{
-A `flextable`
+A `flextable`.
 }
 \description{
-Generates a formatted flextable with the option of removing the headers
+Generates a formatted flextable specific to the abbreviation table.
 }

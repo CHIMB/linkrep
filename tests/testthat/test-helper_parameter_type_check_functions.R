@@ -53,36 +53,6 @@ test_that("Testing validate_string function", {
                "Invalid argument: s. s must be a single character string")
 })
 
-test_that("Testing validate_number function", {
-  # valid inputs
-  expect_no_error(validate_number(333, "n"))
-  expect_no_error(validate_number(-5.8, "n"))
-  expect_no_error(validate_number(as.integer(10), "n"))
-  expect_no_error(validate_number(90L, "n"))
-
-  # invalid inputs
-  expect_error(validate_number(c(2,3,4), "n"),
-               "Invalid argument: n. n must be a single numeric value")
-  expect_error(validate_number("-11", "n"),
-               "Invalid argument: n. n must be a single numeric value")
-  expect_error(validate_number(FALSE, "n"),
-               "Invalid argument: n. n must be a single numeric value")
-  expect_error(validate_number(NA, "n"),
-               "Invalid argument: n. n must be a single numeric value")
-  expect_error(validate_number(NULL, "n"),
-               "Invalid argument: n. n must be a single numeric value")
-  expect_error(validate_number(list(s = c(9,0,2,1)), "n"),
-               "Invalid argument: n. n must be a single numeric value")
-  expect_error(validate_number(data.frame(), "n"),
-               "Invalid argument: n. n must be a single numeric value")
-  expect_error(validate_number(factor(), "n"),
-               "Invalid argument: n. n must be a single numeric value")
-  expect_error(validate_number(data.table(), "n"),
-               "Invalid argument: n. n must be a single numeric value")
-  expect_error(validate_number(c(), "n"),
-               "Invalid argument: n. n must be a single numeric value")
-})
-
 test_that("Testing validate_string_vector function", {
   # valid inputs
   expect_no_error(validate_string_vector("me", "v"))
@@ -108,6 +78,64 @@ test_that("Testing validate_string_vector function", {
                "Invalid argument: v. v must be a character string vector")
   expect_error(validate_string_vector(c(), "v"),
                "Invalid argument: v. v must be a character string vector")
+})
+
+test_that("Testing validate_numeric function", {
+  # valid inputs
+  expect_no_error(validate_numeric(333, "n"))
+  expect_no_error(validate_numeric(-5.8, "n"))
+  expect_no_error(validate_numeric(as.integer(10), "n"))
+  expect_no_error(validate_numeric(90L, "n"))
+
+  # invalid inputs
+  expect_error(validate_numeric(c(2,3,4), "n"),
+               "Invalid argument: n. n must be a single numeric value")
+  expect_error(validate_numeric("-11", "n"),
+               "Invalid argument: n. n must be a single numeric value")
+  expect_error(validate_numeric(FALSE, "n"),
+               "Invalid argument: n. n must be a single numeric value")
+  expect_error(validate_numeric(NA, "n"),
+               "Invalid argument: n. n must be a single numeric value")
+  expect_error(validate_numeric(NULL, "n"),
+               "Invalid argument: n. n must be a single numeric value")
+  expect_error(validate_numeric(list(s = c(9,0,2,1)), "n"),
+               "Invalid argument: n. n must be a single numeric value")
+  expect_error(validate_numeric(data.frame(), "n"),
+               "Invalid argument: n. n must be a single numeric value")
+  expect_error(validate_numeric(factor(), "n"),
+               "Invalid argument: n. n must be a single numeric value")
+  expect_error(validate_numeric(data.table(), "n"),
+               "Invalid argument: n. n must be a single numeric value")
+  expect_error(validate_numeric(c(), "n"),
+               "Invalid argument: n. n must be a single numeric value")
+})
+
+test_that("Testing validate_numeric_vector function", {
+  # valid inputs
+  expect_no_error(validate_numeric_vector(333, "n"))
+  expect_no_error(validate_numeric_vector(as.integer(-5.8), "n"))
+  expect_no_error(validate_numeric_vector(90L, "n"))
+  expect_no_error(validate_numeric_vector(c(-11, 50L, 0, 981), "n"))
+
+  # invalid inputs
+  expect_error(validate_numeric_vector("-11", "n"),
+               "Invalid argument: n. n must be a numeric vector")
+  expect_error(validate_numeric_vector(FALSE, "n"),
+               "Invalid argument: n. n must be a numeric vector")
+  expect_error(validate_numeric_vector(NA, "n"),
+               "Invalid argument: n. n must be a numeric vector")
+  expect_error(validate_numeric_vector(NULL, "n"),
+               "Invalid argument: n. n must be a numeric vector")
+  expect_error(validate_numeric_vector(list(s = c(9,0,2,1)), "n"),
+               "Invalid argument: n. n must be a numeric vector")
+  expect_error(validate_numeric_vector(data.frame(), "n"),
+               "Invalid argument: n. n must be a numeric vector")
+  expect_error(validate_numeric_vector(factor(), "n"),
+               "Invalid argument: n. n must be a numeric vector")
+  expect_error(validate_numeric_vector(data.table(), "n"),
+               "Invalid argument: n. n must be a numeric vector")
+  expect_error(validate_numeric_vector(c(), "n"),
+               "Invalid argument: n. n must be a numeric vector")
 })
 
 test_that("Testing validate_df function", {
@@ -242,38 +270,3 @@ test_that("Testing extra conditions for validate_common_parameters function", {
   expect_error(validate_common_parameters(font_style = "fonty1"))
   expect_error(validate_common_parameters(font_style = "i hope this isn't the name of a font"))
 })
-
-# test_that("testing extra conditions for num_decimal_places parameter", {
-#   # valid inputs
-#   expect_no_error(validate_common_parameters(num_decimal_places = 0))
-#   expect_no_error(validate_common_parameters(num_decimal_places = 10.0))
-#
-#   # edge cases
-#   expect_error(validate_common_parameters(num_decimal_places = -1),
-#                "Invalid argument: num_decimal_places must be >= 0.")
-#   expect_error(validate_common_parameters(num_decimal_places = -3),
-#                "Invalid argument: num_decimal_places must be >= 0.")
-# })
-
-# test_that("testing extra conditions for font_size parameter", {
-#   # valid inputs
-#   expect_no_error(validate_common_parameters(font_size = 1))
-#   expect_no_error(validate_common_parameters(font_size = 50))
-#
-#   # edge cases
-#   expect_error(validate_common_parameters(font_size = 0),
-#                "Invalid argument: font_size. font_size must be > 0.")
-#   expect_error(validate_common_parameters(font_size = -45),
-#                "Invalid argument: font_size. font_size must be > 0.")
-# })
-
-# test_that("testing extra conditions for font_style parameter", {
-#   # valid inputs
-#   expect_no_error(validate_common_parameters(font_style = system_fonts()$family[3]))
-#   expect_no_error(validate_common_parameters(font_style = system_fonts()$name[15]))
-#
-#   # edge cases
-#   expect_error(validate_common_parameters(font_style = "fonty1"))
-#   expect_error(validate_common_parameters(font_style = "i hope this isn't the name of a font"))
-# })
-
