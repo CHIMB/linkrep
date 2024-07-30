@@ -14,8 +14,14 @@ Imports:
     data.table,
     dplyr,
     flextable,
+    fmsb,
+    ggplot2,
     gtsummary,
-    systemfonts
+    Hmisc,
+    lubridate,
+    systemfonts,
+    tidyr,
+    tidyselect
 Suggests: 
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
