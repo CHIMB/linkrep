@@ -7,10 +7,25 @@
 #'
 validate_string <- function(param, param_name){
   if (!is.character(param_name) | length(param_name) != 1){
-    stop("Invalid argument: param_name. param_name must be a single character string")
+    stop("Invalid argument: param_name. param_name must be a single string")
   }
   if (!is.character(param) | length(param) != 1){
-    stop(sprintf("Invalid argument: %s. %s must be a single character string", param_name, param_name))
+    stop(sprintf("Invalid argument: %s. %s must be a single string", param_name, param_name))
+  }
+}
+
+
+#' Validate String Vector Parameters
+#'
+#' Check if parameter is a string vector.
+#'
+#' @param param The string vector parameter to check.
+#' @param param_name The name of the parameter to be used in potential error messages.
+#'
+validate_string_vector <- function(param, param_name){
+  validate_string(param_name, "param_name")
+  if (!is.character(param)) {
+    stop(sprintf("Invalid argument: %s. %s must be a character string vector", param_name, param_name))
   }
 }
 
@@ -29,21 +44,6 @@ validate_boolean <- function(param, param_name){
   }
   if (is.na(param) | !is.logical(param)){
     stop(sprintf("Invalid argument: %s. %s must be TRUE or FALSE", param_name, param_name))
-  }
-}
-
-
-#' Validate String Vector Parameters
-#'
-#' Check if parameter is a string vector.
-#'
-#' @param param The string vector parameter to check.
-#' @param param_name The name of the parameter to be used in potential error messages.
-#'
-validate_string_vector <- function(param, param_name){
-  validate_string(param_name, "param_name")
-  if (!is.character(param)) {
-    stop(sprintf("Invalid argument: %s. %s must be a character string vector", param_name, param_name))
   }
 }
 

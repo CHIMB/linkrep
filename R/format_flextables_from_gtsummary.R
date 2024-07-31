@@ -6,7 +6,7 @@
 #' @param output_format A character string specifying the output format, must be one of "`pdf`" or "`docx`".
 #' @param font_size A numeric specifying the font size for the table text.
 #' @param font_style A character string specifying the font. Must be present in \code{system_fonts()$name} or \code{system_fonts()$family} in the package \code{\link{system_fonts}}
-#' @param footnotes A character vector of additional footnotes. Each element in the vector will be displayed on a new line.
+#' @param footnotes A character string of footnotes. Must be one string when called with this function.
 #'
 #' @return A `flextable`.
 #'
@@ -20,10 +20,12 @@ format_flextables_from_gtsummary <- function(flextable,
   validate_flextable(flextable, "flextable")
   validate_common_parameters(output_format = output_format,
                              font_size = font_size,
-                             font_style = font_style,
-                             footnotes = footnotes)
+                             font_style = font_style)
 
-  flextable <- add_footer_lines(flextable, values = footnotes)
+  if (!is.null(footnotes)){
+    validate_string(footnotes, "footnotes")
+    flextable <- add_footer_lines(flextable, values = footnotes)
+  }
 
   flextable <- fontsize(flextable, size = font_size, part = "all")
   flextable <- font(flextable, fontname = font_style, part = "all")

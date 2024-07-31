@@ -14,7 +14,7 @@
 #'
 #' @return A `flextable` that was originally a `gtsummary`.
 #'
-#' @importFrom gtsummary theme_gtsummary_language tbl_summary as_flex_table modify_header modify_footnote
+#' @importFrom gtsummary theme_gtsummary_language tbl_summary as_flex_table modify_header modify_footnote all_categorical everything all_stat_cols
 #'
 missingness_table <- function(data,
                               output_format,

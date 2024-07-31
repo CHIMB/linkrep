@@ -78,9 +78,6 @@ formatted_flextable <- function(data,
 
   table <- set_flextable_labels(data, table)
 
-  table <- fontsize(table, size = font_size, part = "all")
-  table <- font(table, fontname = font_style, part = "all")
-
   if(!is.null(footnotes)) {
     table <- add_footer_lines(table, values = paste(footnotes, collapse = "\n"))
   }
@@ -108,6 +105,9 @@ formatted_flextable <- function(data,
   if (!is.null(body_align)){
     table <- flextable::align(table, align = body_align, part = "body")
   }
+
+  table <- fontsize(table, size = font_size, part = "all")
+  table <- font(table, fontname = font_style, part = "all")
 
   if (output_format == "pdf"){
     table <- set_table_width(table)

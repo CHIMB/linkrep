@@ -32,25 +32,25 @@ test_that("Testing validate_string function", {
 
   # invalid inputs
   expect_error(validate_string(c("str1", "str2", "str3"), "s"),
-               "Invalid argument: s. s must be a single character string")
+               "Invalid argument: s. s must be a single string")
   expect_error(validate_string(-100, "s"),
-               "Invalid argument: s. s must be a single character string")
+               "Invalid argument: s. s must be a single string")
   expect_error(validate_string(FALSE, "s"),
-               "Invalid argument: s. s must be a single character string")
+               "Invalid argument: s. s must be a single string")
   expect_error(validate_string(NA, "s"),
-               "Invalid argument: s. s must be a single character string")
+               "Invalid argument: s. s must be a single string")
   expect_error(validate_string(NULL, "s"),
-               "Invalid argument: s. s must be a single character string")
+               "Invalid argument: s. s must be a single string")
   expect_error(validate_string(list(), "s"),
-               "Invalid argument: s. s must be a single character string")
+               "Invalid argument: s. s must be a single string")
   expect_error(validate_string(data.frame(a = c(T,F)), "s"),
-               "Invalid argument: s. s must be a single character string")
+               "Invalid argument: s. s must be a single string")
   expect_error(validate_string(factor(), "s"),
-               "Invalid argument: s. s must be a single character string")
+               "Invalid argument: s. s must be a single string")
   expect_error(validate_string(data.table(), "s"),
-               "Invalid argument: s. s must be a single character string")
+               "Invalid argument: s. s must be a single string")
   expect_error(validate_string(c(), "s"),
-               "Invalid argument: s. s must be a single character string")
+               "Invalid argument: s. s must be a single string")
 })
 
 test_that("Testing validate_string_vector function", {

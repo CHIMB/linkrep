@@ -2,30 +2,32 @@
 #'
 #' Generates a summary table of linkage rates stratified by characteristics.
 #'
-#' @param main_data
-#' @param output_format
-#' @param column_var
-#' @param strata_vars
-#' @param main_data_missing_field_indicators_data
-#' @param display_total_column
-#' @param display_mean_not_median_stats
-#' @param display_alphabetically
-#' @param font_size
-#' @param font_style
-#' @param footnotes
-#' @param thousands_separator
-#' @param decimal_mark
-#' @param num_decimal_places
-#' @param display_percent_symbol
-#' @param output_to_csv
-#' @param output_dir
+#' @param main_data a
+#' @param output_format b
+#' @param column_var c
+#' @param strata_vars d
+#' @param main_data_missing_field_indicators_data e
+#' @param display_total_column f
+#' @param display_mean_not_median_stats g
+#' @param display_alphabetically h
+#' @param font_size i
+#' @param font_style j
+#' @param footnotes k
+#' @param thousands_separator l
+#' @param decimal_mark m
+#' @param num_decimal_places n
+#' @param display_percent_symbol o
+#' @param output_to_csv p
+#' @param output_dir q
 #'
 #' @return A `flextable` that was originally a `gtsummary`.
 #'
-#' @importFrom gtsummary theme_gtsummary_language tbl_summary as_flex_table modify_header modify_footnote add_overall bold_labels
+#' @importFrom gtsummary theme_gtsummary_language tbl_summary as_flex_table modify_header modify_footnote add_overall bold_labels style_number all_categorical all_continuous all_stat_cols
 #' @importFrom dplyr select mutate relocate
 #' @importFrom tidyselect all_of
 #' @importFrom Hmisc label
+#' @importFrom rlang := !!
+#' @importFrom utils write.csv
 #'
 #' @examples ###########NOT DONE!!!!!!!!
 linkage_rate_table <- function(main_data,
@@ -49,15 +51,15 @@ linkage_rate_table <- function(main_data,
 
 {
   # handle input errors
-  validate_parameters(data = main_data,
-                      footnotes = footnotes,
-                      output_format = output_format,
-                      thousands_separator = thousands_separator,
-                      decimal_mark = decimal_mark,
-                      num_decimal_places = num_decimal_places,
-                      display_percent_symbol = display_percent_symbol,
-                      font_size = font_size,
-                      font_style = font_style)
+  validate_common_parameters(data = main_data,
+                             footnotes = footnotes,
+                             output_format = output_format,
+                             thousands_separator = thousands_separator,
+                             decimal_mark = decimal_mark,
+                             num_decimal_places = num_decimal_places,
+                             display_percent_symbol = display_percent_symbol,
+                             font_size = font_size,
+                             font_style = font_style)
 
   validate_string(column_var, "column_var")
   validate_string_vector(strata_vars, "strata_vars")
@@ -123,7 +125,7 @@ linkage_rate_table <- function(main_data,
         data_subset <- mutate(data_subset, !!missing_col_name := main_data_missing_field_indicators_data[[missing_col_name]])
         # need variable to be right after the 'main_data' variable to be able to make it a sublevel of it in the table
         data_subset <- relocate(data_subset, !!missing_col_name, .after = !!data_subset_col_name)
-        label(data_subset[[missing_col_name]]) <- "Missing"
+        Hmisc::label(data_subset[[missing_col_name]]) <- "Missing"
         main_data_missing_field_indicators_data[[missing_col_name]] <- NULL
         i <- i + 2
       } else {
@@ -134,7 +136,7 @@ linkage_rate_table <- function(main_data,
           data_subset <- mutate(data_subset, !!missing_col_name := main_data_missing_field_indicators_data[[missing_index]])
           # need variable to be right after the 'main_data' variable to be able to make it a sublevel of it in the table
           data_subset <- relocate(data_subset, !!missing_col_name, .after = !!data_subset_col_name)
-          label(data_subset[[missing_col_name]]) <- "Missing"
+          Hmisc::label(data_subset[[missing_col_name]]) <- "Missing"
           main_data_missing_field_indicators_data[[missing_col_name]] <- NULL
           i <- i + 1
         }
@@ -147,9 +149,9 @@ linkage_rate_table <- function(main_data,
       for (i in seq_along(main_data_missing_field_indicators_data)){
         col_label <- label(main_data_missing_field_indicators_data[,i])
         if (col_label == ""){
-          label(main_data_missing_field_indicators_data[,i]) <- paste("Missing", names(main_data_missing_field_indicators_data)[i])
+          Hmisc::label(main_data_missing_field_indicators_data[,i]) <- paste("Missing", names(main_data_missing_field_indicators_data)[i])
         } else {
-          label(main_data_missing_field_indicators_data[,i]) <- paste("Missing", col_label)
+          Hmisc::label(main_data_missing_field_indicators_data[,i]) <- paste("Missing", col_label)
         }
       }
     }
@@ -205,7 +207,6 @@ linkage_rate_table <- function(main_data,
       last = TRUE,
       col_label = "**Total**\n(N = {style_number(n)})", #changed <br> to \n
       statistic = list(all_categorical() ~ "{N}",
-                       all_dichotomous() ~ "{N}",
                        all_continuous() ~ continuous_stat),
     )
   }
