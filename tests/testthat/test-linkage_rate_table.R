@@ -108,13 +108,13 @@ test_that("Testing parameters with extra type checks", {
   # system.file() won't work if package is not installed
   expect_no_error(suppressMessages(linkage_rate_table(main_data, out_f, col_var,
                                                       strata_vars,
-                                                      output_dir = system.file("R", package = "linkrep"))))
+                                                      output_dir = tempdir())))
 
   # invalid inputs
   # system.file() won't work if package is not installed
   expect_error(suppressMessages(linkage_rate_table(main_data, out_f, col_var,
                                                    strata_vars,
-                                                   output_dir = system.file("README.Rmd", package = "linkrep"))))
+                                                   output_dir = tempfile())))
   expect_error(suppressMessages(linkage_rate_table(main_data, out_f, col_var,
                                                    strata_vars,
                                                    output_dir = "directory")))
@@ -127,10 +127,11 @@ test_that("Testing parameters with extra type checks", {
 
 test_that("Testing csv output option", {
   # system.file() won't work if package is not installed
+  out_dir <- tempdir()
   t <- suppressMessages(linkage_rate_table(main_data, out_f, col_var,
                                            strata_vars, output_to_csv = T,
-                                           output_dir = system.file("tests", package = "linkrep")))
-  out_file <- paste0(system.file("tests", package = "linkrep"), "/linkage_rate_table.csv")
+                                           output_dir = out_dir))
+  out_file <- paste0(out_dir, "/linkage_rate_table.csv")
   expect_true(file.exists(out_file))
   unlink(out_file)
 })
@@ -165,40 +166,6 @@ test_that("Testing footnotes output correctly", {
   expect_equal(t$footer$content$data[[1]]$txt, "one\nun\nuno\neins\nData are presented as n (%), mean \u00B1 SD, or median (Q1, Q3); where SD = standard deviation, Q1 = 25\u1d57\u02b0 percentile and Q3 = 75\u1d57\u02b0 percentile.")
 })
 
-
-
-# source("C:/Users/stoughte/Documents/CHI Github/BMD Data/making_data_report_ready.R")
-#
-# t <- linkage_rate_table(bmd_data,
-#                    "docx",
-#                    "linked",
-#                    c("gender", "acquisition_year_categ", "health_centre"),
-#                    bmd_data_missing)
-#
-# set.seed(55)
-# linked <- sample(0:1, nrow(mtcars), replace = TRUE)
-# data <- cbind(mtcars, linked)
-# linkage_rate_table(data, "docx", "linked", names(mtcars), display_mean_not_median_stats = TRUE)
-
-# check factoring worked (so try with binary and logical variables)
-# Linked/Unlinked
-
-# check remove total column
-
-# check with and without missing dataset
-
-# check csv outputs if requested
-
-# check all the extra type checks:
-# strata_vars, output_dir, if output_to_csv T and output_dir NULL, ...
-
-# check 0(0) outputs instead of 0(NA)
-
-# check Missing becomes subset of main var
-
-# check that the above is done correctly, with label and var_missing
-
-# check the continuous stats
 
 
 
