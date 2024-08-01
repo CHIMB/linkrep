@@ -2,23 +2,49 @@
 #'
 #' Generates a summary table of linkage rates stratified by characteristics.
 #'
-#' @param main_data a
-#' @param output_format b
-#' @param column_var c
-#' @param strata_vars d
-#' @param main_data_missing_field_indicators_data e
-#' @param display_total_column f
-#' @param display_mean_not_median_stats g
-#' @param display_alphabetically h
-#' @param font_size i
-#' @param font_style j
-#' @param footnotes k
-#' @param thousands_separator l
-#' @param decimal_mark m
-#' @param num_decimal_places n
-#' @param display_percent_symbol o
-#' @param output_to_csv p
-#' @param output_dir q
+#' @param main_data A data frame containing the main dataset.
+#' @param output_format A character string specifying the output format, must be
+#'  one of "`pdf`" or "`docx`".
+#' @param column_var A character string of the name of a logical or binary variable
+#'  present in the data that indicates whether a record linked or not. Its values
+#'  will be the columns in the linkage rate table.
+#' @param strata_vars A character vector of the names of the variables present in
+#'  `main_data` to display in the linkage rate table.
+#' @param missing_data_indicators A logical or binary data frame. Variables associated
+#'  with those in `main_data` must either have the same variable name as the variable
+#'  it's associated with in `main_data` with '_missing' attached to the end of
+#'  it or have the same label as the variable it's associated with for it to
+#'  be put under that variables section of the table. All variables present
+#'  in this dataset will be displayed in the table.
+#' @param display_total_column A logical indicating whether to display a total
+#'  (overall) column in the table. Default is `TRUE`.
+#' @param display_mean_not_median_stats A logical indicating whether to display mean
+#'  +/- sd or median (Q1, Q3) statistics for continuous variables. Default is `FALSE`.
+#'
+#' @param display_alphabetically STILL NEED TO IMPLEMENT
+#'
+#' @param font_size A numeric specifying the font size for the table text.
+#' @param font_style A character string specifying the font. Must be present in
+#'  \code{system_fonts()$name} or \code{system_fonts()$family} in the package \code{\link{system_fonts}}.
+#' @param footnotes A character vector of additional footnotes. Each element in
+#'  the vector will be displayed on a new line.
+#' @param thousands_separator A character string specifying the style of the
+#'  thousands separator. Default is "`,`".
+#' @param decimal_mark A character string specifying the style of the decimal mark.
+#'  Default is "`.`".
+#' @param num_decimal_places A number specifying the number of digits to output
+#'  after the decimal mark. Default is `1`.
+#' @param display_percent_symbol A logical indicating whether you want a percent
+#'  symbol to display in the table. Default is `FALSE`.
+#' @param output_to_csv A logical indicating whether the table will get saved in
+#'  a csv file. Default is `FALSE`.
+#' @param output_dir A path to an output directory. The csv file containing the
+#'  table will be saved here if `output_to_csv = TRUE`.
+#'
+#' @details
+#' Data coming from `missing_data_indicators` will be relabelled in two ways:
+#' If the variable is associated with one in `main_data`, it will be labelled "Missing"
+#' If the variable is not assocaited with on in `main_data`, "Missing " will be appended to the front of its label or if no label exists, its variable name
 #'
 #' @return A `flextable` that was originally a `gtsummary`.
 #'
@@ -33,7 +59,7 @@ linkage_rate_table <- function(main_data,
                                output_format,
                                column_var,
                                strata_vars,
-                               main_data_missing_field_indicators_data = NULL,
+                               missing_data_indicators = NULL,
                                display_total_column = TRUE,
                                display_mean_not_median_stats = FALSE,
                                display_alphabetically = FALSE, # need to implement!!
@@ -63,13 +89,13 @@ linkage_rate_table <- function(main_data,
   validate_string(column_var, "column_var")
   validate_string_vector(strata_vars, "strata_vars")
 
-  if (!is.null(main_data_missing_field_indicators_data)){
-    validate_df(main_data_missing_field_indicators_data, "main_data_missing_field_indicators_data")
-    validate_df_binary(main_data_missing_field_indicators_data, "main_data_missing_field_indicators_data")
+  if (!is.null(missing_data_indicators)){
+    validate_df(missing_data_indicators, "missing_data_indicators")
+    validate_df_binary(missing_data_indicators, "missing_data_indicators")
 
     # need these to be dataframes to use dplyr manipulation below
     main_data <- as.data.frame(main_data)
-    main_data_missing_field_indicators_data <- as.data.frame(main_data_missing_field_indicators_data)
+    missing_data_indicators <- as.data.frame(missing_data_indicators)
   }
 
   validate_boolean(display_total_column, "display_total_column")
@@ -94,7 +120,7 @@ linkage_rate_table <- function(main_data,
   if (length(invalid_strata_vars) > 0) {
     stop("Invalid argument: strata_vars. Not all variables provided in strata_vars are present in 'main_data'")
   }
-  if (length(strata_vars) == 1 & is.null(main_data_missing_field_indicators_data)){
+  if (length(strata_vars) == 1 & is.null(missing_data_indicators)){
     if (strata_vars == column_var){
       stop("column_var and strata_vars cannot be the same")
     }
@@ -109,12 +135,12 @@ linkage_rate_table <- function(main_data,
   # data_subset will contain the necessary variables to generate the table
   data_subset <- select(main_data, all_of(strata_vars), all_of(column_var))
 
-  if (!is.null(main_data_missing_field_indicators_data)){
+  if (!is.null(missing_data_indicators)){
     # Match the columns in the two datasets and label the matched missing indicators "Missing"
     i <- 1
-    while(i <= ncol(data_subset) & ncol(main_data_missing_field_indicators_data) > 0){
+    while(i <= ncol(data_subset) & ncol(missing_data_indicators) > 0){
       # missing indicators labels
-      missing_labels <- label(main_data_missing_field_indicators_data)
+      missing_labels <- label(missing_data_indicators)
 
       data_subset_col_name <- names(data_subset)[i]
       # naming standard for missing field indicators
@@ -123,23 +149,23 @@ linkage_rate_table <- function(main_data,
       # two options:
       # 1. The name of the variable in main_data_missing... matches the name variable it's associated with in main_data with '_missing' attached to the end of it
       # 2. The label of the variable in main_data_missing... matches the label of the variable it's associated with in main_data
-      if (missing_col_name %in% names(main_data_missing_field_indicators_data)) {
-        data_subset <- mutate(data_subset, !!missing_col_name := main_data_missing_field_indicators_data[[missing_col_name]])
+      if (missing_col_name %in% names(missing_data_indicators)) {
+        data_subset <- mutate(data_subset, !!missing_col_name := missing_data_indicators[[missing_col_name]])
         # need variable to be right after the 'main_data' variable to be able to make it a sublevel of it in the table
         data_subset <- relocate(data_subset, !!missing_col_name, .after = !!data_subset_col_name)
         Hmisc::label(data_subset[[missing_col_name]]) <- "Missing"
-        main_data_missing_field_indicators_data[[missing_col_name]] <- NULL
+        missing_data_indicators[[missing_col_name]] <- NULL
         i <- i + 2
       } else {
         col_label <- label(data_subset[[i]])
         if ((col_label != "") & (col_label %in% missing_labels)) {
           missing_index <- which(missing_labels == col_label)
           missing_col_name <- names(missing_labels)[missing_index]
-          data_subset <- mutate(data_subset, !!missing_col_name := main_data_missing_field_indicators_data[[missing_index]])
+          data_subset <- mutate(data_subset, !!missing_col_name := missing_data_indicators[[missing_index]])
           # need variable to be right after the 'main_data' variable to be able to make it a sublevel of it in the table
           data_subset <- relocate(data_subset, !!missing_col_name, .after = !!data_subset_col_name)
           Hmisc::label(data_subset[[missing_col_name]]) <- "Missing"
-          main_data_missing_field_indicators_data[[missing_col_name]] <- NULL
+          missing_data_indicators[[missing_col_name]] <- NULL
           i <- i + 1
         }
         i <- i + 1
@@ -147,19 +173,19 @@ linkage_rate_table <- function(main_data,
     }
 
     # label remaining missing indicators with "Missing " in front of the label or variable name so it stands on its own in the table
-    if (ncol(main_data_missing_field_indicators_data) > 0) {
-      for (i in seq_along(main_data_missing_field_indicators_data)){
-        col_label <- label(main_data_missing_field_indicators_data[,i])
+    if (ncol(missing_data_indicators) > 0) {
+      for (i in seq_along(missing_data_indicators)){
+        col_label <- label(missing_data_indicators[,i])
         if (col_label == ""){
-          Hmisc::label(main_data_missing_field_indicators_data[,i]) <- paste("Missing", names(main_data_missing_field_indicators_data)[i])
+          Hmisc::label(missing_data_indicators[,i]) <- paste("Missing", names(missing_data_indicators)[i])
         } else {
-          Hmisc::label(main_data_missing_field_indicators_data[,i]) <- paste("Missing", col_label)
+          Hmisc::label(missing_data_indicators[,i]) <- paste("Missing", col_label)
         }
       }
     }
 
     # combine the two datasets
-    data_subset <- cbind(data_subset, main_data_missing_field_indicators_data)
+    data_subset <- cbind(data_subset, missing_data_indicators)
   }
 
   categorical_stat <- ifelse(display_percent_symbol, "{n} ({p}%)", "{n} ({p})")

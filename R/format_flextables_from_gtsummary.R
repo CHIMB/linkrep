@@ -3,9 +3,11 @@
 #' Formats the provided flextable with the modifications.
 #'
 #' @param flextable A `flextable` object.
-#' @param output_format A character string specifying the output format, must be one of "`pdf`" or "`docx`".
+#' @param output_format A character string specifying the output format, must be
+#'  one of "`pdf`" or "`docx`".
 #' @param font_size A numeric specifying the font size for the table text.
-#' @param font_style A character string specifying the font. Must be present in \code{system_fonts()$name} or \code{system_fonts()$family} in the package \code{\link{system_fonts}}
+#' @param font_style A character string specifying the font. Must be present in
+#'  \code{system_fonts()$name} or \code{system_fonts()$family} in the package \code{\link{system_fonts}}
 #' @param footnotes A character string of footnotes. Must be one string when called with this function.
 #'
 #' @return A `flextable`.

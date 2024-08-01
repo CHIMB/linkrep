@@ -168,7 +168,8 @@ validate_flextable <- function(ft, param_name){
 #' @param num_decimal_places A number \eqn{>= 0}.
 #' @param display_percent_symbol A logical.
 #' @param font_size A number > 0.
-#' @param font_style A string present in \code{system_fonts()$name} or \code{system_fonts()$family} in the package \code{\link{system_fonts}}
+#' @param font_style A string present in \code{system_fonts()$name} or
+#'  \code{system_fonts()$family} in the package \code{\link{system_fonts}}
 #'
 #' @importFrom systemfonts system_fonts
 #'

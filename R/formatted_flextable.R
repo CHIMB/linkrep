@@ -1,15 +1,21 @@
 #' Create a Formatted Flextable
 #'
 #' @param data A data frame.
-#' @param output_format A character string specifying the output format, must be one of "`pdf`" or "`docx`".
+#' @param output_format A character string specifying the output format, must be
+#'  one of "`pdf`" or "`docx`".
 #' @param font_size A numeric specifying the font size for the table text.
-#' @param font_style A character string specifying the font. Must be present in \code{system_fonts()$name} or \code{system_fonts()$family} in the package \code{\link{system_fonts}}
-#' @param footnotes A character vector of additional footnotes. Each element in the vector will be displayed on a new line.
+#' @param font_style A character string specifying the font. Must be present in
+#'  \code{system_fonts()$name} or \code{system_fonts()$family} in the package \code{\link{system_fonts}}
+#' @param footnotes A character vector of additional footnotes. Each element in
+#'  the vector will be displayed on a new line.
 #' @param thousands_separator A character string specifying the thousands separator.
 #' @param decimal_mark A character string specifying the decimal mark.
-#' @param num_decimal_places A numeric specifying the number of digits to output after the decimal mark.
-#' @param header_align A character string specifying the alignment of the header, must be one of "`right`", "`left`" or "`center`".
-#' @param body_align A character string specifying the alignment of the body, must be one of "`right`", "`left`" or "`center`".
+#' @param num_decimal_places A numeric specifying the number of digits to output
+#'  after the decimal mark.
+#' @param header_align A character string specifying the alignment of the header,
+#'  must be one of "`right`", "`left`" or "`center`".
+#' @param body_align A character string specifying the alignment of the body, must
+#'  be one of "`right`", "`left`" or "`center`".
 #'
 #' @return A `flextable`
 #'

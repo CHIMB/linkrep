@@ -18,19 +18,25 @@ algorithm_summary_table(
 \arguments{
 \item{data}{A data frame.}
 
-\item{output_format}{A character string specifying the output format, must be one of "`pdf`" or "`docx`".}
+\item{output_format}{A character string specifying the output format, must be
+one of "`pdf`" or "`docx`".}
 
 \item{font_size}{A numeric specifying the font size for the table text.}
 
-\item{font_style}{A character string specifying the font. Must be present in \code{system_fonts()$name} or \code{system_fonts()$family} in the package \code{\link{system_fonts}}}
+\item{font_style}{A character string specifying the font. Must be present in
+\code{system_fonts()$name} or \code{system_fonts()$family} in the package \code{\link{system_fonts}}}
 
-\item{footnotes}{A character vector of additional footnotes. Each element in the vector will be displayed on a new line.}
+\item{footnotes}{A character vector of additional footnotes. Each element in
+the vector will be displayed on a new line.}
 
-\item{thousands_separator}{A character string specifying the style of the thousands separator. Default is "`,`".}
+\item{thousands_separator}{A character string specifying the style of the
+thousands separator. Default is "`,`".}
 
-\item{decimal_mark}{A character string specifying the style of the decimal mark. Default is "`.`".}
+\item{decimal_mark}{A character string specifying the style of the decimal mark.
+Default is "`.`".}
 
-\item{num_decimal_places}{A number specifying the number of digits to output after the decimal mark. Default is `1`.}
+\item{num_decimal_places}{A number specifying the number of digits to output
+after the decimal mark. Default is `1`.}
 }
 \value{
 A `flextable`.

@@ -3,9 +3,12 @@
 #' Generates a bar plot of linkage rates by acquisition dates with the x-axis formatted to look nice depending on the number of unique years present in data.
 #'
 #' @param data A data frame.
-#' @param link_indicator_var A character string of the name of a logical or binary variable present in the data that indicates whether a record linked or not.
-#' @param acquisition_year_var A character string of the name of the variable that represents the acquisition years.
-#' @param acquisition_month_var A character string of the name of the variable that represents the acquisition months.
+#' @param link_indicator_var A character string of the name of a logical or binary
+#'  variable present in the data that indicates whether a record linked or not.
+#' @param acquisition_year_var A character string of the name of the variable that
+#'  represents the acquisition years.
+#' @param acquisition_month_var A character string of the name of the variable that
+#'  represents the acquisition months.
 #'
 #' @return A bar plot.
 #'

@@ -33,7 +33,8 @@ validate_common_parameters(
 
 \item{font_size}{A number > 0.}
 
-\item{font_style}{A string present in \code{system_fonts()$name} or \code{system_fonts()$family} in the package \code{\link{system_fonts}}}
+\item{font_style}{A string present in \code{system_fonts()$name} or
+\code{system_fonts()$family} in the package \code{\link{system_fonts}}}
 }
 \description{
 Check if the parameters listed are input correctly.

@@ -15,11 +15,13 @@ format_flextables_from_gtsummary(
 \arguments{
 \item{flextable}{A `flextable` object.}
 
-\item{output_format}{A character string specifying the output format, must be one of "`pdf`" or "`docx`".}
+\item{output_format}{A character string specifying the output format, must be
+one of "`pdf`" or "`docx`".}
 
 \item{font_size}{A numeric specifying the font size for the table text.}
 
-\item{font_style}{A character string specifying the font. Must be present in \code{system_fonts()$name} or \code{system_fonts()$family} in the package \code{\link{system_fonts}}}
+\item{font_style}{A character string specifying the font. Must be present in
+\code{system_fonts()$name} or \code{system_fonts()$family} in the package \code{\link{system_fonts}}}
 
 \item{footnotes}{A character string of footnotes. Must be one string when called with this function.}
 }

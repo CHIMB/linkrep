@@ -14,11 +14,14 @@ linkage_rates_over_time_plot(
 \arguments{
 \item{data}{A data frame.}
 
-\item{link_indicator_var}{A character string of the name of a logical or binary variable present in the data that indicates whether a record linked or not.}
+\item{link_indicator_var}{A character string of the name of a logical or binary
+variable present in the data that indicates whether a record linked or not.}
 
-\item{acquisition_year_var}{A character string of the name of the variable that represents the acquisition years.}
+\item{acquisition_year_var}{A character string of the name of the variable that
+represents the acquisition years.}
 
-\item{acquisition_month_var}{A character string of the name of the variable that represents the acquisition months.}
+\item{acquisition_month_var}{A character string of the name of the variable that
+represents the acquisition months.}
 }
 \value{
 A bar plot.

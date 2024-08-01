@@ -3,10 +3,13 @@
 #' Generates a formatted flextable specific to the abbreviation table.
 #'
 #' @param data A data frame.
-#' @param output_format A character string specifying the output format, must be one of "`pdf`" or "`docx`".
+#' @param output_format A character string specifying the output format, must be
+#'  one of "`pdf`" or "`docx`".
 #' @param font_size A numeric specifying the font size for the table text.
-#' @param font_style A character string specifying the font. Must be present in \code{system_fonts()$name} or \code{system_fonts()$family} in the package \code{\link{system_fonts}}
-#' @param display_headers A logical indicating whether to display the headers in the table. Default is `TRUE`.
+#' @param font_style A character string specifying the font. Must be present in
+#'  \code{system_fonts()$name} or \code{system_fonts()$family} in the package \code{\link{system_fonts}}
+#' @param display_headers A logical indicating whether to display the headers in
+#'  the table. Default is `TRUE`.
 #'
 #' @return A `flextable`.
 #'

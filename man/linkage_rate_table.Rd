@@ -9,7 +9,7 @@ linkage_rate_table(
   output_format,
   column_var,
   strata_vars,
-  main_data_missing_field_indicators_data = NULL,
+  missing_data_indicators = NULL,
   display_total_column = TRUE,
   display_mean_not_median_stats = FALSE,
   display_alphabetically = FALSE,
@@ -25,43 +25,67 @@ linkage_rate_table(
 )
 }
 \arguments{
-\item{main_data}{a}
+\item{main_data}{A data frame containing the main dataset.}
 
-\item{output_format}{b}
+\item{output_format}{A character string specifying the output format, must be
+one of "`pdf`" or "`docx`".}
 
-\item{column_var}{c}
+\item{column_var}{A character string of the name of a logical or binary variable
+present in the data that indicates whether a record linked or not. Its values
+will be the columns in the linkage rate table.}
 
-\item{strata_vars}{d}
+\item{strata_vars}{A character vector of the names of the variables present in
+`main_data` to display in the linkage rate table.}
 
-\item{main_data_missing_field_indicators_data}{e}
+\item{missing_data_indicators}{A logical or binary data frame. Variables associated
+with those in `main_data` must either have the same variable name as the variable
+it's associated with in `main_data` with '_missing' attached to the end of
+it or have the same label as the variable it's associated with for it to
+be put under that variables section of the table. All variables present
+in this dataset will be displayed in the table.}
 
-\item{display_total_column}{f}
+\item{display_total_column}{A logical indicating whether to display a total
+(overall) column in the table. Default is `TRUE`.}
 
-\item{display_mean_not_median_stats}{g}
+\item{display_mean_not_median_stats}{A logical indicating whether to display mean
++/- sd or median (Q1, Q3) statistics for continuous variables. Default is `FALSE`.}
 
-\item{display_alphabetically}{h}
+\item{display_alphabetically}{STILL NEED TO IMPLEMENT}
 
-\item{font_size}{i}
+\item{font_size}{A numeric specifying the font size for the table text.}
 
-\item{font_style}{j}
+\item{font_style}{A character string specifying the font. Must be present in
+\code{system_fonts()$name} or \code{system_fonts()$family} in the package \code{\link{system_fonts}}.}
 
-\item{footnotes}{k}
+\item{footnotes}{A character vector of additional footnotes. Each element in
+the vector will be displayed on a new line.}
 
-\item{thousands_separator}{l}
+\item{thousands_separator}{A character string specifying the style of the
+thousands separator. Default is "`,`".}
 
-\item{decimal_mark}{m}
+\item{decimal_mark}{A character string specifying the style of the decimal mark.
+Default is "`.`".}
 
-\item{num_decimal_places}{n}
+\item{num_decimal_places}{A number specifying the number of digits to output
+after the decimal mark. Default is `1`.}
 
-\item{display_percent_symbol}{o}
+\item{display_percent_symbol}{A logical indicating whether you want a percent
+symbol to display in the table. Default is `FALSE`.}
 
-\item{output_to_csv}{p}
+\item{output_to_csv}{A logical indicating whether the table will get saved in
+a csv file. Default is `FALSE`.}
 
-\item{output_dir}{q}
+\item{output_dir}{A path to an output directory. The csv file containing the
+table will be saved here if `output_to_csv = TRUE`.}
 }
 \value{
 A `flextable` that was originally a `gtsummary`.
 }
 \description{
 Generates a summary table of linkage rates stratified by characteristics.
+}
+\details{
+Data coming from `missing_data_indicators` will be relabelled in two ways:
+If the variable is associated with one in `main_data`, it will be labelled "Missing"
+If the variable is not assocaited with on in `main_data`, "Missing " will be appended to the front of its label or if no label exists, its variable name
 }
