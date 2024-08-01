@@ -29,12 +29,11 @@
 #' @importFrom rlang := !!
 #' @importFrom utils write.csv
 #'
-#' @examples ###########NOT DONE!!!!!!!!
 linkage_rate_table <- function(main_data,
                                output_format,
                                column_var,
                                strata_vars,
-                               main_data_missing_field_indicators_data = NULL, # need to do checks! especially with it maybe being NULL
+                               main_data_missing_field_indicators_data = NULL,
                                display_total_column = TRUE,
                                display_mean_not_median_stats = FALSE,
                                display_alphabetically = FALSE, # need to implement!!
@@ -93,7 +92,7 @@ linkage_rate_table <- function(main_data,
 
   invalid_strata_vars <- base::setdiff(strata_vars, names(main_data))
   if (length(invalid_strata_vars) > 0) {
-    stop("Invalid argument: strata_vars. Not all variables provided in strata_vars are present in 'data'")
+    stop("Invalid argument: strata_vars. Not all variables provided in strata_vars are present in 'main_data'")
   }
   if (length(strata_vars) == 1 & is.null(main_data_missing_field_indicators_data)){
     if (strata_vars == column_var){
@@ -111,16 +110,19 @@ linkage_rate_table <- function(main_data,
   data_subset <- select(main_data, all_of(strata_vars), all_of(column_var))
 
   if (!is.null(main_data_missing_field_indicators_data)){
-    # missing indicators original labels
-    missing_labels <- label(main_data_missing_field_indicators_data)
-
     # Match the columns in the two datasets and label the matched missing indicators "Missing"
     i <- 1
     while(i <= ncol(data_subset) & ncol(main_data_missing_field_indicators_data) > 0){
+      # missing indicators labels
+      missing_labels <- label(main_data_missing_field_indicators_data)
+
       data_subset_col_name <- names(data_subset)[i]
       # naming standard for missing field indicators
       missing_col_name <- paste0(data_subset_col_name, "_missing")
 
+      # two options:
+      # 1. The name of the variable in main_data_missing... matches the name variable it's associated with in main_data with '_missing' attached to the end of it
+      # 2. The label of the variable in main_data_missing... matches the label of the variable it's associated with in main_data
       if (missing_col_name %in% names(main_data_missing_field_indicators_data)) {
         data_subset <- mutate(data_subset, !!missing_col_name := main_data_missing_field_indicators_data[[missing_col_name]])
         # need variable to be right after the 'main_data' variable to be able to make it a sublevel of it in the table
@@ -130,7 +132,7 @@ linkage_rate_table <- function(main_data,
         i <- i + 2
       } else {
         col_label <- label(data_subset[[i]])
-        if (col_label %in% missing_labels) {
+        if ((col_label != "") & (col_label %in% missing_labels)) {
           missing_index <- which(missing_labels == col_label)
           missing_col_name <- names(missing_labels)[missing_index]
           data_subset <- mutate(data_subset, !!missing_col_name := main_data_missing_field_indicators_data[[missing_index]])

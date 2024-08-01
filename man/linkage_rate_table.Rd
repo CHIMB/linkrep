@@ -65,6 +65,3 @@ A `flextable` that was originally a `gtsummary`.
 \description{
 Generates a summary table of linkage rates stratified by characteristics.
 }
-\examples{
-###########NOT DONE!!!!!!!!
-}
