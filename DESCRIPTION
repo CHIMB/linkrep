@@ -3,7 +3,7 @@ Type: Package
 Title: What the Package Does (Title Case)
 Version: 0.1.0
 Authors@R: c(
-            person(given=c("Elizabeth"), family="Stoughton", email="stoughte@myumanitoba.ca", role="aut"),
+            person(given=c("Elizabeth"), family="Stoughton", email="stoughte@myumanitoba.ca", role=c("aut", "cre")),
             person(given=c("Barret", "A."), family="Monchka", email="Barret.Monchka@umanitoba.ca", role="aut")
           )
 Maintainer: The package maintainer <yourself@somewhere.net>
@@ -22,11 +22,13 @@ Imports:
     gtsummary,
     Hmisc,
     lubridate,
+    quarto,
     rlang,
     systemfonts,
     tidyr,
     tidyselect,
-    utils
+    utils,
+    xfun
 Suggests: 
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
