@@ -168,4 +168,3 @@ test_that("Testing footnotes output correctly", {
 
 
 
-

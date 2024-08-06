@@ -10,7 +10,7 @@ test_that("Testing data checks work", {
   expect_null(suppressWarnings(performance_measures_plot(mtcars)))
 
   expect_warning(performance_measures_plot(data.frame(num = -100, bum = 70)),
-                 "must be more than 2 variables present in performance measures to creat radar chart therefore, radra chart will not be output")
+                 "must be more than 2 variables present in performance measures to create radar chart therefore, radar chart will not be output")
   expect_null(suppressWarnings(performance_measures_plot(data.frame(num = -100, bum = 70))))
 
   expect_warning(performance_measures_plot(data.frame(a = 9, b = "b", c = 2)),
