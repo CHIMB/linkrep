@@ -1,0 +1,921 @@
+---
+format: 
+  pdf:
+    mainfont: {mainfont}
+    sansfont: {sansfont}
+    fontsize: {fontsize}
+    fig-pos: 'H'
+    toc: false
+    number-sections: true
+    include-in-header:
+      - {background_images}
+  docx:
+      reference-doc: {word_template}
+      toc: true
+      number-sections: true
+editor: visual
+
+bibliography: {references}
+csl: "`r system.file('templates', 'bibliography_output_style', package = 'linkrep')`"
+
+execute:
+  echo: false
+  
+params: 
+  main_data_path: null
+  main_data_used_temp_path: false
+  report_title: null
+  left_dataset_name: null 
+  right_dataset_name: null
+  output_dir: null
+  data_linker: null 
+  linkage_rate_tbl_col_var: null
+  linkage_rate_tbl_strata_vars: null
+  linkage_rate_tbl_footnotes: null 
+  linkage_rate_tbl_display_total_column: true
+  linkage_rate_tbl_display_mean_not_median_stats: false
+  linkage_rate_tbl_display_alphabetically: false # new
+  linkage_rate_tbl_output_to_csv: false
+  missing_data_indicators_path: null # new
+  missing_data_indicators_used_temp_path: false # new
+  missingness_tbl_footnotes: null 
+  output_format: "pdf"
+  save_linkage_rate: true # new
+  project_id: null # new
+  num_records_right_dataset: null # new
+  acquisition_year_var: null # new
+  acquisition_month_var: null # new
+  algorithm_summary_data_path: null
+  algorithm_summary_data_used_temp_path: false
+  algorithm_summary_tbl_footnotes: null 
+  performance_measures_data_path: null
+  performance_measures_data_used_temp_path: false
+  performance_measures_tbl_footnotes: null 
+  classification_metrics_used: null
+  ground_truth: null
+  ground_truth_missing_var: null # new
+  abbreviations_data_path: null
+  abbreviations_data_used_temp_path: false
+  abbreviations_display_header: true
+  thousands_separator: ","
+  decimal_mark: "."
+  num_decimal_places: 1
+  display_percent_symbol: false
+  table_font_size: 12
+  font_style: "Times New Roman"
+  display_back_cover_page: true
+
+header-includes:
+- \renewcommand{\thesection}{\arabic{section}.}
+- \renewcommand{\thesubsection}{\arabic{section}.\arabic{subsection}}
+- \usepackage{geometry}
+- \geometry{paperheight=11in, paperwidth=8.5in, top = 1in, bottom = 1.5in, left = 1in, right = 1in}
+- \usepackage{caption}
+- \raggedright
+- \captionsetup[figure]{justification=raggedright,singlelinecheck=false}
+- \captionsetup[table]{justification=raggedright,singlelinecheck=false}
+---
+
+```{r load packages, include=FALSE, message=FALSE}
+library(linkrep)
+library(data.table)
+# library(dplyr)
+library(flextable)
+# library(fmsb)
+# library(ggplot2)
+# library(gtsummary)
+# library(Hmisc)
+# library(lubridate)
+# library(rlang)
+# library(systemfonts)
+# library(tidyr)
+# library(tidyselect)
+# library(utils)
+library(xfun)
+```
+
+```{r load functions}
+# source(system.file("R", "abbreviation_table.R", package = "linkrep"))
+# source(system.file("R", "algorithm_summary_table.R", package = "linkrep"))
+# source(system.file("R", "format_flextables_from_gtsummary.R", package = "linkrep"))
+# source(system.file("R", "formatted_flextable.R", package = "linkrep"))
+# source(system.file("R", "helper_parameter_type_check_functions.R", package = "linkrep"))
+# source(system.file("R", "linkage_rate_table.R", package = "linkrep"))
+# source(system.file("R", "linkage_rates_over_time_plot.R", package = "linkrep"))
+# source(system.file("R", "missingness_table.R", package = "linkrep"))
+# source(system.file("R", "performance_measures_plot.R", package = "linkrep"))
+# source(system.file("R", "performance_measures_table.R", package = "linkrep"))
+# source(system.file("R", "set_table_width.R", package = "linkrep"))
+```
+
+```{r read_data function}
+#----
+# read_data
+#
+# Performs error checking on the file path and reads in the data.
+#
+# @param dataset_path A file path to the data.
+# @param parameter The name of the parameter whose path we're checking.
+#
+# @return The read in data.
+#----
+read_data <- function(dataset_path, parameter){
+  if (file_ext(dataset_path) == "rds"){
+    data <- readRDS(dataset_path)
+    if (!is.data.frame(data) & !is.data.table(data)){
+      stop(sprintf("Invalid argument: %s. %s must be of type 'data.frame' in your .rds file", parameter, parameter))
+    }
+  } else {
+    data <- read.table(dataset_path, header = TRUE, sep = ",")
+  }
+  if (nrow(data) == 0){
+    stop(sprintf("Invalid argument: %s. %s must be non-empty", parameter, parameter))
+  }
+  return(data)
+}
+```
+
+```{r read in data}
+main_data <- read_data(params$main_data_path, "main_data")
+if (params$main_data_used_temp_path){
+  unlink(params$main_data_path)
+}
+
+acquisition_year_present <- FALSE
+acquisition_year <- NULL
+if (!is.null(params$acquisition_year_var)){
+    validate_var_in_data(params$acquisition_year_var, main_data, "acquisition_year_var", "main_data")
+  acquisition_year_present <- TRUE
+  acquisition_year <- main_data[[params$acquisition_year_var]]
+  if(!is.numeric(acquisition_year) & !is.integer(acquisition_year)){
+    stop("Invalid argument: acquisition_year_var. acquisition_year_var must be a numeric variable")
+  } 
+}
+
+acquisition_month_present <- FALSE
+acquisition_month <- NULL
+if (!is.null(params$acquisition_month_var)){
+  validate_var_in_data(params$acquisition_month_var, main_data, "acquisition_month_var", "main_data")
+  acquisition_month_present <- TRUE
+  acquisition_month <- main_data[[params$acquisition_month_var]]
+  if(!is.numeric(acquisition_month) & !is.integer(acquisition_month)){
+    stop("Invalid argument: acquisition_month_var. acquisition_month_var must be a numeric variable")
+  } 
+  if (!all(acquisition_month %in% c(1:12, NA))){
+    stop("acquisition_month_var contains invalid values. Must be either NA or numbers from 1 to 12.")
+  }
+}
+
+if (acquisition_month_present & !acquisition_year_present){
+  stop("'acquisition_year_var' must be provided with 'acquisition_month_var'")
+}
+
+missing_data_indicators <- NULL
+if (!is.null(params$missing_data_indicators_path)){
+  missing_data_indicators <- read_data(params$missing_data_indicators_path, "missing_data_indicators")
+  if (params$missing_data_indicators_used_temp_path){
+    unlink(params$missing_data_indicators_path)
+  }
+  if (nrow(main_data) != nrow(missing_data_indicators)){
+    stop("'main_data' and 'missing_data_indicators' should contain the same number of records")
+  }
+  
+  validate_df_binary(missing_data_indicators, "missing_data_indicators")
+}
+
+abbreviations_data <- NULL
+if (!is.null(params$abbreviations_data_path)){
+  abbreviations_data <- read_data(params$abbreviations_data_path, "abbreviations")
+  if (params$abbreviations_data_used_temp_path){
+    unlink(params$abbreviations_data_path)
+  }
+  if (ncol(abbreviations_data) != 2){
+    stop("Invalid argument: abbreviations_data. abbreviations_data must have two columns, one for the abbreviations and one for their definitions")
+  }
+}
+
+algorithm_summary_data <- NULL
+if (!is.null(params$algorithm_summary_data_path)){
+  algorithm_summary_data <- read_data(params$algorithm_summary_data_path, "algorithm_summary_data")
+  if (params$algorithm_summary_data_used_temp_path){
+    unlink(params$algorithm_summary_data_path)
+  }
+}
+
+ground_truth_missing <- NULL
+performance_measures_data <- NULL
+if (!is.null(params$performance_measures_data_path)){
+  performance_measures_data <- read_data(params$performance_measures_data_path, "performance_measures_data")
+  if (params$performance_measures_data_used_temp_path){
+    unlink(params$performance_measures_data_path)
+  }
+  if (is.null(params$ground_truth_missing_var)){
+     stop("Must provide ground_truth and ground_truth_missing_var with 'performance_measures_data'")
+  }
+  if (params$ground_truth_missing_var %in% names(main_data)){
+    ground_truth_missing <- main_data[[params$ground_truth_missing_var]]
+  } else if (params$ground_truth_missing_var %in% names(missing_data_indicators)){
+    ground_truth_missing <- missing_data_indicators[[params$ground_truth_missing_var]]
+  } else {
+    stop("Invalid argument: ground_truth_missing_var. ground_truth_missing_var must be a variable present in 'main_data' or 'missing_data_indicators'")
+  }
+  if (!(sum(ground_truth_missing != 0 & ground_truth_missing != 1) == 0 & sum(is.na(ground_truth_missing)) == 0)){
+    stop("Invalid argument: ground_truth_missing_var. ground_truth_missing_var must be a binary or logical variable")
+  }
+}
+```
+
+```{r get linkage dates}
+
+data_time_period <- NULL
+
+if (acquisition_year_present){
+  min_year <- min(acquisition_year, na.rm = TRUE)
+  max_year <- max(acquisition_year, na.rm = TRUE)
+
+  if (acquisition_month_present){
+
+    #----
+    # label_month
+    #
+    # assigns the month its English abbreviation
+    #----
+    label_month <- function(month){
+      if (month == 1){
+          month <- "Jan."
+        } else if (month == 2){
+          month <- "Feb."
+        } else if (month == 3){
+          month <- "Mar."
+        } else if (month == 4){
+          month <- "Apr."
+        } else if (month == 5){
+          month <- "May."
+        } else if (month == 6){
+          month <- "June."
+        } else if (month == 7){
+          month <- "July."
+        } else if (month == 8){
+          month <- "Aug."
+        } else if (month == 9){
+          month <- "Sept."
+        } else if (month == 10){
+          month <- "Oct."
+        } else if (month == 11){
+          month <- "Nov."
+        } else {
+          month <- "Dec."
+        }
+      return(month)
+    }
+
+    min_month <- min(acquisition_month[acquisition_year == min_year], na.rm = TRUE)
+    min_month <- label_month(min_month)
+    max_month <- max(acquisition_month[acquisition_year == max_year], na.rm = TRUE)
+    max_month <- label_month(max_month)
+  } else {
+    min_month <- NULL
+    max_month <- NULL
+  }
+
+  if (min_year == max_year){
+    data_time_period <- min_year
+  } else {
+    if (is.null(min_month)){
+      data_time_period <- paste(min_year, "-", max_year)
+    } else {
+      data_time_period <- paste(min_month, min_year, "-", max_month, max_year)
+    }
+  }
+}
+```
+
+```{r calculate values needed throughout report}
+MAX_PORTRAIT_TABLE_WIDTH <- 6.5
+
+# format all numbers here
+
+num_records_left_dataset <- nrow(main_data)
+num_records_left_dataset <- formatC(num_records_left_dataset, big.mark = params$thousands_separator, format = "f", digits = 0)
+num_records_right_dataset <- NULL
+if (!is.null(params$num_records_right_dataset)){
+  num_records_right_dataset <- params$num_records_right_dataset
+  num_records_right_dataset <- formatC(num_records_right_dataset, big.mark = params$thousands_separator, format = "f", digits = 0)
+}
+
+num_records_linked <- sum(main_data[[params$linkage_rate_tbl_col_var]] == 1)
+num_records_linked <- formatC(num_records_linked, big.mark = params$thousands_separator, format = "f", digits = 0)
+overall_linkage_rate <- sum(main_data[[params$linkage_rate_tbl_col_var]] == 1)/nrow(main_data) * 100
+overall_linkage_rate <- formatC(overall_linkage_rate, digits = params$num_decimal_places, big.mark = params$thousands_separator, decimal.mark = params$decimal_mark, format = "f")
+
+num_non_missing_ground_truth <- NULL
+percent_non_missing_ground_truth <- NULL
+if (!is.null(ground_truth_missing)){
+  num_non_missing_ground_truth <- nrow(main_data) - sum(ground_truth_missing)
+  percent_non_missing_ground_truth <- num_non_missing_ground_truth / nrow(main_data)
+  num_non_missing_ground_truth <- formatC(num_non_missing_ground_truth, big.mark = params$thousands_separator, format = "f", digits = 0)
+  percent_non_missing_ground_truth <- formatC(percent_non_missing_ground_truth, big.mark = params$thousands_separator, decimal.mark = params$decimal_mark, digits = params$num_decimal_places, format = "f")
+}
+
+report_generation_date <- Sys.Date()
+report_generation_date <- format(report_generation_date, "%b. %d, %Y")
+```
+
+```{r output linkage info in SQLite file, include = FALSE}
+if (params$save_linkage_rate){
+  library(RSQLite)
+  library(DBI)
+
+  sqlite_file <- file.path(params$output_dir, "linkage_rate.sqlite")
+  con <- dbConnect(RSQLite::SQLite(), sqlite_file)
+  
+  p_id <- params$project_id
+  if (is.null(p_id)){
+    p_id <- NA
+  }
+  
+  if (is.null(data_time_period)){
+    data_time_period <- NA
+  }
+
+  data <- data.frame(
+    report_generation_date = report_generation_date,
+    report_generation_year = as.numeric(format(Sys.Date(), "%Y")),
+    data_linker = params$data_linker,
+    left_dataset_name = params$left_dataset_name,
+    right_dataset_name = params$right_dataset_name,
+    overall_linkage_rate = overall_linkage_rate,
+    acquisition_dates_left_dataset = data_time_period,
+    project_id = p_id
+  )
+
+  dbWriteTable(con, 'linkage_rate', data, overwrite = TRUE)
+  dbDisconnect(con)
+}
+
+```
+
+::: {.content-visible when-format="pdf"}
+```{=tex}
+\begin{titlepage}
+    \begin{flushright}
+    \thispagestyle{nopagenumbers}
+        \vspace*{5cm}
+
+        \Huge
+        \textbf{`r params$report_title`}\\
+        \LARGE
+        \textbf{`r ifelse(is.null(data_time_period), "", data_time_period)`}
+
+        \LARGE
+        Record Linkage Quality Report
+
+        \vspace{4cm}
+
+        \large
+        \textbf{`r ifelse(is.null(params$project_id), "", sprintf("PHRPC \\#: %s", as.character(params$project_id)))`}
+
+        \vfill
+        
+        \large
+        Report Generation Date: `r report_generation_date`
+
+    \end{flushright}
+\end{titlepage}
+```
+\hypersetup{linkcolor=black}
+
+\thispagestyle{nopagenumbers}
+:::
+
+::: {.content-visible when-format="pdf"}
+```{=tex}
+\section*{Acknowledgements}
+```
+:::
+
+::: {.content-visible when-format="docx"}
+# Acknowledgements {.unnumbered}
+:::
+
+{{< pagebreak >}}
+
+::: {.content-visible when-format="pdf"}
+```{=tex}
+\renewcommand{\contentsname}{Table of Contents}
+\tableofcontents
+```
+:::
+
+{{< pagebreak >}}
+
+`r if(!is.null(abbreviations_data)) "::: {.content-visible}" else "::: {.content-hidden}"`
+
+::: {.content-visible when-format="pdf"}
+```{=tex}
+\section*{List of Abbreviations}
+\addcontentsline{toc}{section}{List of Abbreviations}
+```
+
+```{r abbreviations pdf output, results='asis'}
+if (!is.null(abbreviations_data) & params$output_format == "pdf"){
+  cat("\\begin{description}")
+  for (i in 1:nrow(abbreviations_data)){
+    cat("\\item[", abbreviations_data[[1]][i], "]")
+    cat(abbreviations_data[[2]][i])
+  }
+  cat("\\end{description}")
+}
+
+```
+:::
+
+::: {.content-visible when-format="docx"}
+```{r generate abbreviations table, results='asis'}
+if (!is.null(abbreviations_data) & params$output_format == "docx"){
+abbrev_tbl <- abbreviation_table(
+data = abbrev_tbl_data,
+output_format = params$output_format,
+font_size = params$table_font_size,
+font_style = params$font_style,
+display_headers = params$abbreviations_display_header)
+if (flextable_dim(abbrev_tbl)$widths >= MAX_PORTRAIT_TABLE_WIDTH){
+    cat("\\newpage")
+    cat("\\pdfpagewidth = 11in")
+    cat("\\pdfpageheight = 8.5in")
+    cat("\\newgeometry{top = 1in, bottom = 4in, left = 1in, right = 1in}")
+  }
+}
+```
+
+# List of Abbreviations {.unnumbered}
+
+\addcontentsline{toc}{section}{List of Abbreviations}
+
+```{r abbreviations word output, ft.align="left"}
+# output table
+if (params$output_format == "docx"){
+  abbrev_tbl
+}
+```
+
+```{r, results='asis'}
+if (!is.null(abbreviations_data) & params$output_format == "docx"){
+  if (flextable_dim(abbrev_tbl)$widths >= MAX_PORTRAIT_TABLE_WIDTH){
+    cat("\\newpage")
+    cat("\\pdfpagewidth = 8.5in")
+    cat("\\pdfpageheight = 11in")
+    cat("\\newgeometry{top = 1in, bottom = 1.5in, left = 1in, right = 1in}")
+  }
+}
+```
+:::
+
+:::
+
+{{< pagebreak >}}
+
+::: {.content-visible when-format="pdf"}
+```{=tex}
+\section*{Summary}
+\addcontentsline{toc}{section}{Summary}
+```
+:::
+
+::: {.content-visible when-format="docx"}
+# Summary {.unnumbered}
+
+\addcontentsline{toc}{section}{Summary}
+:::
+
+The purpose of this report is to detail the methods used to link the records in `r params$left_dataset_name` (N = `r num_records_left_dataset`) to those in `r params$right_dataset_name` `r ifelse(is.null(num_records_right_dataset), "", sprintf("(N = %s)", num_records_right_dataset))` and to provide guidance on how to evaluate the quality of the linkage process.
+
+Records were linked using an iterative, multistage process that uses a combination of deterministic and probabilistic approaches to link the records. We linked `r num_records_linked` records, achieving an overall linkage rate of `r overall_linkage_rate`% (@tbl-linkage_rates).
+
+{{< pagebreak >}}
+
+::: {.content-visible when-format="pdf"}
+```{=tex}
+\section*{How to Read This Report}
+\addcontentsline{toc}{section}{How to Read This Report}
+```
+:::
+
+::: {.content-visible when-format="docx"}
+# How to Read This Report {.unnumbered}
+
+\addcontentsline{toc}{section}{How to Read This Report}
+:::
+
+{{< pagebreak >}}
+
+```{r generate linkage rate table, message = FALSE, results='asis'}
+link_rate_tbl <- linkage_rate_table(
+main_data = main_data,
+output_format = params$output_format,
+column_var = params$linkage_rate_tbl_col_var,
+strata_vars = params$linkage_rate_tbl_strata_vars,
+missing_data_indicators = missing_data_indicators,
+display_total_column = params$linkage_rate_tbl_display_total_column,
+display_mean_not_median_stats = params$linkage_rate_tbl_display_mean_not_median_stats,
+display_alphabetically = params$linkage_rate_tbl_display_alphabetically,
+font_size = params$table_font_size,
+font_style = params$font_style,
+footnotes = params$linkage_rate_tbl_footnotes,
+thousands_separator = params$thousands_separator,
+decimal_mark = params$decimal_mark,
+num_decimal_places = params$num_decimal_places,
+display_percent_symbol = params$display_percent_symbol,
+output_to_csv = params$linkage_rate_tbl_output_to_csv,
+output_dir = params$output_dir
+)
+if (params$output_format == "pdf" & flextable_dim(link_rate_tbl)$widths >= MAX_PORTRAIT_TABLE_WIDTH){
+    cat("\\newpage")
+    cat("\\pdfpagewidth = 11in")
+    cat("\\pdfpageheight = 8.5in")
+    cat("\\newgeometry{top = 1in, bottom = 4in, left = 1in, right = 1in}")
+  }
+```
+
+# Results
+
+## Linkage Rate Summary
+
+### Linkage Rate Table
+
+```{r linkage rate table, ft.align="left"}
+#| label: tbl-linkage_rates
+#| tbl-cap: !expr paste0("Stratified linkage rates for records in ", params$left_dataset_name, " that linked to the records in ",  params$right_dataset_name, " (N = ", num_records_left_dataset, ifelse(data_time_period == "", "", ", "), data_time_period, ").")  
+
+link_rate_tbl
+```
+
+```{r, results='asis'}
+if (params$output_format == "pdf" & flextable_dim(link_rate_tbl)$widths >= MAX_PORTRAIT_TABLE_WIDTH){
+cat("\\newpage")
+    cat("\\pdfpagewidth = 8.5in")
+    cat("\\pdfpageheight = 11in")
+    cat("\\newgeometry{top = 1in, bottom = 1.5in, left = 1in, right = 1in}")
+}
+```
+
+`r if(acquisition_year_present & acquisition_month_present) "::: {.content-visible}" else "::: {.content-hidden}"`
+
+```{r generate linkage rate distribution}
+link_rates_plot <- NULL
+if(acquisition_year_present & acquisition_month_present){
+  link_rates_plot <- linkage_rates_over_time_plot(
+                      data = main_data, 
+                      link_indicator_var =  params$linkage_rate_tbl_col_var,
+                      acquisition_year_var = params$acquisition_year_var,
+                      acquisition_month_var = params$acquisition_month_var)
+}
+
+```
+
+`r if(!is.null(link_rates_plot)) "::: {.content-visible}" else "::: {.content-hidden}"`
+
+### Linkage Rate Distribution
+
+```{r linkage rate distribution, message=FALSE}
+#| label: fig-linkage_rate_dist
+#| fig-cap: !expr paste0("Distribution of linkage rates over acquisition dates for records in ", params$left_dataset_name,".")
+#| fig-align: left
+
+if(acquisition_year_present & acquisition_month_present & !is.null(link_rates_plot)){
+  link_rates_plot
+}
+```
+
+:::
+
+:::
+
+{{< pagebreak >}}
+
+`r if(!is.null(algorithm_summary_data)) "::: {.content-visible}" else "::: {.content-hidden}"`
+
+```{r generate algorithm summary table, results='asis'}
+if (!is.null(algorithm_summary_data)) {
+alg_summ_tbl <- algorithm_summary_table(
+  data = algorithm_summary_data,
+  output_format = params$output_format,
+  font_size = params$table_font_size,
+  font_style = params$font_style,
+  footnotes = params$algorithm_summary_tbl_footnotes,
+  thousands_separator = params$thousands_separator,
+  decimal_mark = params$decimal_mark,
+  num_decimal_places = params$num_decimal_places
+  )
+if (params$output_format == "pdf" & flextable_dim(alg_summ_tbl)$widths >= MAX_PORTRAIT_TABLE_WIDTH){
+    cat("\\newpage")
+    cat("\\pdfpagewidth = 11in")
+    cat("\\pdfpageheight = 8.5in")
+    cat("\\newgeometry{top = 1in, bottom = 4in, left = 1in, right = 1in}")
+  }
+}
+```
+
+## Linkage Algorithm Summary
+
+### Linkage Algorithm Passes
+
+```{r algorithm summary table, ft.align="left"}
+#| label: tbl-algorithm_summary
+#| tbl-cap: !expr paste0("Linkage algorithm summary for the linkage of records in ", params$left_dataset_name, " to those in ", params$right_dataset_name, ". This table provides a detailed overview of each pass in the linkage process.")
+
+if (!is.null(algorithm_summary_data)) {
+  alg_summ_tbl
+}
+```
+
+```{r, results='asis'}
+if (!is.null(algorithm_summary_data)) {
+  if (params$output_format == "pdf" & flextable_dim(alg_summ_tbl)$widths >= MAX_PORTRAIT_TABLE_WIDTH){
+    cat("\\newpage")
+    cat("\\pdfpagewidth = 8.5in")
+    cat("\\pdfpageheight = 11in")
+    cat("\\newgeometry{top = 1in, bottom = 1.5in, left = 1in, right = 1in}")
+  }
+}
+```
+
+:::
+
+`r if(!is.null(performance_measures_data)) "::: {.content-visible}" else "::: {.content-hidden}"`
+
+```{r generate performance measures table, ft.align="left", results='asis'}
+t <- NULL
+if (!is.null(performance_measures_data)) {
+perf_meas_tbl <- performance_measures_table(
+  data = performance_measures_data,
+  output_format = params$output_format,
+  font_size = params$table_font_size,
+  font_style = params$font_style,
+  footnotes = params$performance_measures_tbl_footnotes,
+  thousands_separator = params$thousands_separator,
+  decimal_mark = params$decimal_mark,
+  num_decimal_places = params$num_decimal_places
+  )
+  if (params$output_format == "pdf" & flextable_dim(perf_meas_tbl)$widths >= MAX_PORTRAIT_TABLE_WIDTH){
+    cat("\\newpage")
+    cat("\\pdfpagewidth = 11in")
+    cat("\\pdfpageheight = 8.5in")
+    cat("\\newgeometry{top = 1in, bottom = 4in, left = 1in, right = 1in}")
+  }
+}
+```
+
+### Linkage Algorithm Performance Measures
+
+```{r performance measures table, ft.align="left"}
+#| label: tbl-performance_measures 
+#| tbl-cap: !expr paste0("Performance measures for estimating the performance of the probabilistic portion of the linkage algorithm for records in ", params$left_dataset_name, " linked to those in ", params$right_dataset_name, ". These were estimated for the subset of records that had non-missing values for ", params$ground_truth_var, " (N = ", num_non_missing_ground_truth, ", ", percent_non_missing_ground_truth, "%).")
+
+if (!is.null(performance_measures_data)) {
+  perf_meas_tbl
+}
+```
+
+```{r performance measures radar chart, message=FALSE, fig.width=5, fig.height=5}
+#| label: fig-performance_measures_chart
+#| fig-cap: Visualization of the performance metrics provided in @tbl-performance_measures.
+#| fig-align: left
+
+perf_meas_plot_displayed <- FALSE
+if (!is.null(performance_measures_data)) {
+
+  # only output plot if conditions are met
+  if (nrow(performance_measures_data) == 1 & ncol(performance_measures_data >= 3 &
+  all(sapply(performance_measures_data, class) %in% c("numeric","integer"))) & 
+  all(performance_measures_data[1,] >= 0 & performance_measures_data[1,] <= 100)){
+    performance_measures_plot(performance_measures_data)
+  }
+}
+```
+
+```{r, results='asis'}
+if (!is.null(performance_measures_data)) {
+  if (params$output_format == "pdf" & flextable_dim(perf_meas_tbl)$widths >= MAX_PORTRAIT_TABLE_WIDTH){
+    cat("\\newpage")
+    cat("\\pdfpagewidth = 8.5in")
+    cat("\\pdfpageheight = 11in")
+    cat("\\newgeometry{top = 1in, bottom = 1.5in, left = 1in, right = 1in}")
+  }
+}
+
+```
+
+:::
+
+`r if(!is.null(missing_data_indicators)) "::: {.content-visible}" else "::: {.content-hidden}"`
+
+{{< pagebreak >}}
+
+```{r generate missingness table, message=FALSE, results='asis'}
+if (!is.null(missing_data_indicators)) {
+miss_tbl <- missingness_table(
+  data = missing_data_indicators,
+  output_format = params$output_format,
+  font_size = params$table_font_size,
+  font_style = params$font_style,
+  footnotes = params$missingness_tbl_footnotes,
+  thousands_separator = params$thousands_separator,
+  decimal_mark = params$decimal_mark,
+  num_decimal_places = params$num_decimal_places,
+  display_percent_symbol = params$display_percent_symbol
+  )
+if (params$output_format == "pdf" & flextable_dim(miss_tbl)$widths >= MAX_PORTRAIT_TABLE_WIDTH){
+    cat("\\newpage")
+    cat("\\pdfpagewidth = 11in")
+    cat("\\pdfpageheight = 8.5in")
+    cat("\\newgeometry{top = 1in, bottom = 4in, left = 1in, right = 1in}")
+  }
+}
+```
+
+## Data Quality Assessment
+
+### Missing Value Table
+
+```{r missingness table, ft.align="left"}
+#| label: tbl-missing_counts
+#| tbl-cap: !expr paste0("Missing value counts for records in ", params$left_dataset_name, ".")
+
+if (!is.null(missing_data_indicators)) {
+  miss_tbl
+}
+```
+
+```{r, results='asis'}
+if (!is.null(missing_data_indicators)) {
+  if (params$output_format == "pdf" & flextable_dim(miss_tbl)$widths >= MAX_PORTRAIT_TABLE_WIDTH){
+    cat("\\newpage")
+    cat("\\pdfpagewidth = 8.5in")
+    cat("\\pdfpageheight = 11in")
+    cat("\\newgeometry{top = 1in, bottom = 1.5in, left = 1in, right = 1in}")
+  }
+}
+```
+
+:::
+
+```{r, results='asis'}
+##| label: tbl-mis_imput
+##| tbl-cap: Missing sex imputation.
+
+# data <- fread("C:\\Users\\stoughte\\Downloads\\imputation_metadata.csv")
+# t <- flextable(data)
+# t <- set_table_width(t)
+# if (flextable_dim(t)$widths >= 6.5){
+#    cat("\\newpage")
+#    cat("\\pdfpagewidth = 11in")
+#    cat("\\pdfpageheight = 8.5in")
+#    cat("\\newgeometry{top = 1in, bottom = 4in, left = 1in, right = 1in}")
+# }
+
+```
+
+# Missing Data Imputation
+
+```{r, ft.align="left"}
+##| label: tbl-mis_imput
+##| tbl-cap: Missing sex imputation.
+# t
+```
+
+```{r, results='asis'}
+# if (flextable_dim(t)$widths >= 6.5){
+# cat("\\newpage")
+#     cat("\\pdfpagewidth = 8.5in")
+#     cat("\\pdfpageheight = 11in")
+#     cat("\\newgeometry{top = 1in, bottom = 1.5in, left = 1in, right = 1in}")
+# }
+
+```
+
+{{< pagebreak >}}
+
+# Background
+
+## Record Linkage
+
+Record linkage is the process of identifying which records from different data sources represent the same individual. Records identified as belonging to the same individual---classified as a matched record pair---are joined into a single file, facilitating research. For example, linking project-specific data with a data repository creates a comprehensive dataset for researchers to work with. Linkage algorithms are iterative, identifying matched record pairs through multiple passes of data analysis.
+
+### Blocking
+
+To identify all matching record pairs, you may think to examine all possible combinations and classify each as either a match or a non-match based on specific criteria. This, unfortunately, is not feasible given the enormity of current databases. For instance, if you’re linking two datasets, each containing one million records, you would end up with 1,000,000 x 1,000,000 = 1,000,000,000,000, i.e. one trillion, candidate record pairs that need to be classified. This approach is impractical due to excessive computation time and memory requirements. Instead, blocking is used to reduce the search space of candidate record pairs. Blocking involves selecting one or more variables common to both datasets and exclusively considering record pairs with an exact match on those variables. For example, if birth year is the blocking variable, only record pairs sharing the same birth year are considered; all other potential pairs are disregarded during that pass of the linkage algorithm. Blocking aims to reduce the number of clear non-matches being checked by requiring at least one matching attribute between pairs of records, thereby reducing the computational time and memory requirements needed for the linkage process.
+
+### Variable Selection
+
+In each iteration of the linkage algorithm, a different set of blocking and matching variables are selected. After records are blocked based on the blocking variables, candidate record pairs are assessed against each matching variable. Depending on the type of linkage being performed, they are classified as either a match or a non-match. Blocking and matching variables are common to the datasets being linked and vary in discriminating power—their ability to effectively differentiate between different records within the dataset. For example, surname exhibits high discriminating power due to the multitude of unique surnames in a dataset. In contrast, sex exhibits low discriminating power due to its lack of unique values—usually only two or three—in a dataset, making it less effective for identifying matches based solely on this attribute. A combination of these variables is chosen in each iteration to encompass a broad range of attributes, aiming to enhance the matching process.
+
+### Types of Record Linkage
+
+There are two main linking techniques, deterministic and probabilistic. In deterministic linkage, records are classified as a match if they have an exact match on the considered fields. When a unique identifier, such as PHIN, is available, a deterministic pass with this variable as the matching variable will be the first pass in the linkage algorithm. This pass typically yields the majority of matches in the dataset.\
+In probabilistic linkage, statistics are used to calculate the probability that two records belong to the same individual.\
+This approach is essential in two main scenarios:
+
+1)  When unique identifiers are available, potential missed matches may occur in the deterministic pass due to entry errors like typos or missing values in the matching field. Therefore, probabilistic linkage helps by matching record pairs on other fields, increasing the number of matches identified.
+
+2)  When no unique identifiers are available, probabilistic linkage becomes necessary to match record pairs based on other fields, such as surname, birth year, and given name.
+
+### Probabilistic Linkage
+
+Probabilistic linkage is performed using the Fellegi-Sunter model where match weights are calculated as log-likelihood ratios of M and U conditional probabilities @fellegisunter. The M (Matched) probability is the probability of field values agreeing, given that record pairs refer to the same entity (i.e., a true match); whereas, the U (Unmatched) probability is the probability of field values agreeing, given that record pairs refer to different entities (i.e., a true non-match). Extensions like the Jaro-Winkler distance metric @jarowinkler for approximate string matching are often used with the Fellegi-Sunter model to enhance the matching process. Record pairs are classified as a match if they are above a chosen threshold.
+
+In the Fellegi-Sunter model, two thresholds are set. Record pairs with match weights below the lower threshold are classified as non-matches, while those above the higher threshold are classified as potential matches. Pairs with weights between these thresholds are manually reviewed and classified as appropriate. Due to the high volume of record pairs, a single-threshold approach is often used instead of the two-threshold method. This approach eliminates the need for manual review by classifying pairs as potential matches if their weights exceed the set threshold and non-matches if they do not. If multiple record pairs containing the same record meet the acceptance threshold, the pair with the highest match weight is selected as the match. After each pass of the linkage algorithm, all matched record pairs are removed from consideration before the next iteration begins.
+
+### Limitations
+
+Every linkage process has its limitations. There are two types of linkage errors: false links and missed links. These can arise from: data entry errors, such as misspelled names; incomplete information, such as missing PHIN; and changed information, such as a new last name after marriage. Linkage errors can introduce biases, leading researchers to under- or overestimate their conclusions. For example, women often change their last name after marriage, and if their maiden name is not included in the data, they may not match on surname, resulting in potential false or missed links. This can lead to lower linkage rates for females compared to males and may affect research outcomes.
+
+## Linkage Algorithm Evaluation
+
+To evaluate the quality of the record linkage, we recommend you do the following:
+
+-   Examine the number of unlinked records, stratified by sociodemographic characteristics (@tbl-linkage_rates). If you are using this data for research, this could reveal potential biases in your study data. For example, a significantly lower linkage rate among females compared to males could introduce selection bias in your research study. If you are using this to evaluate the linkage algorithm, variations in linkage rates may highlight limitations in the algorithm’s effectiveness across diverse population groups.
+
+-   Examine the linkage rates over acquisition dates (@fig-linkage_rate_dist). Changes in linkage rates over time may indicate shifts in data quality, variations in data recording practices, or improvements/changes made to the algorithm.
+
+-   Examine the classification metrics performed on the linkage algorithm (@tbl-performance_measures). The linkage algorithm involves a tradeoff between match certainty and match sensitivity. Match certainty refers to the proportion of identified matched pairs that are true matches, indicating the accuracy of the matched pairs. Match sensitivity refers to the proportion of true matches correctly identified by the algorithm out of all true matches, indicating the algorithm's ability to detect actual matches. An example of a match certainty metric is positive predictive value (precision), and an example of a match sensitivity metric is sensitivity (recall). Examining the table will inform you of the certainty and sensitivity of the record linkage performed.
+
+-   Examine previous linkages of the data. If you are evaluating the linkage algorithm and have access to previous linkages, compare linkage rates (@tbl-linkage_rates) and the matching and blocking variables (@tbl-algorithm_summary) to assess consistency and any potential improvements.
+
+{{< pagebreak >}}
+
+# Methods
+
+We used an iterative, multistage approach to link records from two data sources: `r params$left_dataset_name` and `r params$right_dataset_name`. We sought to link the records from `r params$left_dataset_name` to the records in `r params$left_dataset_name`.
+
+## Pre-Processing
+
+The steps taken to clean and standardize the data rely on its cleanliness and availability of fields.
+
+All punctuation was removed from non-numeric fields, and characters were converted to a common case. To reduce name variation, names with common values were given a standard form: nicknames were converted to full given names (e.g., Bill =\> William); and name variations were converted to standard forms (e.g., Haley, Hailey, Hailee =\> Hailey). Similarly, to reduce address variation, abbreviations were expanded to their original forms (e.g., Rd or Rd. =\> Road). Fields with multiple attributes, such as name fields containing both primary (i.e., first name) and secondary (i.e., middle name) given names, were split into separate fields. Date fields were divided into day, month, and year fields by analyzing the date format (e.g., DD/MM/YYYY, MM/DD/YYYY, YYYY-MM-DD, etc.) and separating accordingly.
+
+Categorical variables, such as sex/gender or ethnicity, were given a common set of standard values across the two datasets @datastanpkg. For example, if gender is categorized as Male = 1, Female = 2, Non-binary = 3, Gender fluid = 4, and Other = 5 in the left dataset, and as Male = M, Female = F, and Other = X in the right dataset, the values would be converted to the common categories. Since the right dataset has only three categories, the left dataset’s values would need to be adjusted to match. Specifically, Male = 1 would be converted to M, Female = 2 would be converted to F, and Non-binary = 3, Gender fluid = 4, and Other = 5 would be converted to X.
+
+### Missing Data Imputation
+
+if missing data imputation results are provided to function: Missing data was imputed by inferring sex/gender from primary given name---the first name in the provided name field. In cases where data elements were combined into single fields, such as postal codes being appended to address fields, regular expressions were used to separate the data elements and impute the missing data.
+
+## Linkage Algorithm
+
+Linkage was performed using the reclin2 package @reclin2pkg (version 0.5.0) in R. Records were linked through an iterative process using a combination of deterministic---an exact match on the considered fields---and probabilistic steps (@tbl-algorithm_summary). For probabilistic steps, the Fellegi-Sunter model @fellegisunter and its extensions were used to generate match weights for each matching variable in the candidate record pairs.\
+These extensions included:
+
+a)  The Expectation-Maximization algorithm) for unsupervised learning of M and U conditional probabilities.
+
+b)  The Jaro-Winkler string distance metric [@jarowinkler]---an approximate string comparator---to match string-based identifiers.
+
+c)  Adjusting identifier weights for observed frequencies (i.e., common vs. rare values). For example, less common names (e.g., Barret) that matched were assigned a higher weight than common names (e.g., John).
+
+d)  Total match weights were normalized to a standard range: \[0,1\].
+
+e)  Blocking strategies were used to reduce the search space of candidate record pairs---leading to reduced computation time and memory requirements.
+
+f)  A single minimum acceptance threshold was used instead of the two-threshold approach originally recommended by Fellegi and Sunter which required a clerical review of candidate record pairs with intermediate probabilistic weights.
+
+Different sets of blocking and matching variables (@tbl-algorithm_summary) were selected for each iteration with the aim of considering every possible record pair. In each iteration, the candidate record pairs were all possible combinations of record pairs that remained after blocking filtered out those that did not meet the blocking criteria.
+
+Initially, a deterministic pass was conducted, followed by multiple probabilistic passes. During each probabilistic pass, match weights were computed for each matching variable across all candidate record pairs, summed, and then normalized to produce the final match weight for each pair. An acceptance threshold was selected by examining the match weights of candidate record pairs, identifying weights that appeared to represent both matches and non-matches, and setting it between these intermediate values. Candidate record pairs were classified as matches if their match weight exceeded the chosen threshold and was the highest among all match weights for that record. If a record was involved in multiple pairs with the same highest match weight exceeding the threshold, the pair with the most recent data was selected and classified as a match.
+
+Match weights for string-matching variables, such as surname, were computed using the Jaro-Winkler string distance metric. A Jaro-Winkler acceptance threshold was chosen to classify whether two strings should be considered the same or different. If the distance metric exceeded the threshold, the pair was assigned a weight of 1 to indicate they were considered the same; otherwise, they were assigned a weight of 0.
+
+The pre-processing step introduced new variables that expanded our ability to make comparisons beyond our initial capability. Non-English language names follow different ordering or formatting conventions compared to English language names. Therefore, when multiple given names were present, separating them enabled us to compare all given names with the primary given name of the current record, enhancing the likelihood of a match. To address data entry errors where month and day fields may have been mistakenly interchanged, separating the date fields enabled us to compare days directly with months.
+
+Following each linkage step, matched record pairs were removed from contention before subsequent iterations were performed.
+
+## Linkage Algorithm Evaluation
+
+To evaluate the quality of the linkage algorithm, we stratified linkage rates by sociodemographic fields (@tbl-linkage_rates), allowing us to examine the algorithm's performance and consistency across different demographic categories. We examined linkage rate trends over time (@fig-linkage_rate_dist) to provide insights into the algorithm’s performance across acquisition dates and to assess how changes in data capture may have affected linkage rates over time.
+
+`r if(!is.null(params$performance_measures_data_path)) "::: {.content-visible}" else "::: {.content-hidden}"`
+
+The evaluation of the probabilistic portion of the linkage algorithm was performed on the entire subset of records that had non-missing values for the gold standard field, `r params$left_dataset_name`, before executing the linkage algorithm. Classification metrics---metrics provided by the classification metrics parameter (@tbl-performance_measures)---were derived using `r params$ground_truth_var` to classify pairs of records as matches or non-matches.
+
+:::
+
+{{< pagebreak >}}
+
+# References
+
+::: {#refs}
+:::
+
+`r if(params$display_back_cover_page) "::: {.content-visible}" else "::: {.content-hidden}"`
+
+\newpage
+
+```{=tex}
+\begin{titlepage}
+    \begin{center}
+    \thispagestyle{nopagenumbers}
+        \vspace*{5cm}
+        
+
+    \end{center}
+\end{titlepage}
+```
+:::

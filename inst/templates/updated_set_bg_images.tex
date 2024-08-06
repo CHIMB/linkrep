@@ -1,0 +1,113 @@
+\usepackage{ifthen}
+\usepackage{lastpage}
+\usepackage{eso-pic}
+\usepackage{graphicx}
+\usepackage{fancyhdr}
+\usepackage{pdflscape}
+
+\newif\iflandscape
+
+\newcommand{\checklandscape}{
+  \ifdim\pdfpagewidth>\pdfpageheight
+    \landscapetrue
+  \else
+    \landscapefalse
+  \fi
+}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\setbgimagewithback}
+\fancyfoot[C]{%
+  \checklandscape
+  \iflandscape
+    \hspace*{3cm}\raisebox{0.5cm}{\makebox[\textwidth]{\thepage}} % Centered page number for landscape
+  \else
+    \raisebox{0.5cm}{\thepage} % Regular centered page number for portrait
+  \fi
+}
+
+% page style without page number
+\fancypagestyle{nopagenumbers}{
+  \fancyhf{} % Clear header and footer
+  \fancyhead[L]{\setbgimagewithback}
+}
+
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+
+% use this command when display_back_cover_page = FALSE
+\newcommand{\setbgimagenoback}{
+  \checklandscape
+  \iflandscape
+    \AddToShipoutPictureBG*{
+      \put(\LenToUnit{0cm},\LenToUnit{2.5in}){%
+        \includegraphics[width=11in,height=8.5in]{content_landscape_page_no_back} 
+      }
+    }
+  \else
+    \ifthenelse{\value{page}=1}{
+      \AddToShipoutPictureBG*{
+        \put(\LenToUnit{0cm},\LenToUnit{0cm}){%
+          \includegraphics[width=8.5in,height=11in]{cover_page_no_back}
+        }
+      }
+    }{
+      \ifthenelse{\value{page}=2}{
+        \AddToShipoutPictureBG*{
+          \put(\LenToUnit{0cm},\LenToUnit{0cm}){%
+            \includegraphics[width=8.5in,height=11in]{C:/Users/stoughte/Documents/linkrep/inst/background_images/acknowledgements_page.pdf}
+          }
+        }
+      }{
+        \AddToShipoutPictureBG*{
+          \put(\LenToUnit{0cm},\LenToUnit{0cm}){%
+            \includegraphics[width=8.5in,height=11in]{content_portrait_page_no_back}
+          }
+        }  
+      }
+    }
+  \fi
+}
+
+% use this command when display_back_cover_page = TRUE
+\newcommand{\setbgimagewithback}{
+  \checklandscape
+  \iflandscape
+    \AddToShipoutPictureBG*{
+      \put(\LenToUnit{0cm},\LenToUnit{2.5in}){%
+        \includegraphics[width=11in,height=8.5in]{C:/Users/stoughte/Documents/linkrep/inst/background_images/content_landscape_page.pdf}
+      }
+    }
+  \else
+    \ifthenelse{\value{page}=1}{
+      \AddToShipoutPictureBG*{
+        \put(\LenToUnit{0cm},\LenToUnit{0cm}){%
+          \includegraphics[width=8.5in,height=11in]{C:/Users/stoughte/Documents/linkrep/inst/background_images/cover_page.pdf}
+        }
+      }
+    }{
+      \ifthenelse{\value{page}=\pageref{LastPage}}{
+        \AddToShipoutPictureBG*{
+          \put(\LenToUnit{0cm},\LenToUnit{0cm}){%
+            \includegraphics[width=8.5in,height=11in]{C:/Users/stoughte/Documents/linkrep/inst/background_images/back_cover_page.pdf}
+          }
+        }
+      }{
+        \ifthenelse{\value{page}=2}{
+          \AddToShipoutPictureBG*{
+            \put(\LenToUnit{0cm},\LenToUnit{0cm}){%
+              \includegraphics[width=8.5in,height=11in]{C:/Users/stoughte/Documents/linkrep/inst/background_images/acknowledgements_page.pdf}
+            }
+          }
+        }{
+          \AddToShipoutPictureBG*{
+            \put(\LenToUnit{0cm},\LenToUnit{0cm}){%
+              \includegraphics[width=8.5in,height=11in]{C:/Users/stoughte/Documents/linkrep/inst/background_images/content_portrait_page.pdf}
+            }
+          }  
+        }
+      }
+    }
+  \fi
+}
