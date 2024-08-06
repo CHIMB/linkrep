@@ -99,7 +99,7 @@ validate_df <- function(param, param_name){
 }
 
 
-#' Validate Variable is in Data
+#' Validate a Variable is Present in the Data
 #'
 #' Check if a variable name is present in a dataframe.
 #'
@@ -107,6 +107,8 @@ validate_df <- function(param, param_name){
 #' @param data The dataframe that should contain the variable name passed in.
 #' @param var_param_name The name of the variable parameter to be used in potential error messages.
 #' @param data_param_name The name of the data parameter to be used in potential error messages.
+#'
+#' @export
 #'
 validate_var_in_data <- function(var, data, var_param_name, data_param_name){
   validate_string(var, "var")
@@ -125,6 +127,8 @@ validate_var_in_data <- function(var, data, var_param_name, data_param_name){
 #'
 #' @param param The dataframe parameter to check.
 #' @param param_name The name of the parameter to be used in potential error messages.
+#'
+#' @export
 #'
 validate_df_binary <- function(param, param_name){
   validate_df(param, "param")

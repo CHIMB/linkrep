@@ -1,16 +1,26 @@
-#' Generate Bar Plot of Linkage Rates by Acquisition Dates
+#' Generate Barplot of Linkage Rates by Acquisition Dates
 #'
-#' Generates a bar plot of linkage rates by acquisition dates with the x-axis formatted to look nice depending on the number of unique years present in data.
+#' Generates a barplot of linkage rates by acquisition dates with the x-axis
+#' laid out depending on the number of unique years present in \code{data}.
 #'
-#' @param data A data frame.
-#' @param link_indicator_var A character string of the name of a logical or binary
-#'  variable present in the data that indicates whether a record linked or not.
-#' @param acquisition_year_var A character string of the name of the variable that
-#'  represents the acquisition years.
-#' @param acquisition_month_var A character string of the name of the variable that
-#'  represents the acquisition months.
+#' @param data A data frame containing the variables present in the left dataset
+#' of the linkage.
+#' @param link_indicator_var A string of the name of a logical or binary
+#'  variable present in \code{data} that indicates whether a record linked or not.
+#' @param acquisition_year_var A string of the name of the numeric variable in
+#'  \code{data} that represents the acquisition year.
+#' @param acquisition_month_var A string of the name of the numeric variable in
+#'  \code{data} that represents the acquisition month.
 #'
-#' @return A bar plot.
+#' @details
+#' The x-axis will either be displayed in monthly, quarterly, biyearly or years
+#' depending on the range of the acquisition dates provided.
+#'
+#' In order for the plot to be output, there needs to be enough range in the acquisition
+#' dates to produce at least five bars in the barplot.
+#'
+#' @return A barplot of linkage rates by acquisition date.
+#' @export
 #'
 #' @import ggplot2
 #' @importFrom dplyr mutate summarise group_by ungroup select

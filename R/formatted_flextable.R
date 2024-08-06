@@ -5,7 +5,8 @@
 #'  one of "`pdf`" or "`docx`".
 #' @param font_size A numeric specifying the font size for the table text.
 #' @param font_style A character string specifying the font. Must be present in
-#'  \code{system_fonts()$name} or \code{system_fonts()$family} in the package \code{\link{system_fonts}}
+#'  \code{system_fonts()$name} or \code{system_fonts()$family}. See \code{\link{system_fonts}}
+#'  for more details.
 #' @param footnotes A character vector of additional footnotes. Each element in
 #'  the vector will be displayed on a new line.
 #' @param thousands_separator A character string specifying the thousands separator.

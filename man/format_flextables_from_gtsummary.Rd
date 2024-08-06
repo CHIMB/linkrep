@@ -21,7 +21,8 @@ one of "`pdf`" or "`docx`".}
 \item{font_size}{A numeric specifying the font size for the table text.}
 
 \item{font_style}{A character string specifying the font. Must be present in
-\code{system_fonts()$name} or \code{system_fonts()$family} in the package \code{\link{system_fonts}}}
+\code{system_fonts()$name} or \code{system_fonts()$family}. See \code{\link{system_fonts}}
+for more details.}
 
 \item{footnotes}{A character string of footnotes. Must be one string when called with this function.}
 }

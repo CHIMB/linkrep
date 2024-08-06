@@ -2,16 +2,21 @@
 #'
 #' Generates a formatted flextable specific to the abbreviation table.
 #'
-#' @param data A data frame.
-#' @param output_format A character string specifying the output format, must be
-#'  one of "`pdf`" or "`docx`".
-#' @param font_size A numeric specifying the font size for the table text.
-#' @param font_style A character string specifying the font. Must be present in
-#'  \code{system_fonts()$name} or \code{system_fonts()$family} in the package \code{\link{system_fonts}}
-#' @param display_headers A logical indicating whether to display the headers in
-#'  the table. Default is `TRUE`.
+#' @param data A data frame. Data must contain two columns:
+#'  the list of abbreviations in the first and their definitions in the second.
+#' @param output_format String specifying the desired output format. Allowed values
+#'  are "\code{pdf}" or "\code{docx}".
+#' @param font_size A number specifying the font size for the table text.
+#'  Default is \code{12}.
+#' @param font_style A string specifying the font style. Must be present in
+#'  \code{system_fonts()$name} or \code{system_fonts()$family}. See \code{\link[systemfonts]{system_fonts}}
+#'  for more details.
+#' @param display_headers A logical indicating whether to display the
+#'  column headers in the abbreviation table. Only applied when \code{output_format =}
+#'  "\code{docx}".
 #'
-#' @return A `flextable`.
+#' @return A \code{flextable}.
+#' @export
 #'
 #' @importFrom flextable border_remove delete_part
 #'

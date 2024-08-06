@@ -3,6 +3,7 @@
 #' @param data A single row data frame with values ranging from 0 to 100.
 #'
 #' @return A radar chart.
+#' @export
 #'
 #' @importFrom fmsb radarchartcirc
 #'
@@ -17,12 +18,10 @@ performance_measures_plot <- function(data){
 
   validate_df(data, "data")
 
-  plot <- NULL
-
   if (nrow(data) != 1){
     warning("performance measures is more than one row therefore radar chart will not be output")
   } else if (ncol(data) < 3){
-    warning("must be more than 2 variables present in performance measures to creat radar chart therefore, radra chart will not be output")
+    warning("must be more than 2 variables present in performance measures to create radar chart therefore, radar chart will not be output")
   } else if (!all(sapply(data, class) %in% c("numeric","integer"))){
     warning("performance measures are not all numeric therefore radar chart will not be output")
   } else if (!(all(data[1,] >= 0 & data[1,] <= 100))){
@@ -46,19 +45,18 @@ performance_measures_plot <- function(data){
                   min = rep(MIN_DATA_VALUE, ncol(data)),
                   data)
 
-    plot <- radarchartcirc(data,
-                                      axistype = 1,
-                                      seg = 5,
-                                      pcol = PLOT_COLOUR,
-                                      pfcol = alpha(PLOT_COLOUR, 0.5),
-                                      plwd = 2,
-                                      cglcol = CIRCLES_COLOUR,
-                                      cglty = 1,
-                                      axislabcol = AXIS_LABELS_COLOUR,
-                                      caxislabels = seq(0, 100, 20),
-                                      cglwd = 0.8,
-                                      vlcex = 0.8,
-                                      vlabels = labels)
+    radarchartcirc(data,
+                   axistype = 1,
+                   seg = 5,
+                   pcol = PLOT_COLOUR,
+                   pfcol = alpha(PLOT_COLOUR, 0.5),
+                   plwd = 2,
+                   cglcol = CIRCLES_COLOUR,
+                   cglty = 1,
+                   axislabcol = AXIS_LABELS_COLOUR,
+                   caxislabels = seq(0, 100, 20),
+                   cglwd = 0.8,
+                   vlcex = 0.8,
+                   vlabels = labels)
   }
-  return(plot)
 }

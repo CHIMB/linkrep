@@ -2,7 +2,7 @@
 % Please edit documentation in R/helper_parameter_type_check_functions.R
 \name{validate_var_in_data}
 \alias{validate_var_in_data}
-\title{Validate Variable is in Data}
+\title{Validate a Variable is Present in the Data}
 \usage{
 validate_var_in_data(var, data, var_param_name, data_param_name)
 }

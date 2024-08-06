@@ -25,67 +25,76 @@ linkage_rate_table(
 )
 }
 \arguments{
-\item{main_data}{A data frame containing the main dataset.}
+\item{main_data}{A data frame containing the variables present in the left dataset
+of the linkage.}
 
-\item{output_format}{A character string specifying the output format, must be
-one of "`pdf`" or "`docx`".}
+\item{output_format}{String specifying the desired output format. Allowed values
+are "\code{pdf}" or "\code{docx}".}
 
-\item{column_var}{A character string of the name of a logical or binary variable
-present in the data that indicates whether a record linked or not. Its values
-will be the columns in the linkage rate table.}
+\item{column_var}{A string of the name of a logical or binary variable
+present in \code{main_data} that indicates whether a record linked or not.
+Its values will be the columns in the table.}
 
 \item{strata_vars}{A character vector of the names of the variables present in
-`main_data` to display in the linkage rate table.}
+\code{main_data} to stratify the table by.}
 
-\item{missing_data_indicators}{A logical or binary data frame. Variables associated
-with those in `main_data` must either have the same variable name as the variable
-it's associated with in `main_data` with '_missing' attached to the end of
-it or have the same label as the variable it's associated with for it to
-be put under that variables section of the table. All variables present
-in this dataset will be displayed in the table.}
+\item{missing_data_indicators}{A data frame. All variables in the data
+must be logical or binary, with \code{1} or \code{TRUE} representing a missing
+record for that variable. See Details section for more information on naming
+conventions and how this data is used in the table.}
 
-\item{display_total_column}{A logical indicating whether to display a total
-(overall) column in the table. Default is `TRUE`.}
+\item{display_total_column}{A logical indicating whether to
+display a total (overall) column in the table. Default is \code{TRUE}.}
 
-\item{display_mean_not_median_stats}{A logical indicating whether to display mean
-+/- sd or median (Q1, Q3) statistics for continuous variables. Default is `FALSE`.}
+\item{display_mean_not_median_stats}{A logical indicating whether
+to display the statistics for continuous variables in the table
+as either mean \eqn{\pm} standard deviation or median (Q1, Q3), where Q1 is
+the 25\eqn{^{th}} percentile, and Q3 is the 75\eqn{^{th}} percentile. Default
+is \code{FALSE}.}
 
 \item{display_alphabetically}{STILL NEED TO IMPLEMENT}
 
-\item{font_size}{A numeric specifying the font size for the table text.}
+\item{font_size}{A number specifying the font size for the table text.
+Default is \code{12}.}
 
-\item{font_style}{A character string specifying the font. Must be present in
-\code{system_fonts()$name} or \code{system_fonts()$family} in the package \code{\link{system_fonts}}.}
+\item{font_style}{A string specifying the font style. Must be present in
+\code{system_fonts()$name} or \code{system_fonts()$family}. See \code{\link[systemfonts]{system_fonts}}
+for more details.}
 
-\item{footnotes}{A character vector of additional footnotes. Each element in
-the vector will be displayed on a new line.}
+\item{footnotes}{A character vector of additional footnotes for
+the linkage rate table. Each element in the vector will be displayed on a new line.}
 
-\item{thousands_separator}{A character string specifying the style of the
-thousands separator. Default is "`,`".}
+\item{thousands_separator}{A string specifying the style of the
+thousands separator in all numeric values. Default is "\code{,}".}
 
-\item{decimal_mark}{A character string specifying the style of the decimal mark.
-Default is "`.`".}
+\item{decimal_mark}{A string specifying the style of the decimal mark
+in all numeric values. Default is "\code{.}".}
 
 \item{num_decimal_places}{A number specifying the number of digits to output
-after the decimal mark. Default is `1`.}
+after the decimal mark of all necessary numeric values. Default is \code{1}.}
 
-\item{display_percent_symbol}{A logical indicating whether you want a percent
-symbol to display in the table. Default is `FALSE`.}
+\item{display_percent_symbol}{A logical indicating whether to display a percent symbol
+next to percentages table. Default is \code{FALSE}.}
 
-\item{output_to_csv}{A logical indicating whether the table will get saved in
-a csv file. Default is `FALSE`.}
+\item{output_to_csv}{A logical indicating whether to save the  table in a csv
+file. Default is \code{FALSE}.}
 
-\item{output_dir}{A path to an output directory. The csv file containing the
+\item{output_dir}{A path to a directory. The csv file containing the
 table will be saved here if `output_to_csv = TRUE`.}
 }
 \value{
-A `flextable` that was originally a `gtsummary`.
+A \code{flextable} that was originally a \code{gtsummary}.
 }
 \description{
 Generates a summary table of linkage rates stratified by characteristics.
 }
 \details{
-Data coming from `missing_data_indicators` will be relabelled in two ways:
-If the variable is associated with one in `main_data`, it will be labelled "Missing"
-If the variable is not assocaited with on in `main_data`, "Missing " will be appended to the front of its label or if no label exists, its variable name
+Details on \code{missing_data_indicators}:\cr
+Variables associated with those in \code{main_data} must either have the same
+ variable name suffixed by "\code{_missing}" or have the same label for it to be
+ displayed in the linkage rate table as a value of that variable. In this case,
+ the variable will be relabelled "\code{Missing}" and tabbed under the header of
+ the variable it's associated with. If the variable is not associated with one
+ in \code{main_data} it will be relabelled with its label or variable name
+ prefixed by "\code{Missing }".
 }

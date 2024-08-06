@@ -17,33 +17,37 @@ missingness_table(
 )
 }
 \arguments{
-\item{data}{A binary/logical data frame.}
+\item{data}{A data frame. All variables must be logical or binary, with
+\code{1} or \code{TRUE} representing a missing record for that variable.
+ conventions and where this data is used in the report.}
 
-\item{output_format}{A character string specifying the output format, must be
-one of "`pdf`" or "`docx`".}
+\item{output_format}{String specifying the desired output format. Allowed values
+are "\code{pdf}" or "\code{docx}".}
 
-\item{font_size}{A numeric specifying the font size for the table text.}
+\item{font_size}{A number specifying the font size for the table text.
+Default is \code{12}.}
 
-\item{font_style}{A character string specifying the font. Must be present in
-\code{system_fonts()$name} or \code{system_fonts()$family} in the package \code{\link{system_fonts}}.}
+\item{font_style}{A string specifying the font style. Must be present in
+\code{system_fonts()$name} or \code{system_fonts()$family}. See \code{\link[systemfonts]{system_fonts}}
+for more details.}
 
-\item{footnotes}{A character vector of additional footnotes. Each element in
-the vector will be displayed on a new line.}
+\item{footnotes}{A character vector of additional footnotes for
+the linkage rate table. Each element in the vector will be displayed on a new line.}
 
-\item{thousands_separator}{A character string specifying the style of the
-thousands separator. Default is "`,`".}
+\item{thousands_separator}{A string specifying the style of the
+thousands separator in all numeric values. Default is "\code{,}".}
 
-\item{decimal_mark}{A character string specifying the style of the decimal mark.
-Default is "`.`".}
+\item{decimal_mark}{A string specifying the style of the decimal mark
+in all numeric values. Default is "\code{.}".}
 
 \item{num_decimal_places}{A number specifying the number of digits to output
-after the decimal mark. Default is `1`.}
+after the decimal mark of all necessary numeric values. Default is \code{1}.}
 
-\item{display_percent_symbol}{A logical indicating whether you want a percent
-symbol to display in the table. Default is `FALSE`.}
+\item{display_percent_symbol}{A logical indicating whether to display a percent symbol
+next to percentages table. Default is \code{FALSE}.}
 }
 \value{
-A `flextable` that was originally a `gtsummary`.
+A \code{flextable} that was originally a \code{gtsummary}.
 }
 \description{
 Generates a table stratified by variables representing the missingness of the data.

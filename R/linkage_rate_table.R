@@ -2,51 +2,61 @@
 #'
 #' Generates a summary table of linkage rates stratified by characteristics.
 #'
-#' @param main_data A data frame containing the main dataset.
-#' @param output_format A character string specifying the output format, must be
-#'  one of "`pdf`" or "`docx`".
-#' @param column_var A character string of the name of a logical or binary variable
-#'  present in the data that indicates whether a record linked or not. Its values
-#'  will be the columns in the linkage rate table.
+#' @param main_data A data frame containing the variables present in the left dataset
+#' of the linkage.
+#' @param output_format String specifying the desired output format. Allowed values
+#'  are "\code{pdf}" or "\code{docx}".
+#' @param column_var A string of the name of a logical or binary variable
+#'  present in \code{main_data} that indicates whether a record linked or not.
+#'  Its values will be the columns in the table.
 #' @param strata_vars A character vector of the names of the variables present in
-#'  `main_data` to display in the linkage rate table.
-#' @param missing_data_indicators A logical or binary data frame. Variables associated
-#'  with those in `main_data` must either have the same variable name as the variable
-#'  it's associated with in `main_data` with '_missing' attached to the end of
-#'  it or have the same label as the variable it's associated with for it to
-#'  be put under that variables section of the table. All variables present
-#'  in this dataset will be displayed in the table.
-#' @param display_total_column A logical indicating whether to display a total
-#'  (overall) column in the table. Default is `TRUE`.
-#' @param display_mean_not_median_stats A logical indicating whether to display mean
-#'  +/- sd or median (Q1, Q3) statistics for continuous variables. Default is `FALSE`.
+#'  \code{main_data} to stratify the table by.
+#' @param missing_data_indicators A data frame. All variables in the data
+#'  must be logical or binary, with \code{1} or \code{TRUE} representing a missing
+#'  record for that variable. See Details section for more information on naming
+#'  conventions and how this data is used in the table.
+#' @param display_total_column A logical indicating whether to
+#'  display a total (overall) column in the table. Default is \code{TRUE}.
+#' @param display_mean_not_median_stats A logical indicating whether
+#'  to display the statistics for continuous variables in the table
+#'  as either mean \eqn{\pm} standard deviation or median (Q1, Q3), where Q1 is
+#'  the 25\eqn{^{th}} percentile, and Q3 is the 75\eqn{^{th}} percentile. Default
+#'  is \code{FALSE}.
 #'
 #' @param display_alphabetically STILL NEED TO IMPLEMENT
 #'
-#' @param font_size A numeric specifying the font size for the table text.
-#' @param font_style A character string specifying the font. Must be present in
-#'  \code{system_fonts()$name} or \code{system_fonts()$family} in the package \code{\link{system_fonts}}.
-#' @param footnotes A character vector of additional footnotes. Each element in
-#'  the vector will be displayed on a new line.
-#' @param thousands_separator A character string specifying the style of the
-#'  thousands separator. Default is "`,`".
-#' @param decimal_mark A character string specifying the style of the decimal mark.
-#'  Default is "`.`".
+#' @param font_size A number specifying the font size for the table text.
+#'  Default is \code{12}.
+#' @param font_style A string specifying the font style. Must be present in
+#'  \code{system_fonts()$name} or \code{system_fonts()$family}. See \code{\link[systemfonts]{system_fonts}}
+#'  for more details.
+#' @param footnotes A character vector of additional footnotes for
+#' the linkage rate table. Each element in the vector will be displayed on a new line.
+#' @param thousands_separator A string specifying the style of the
+#'  thousands separator in all numeric values. Default is "\code{,}".
+#' @param decimal_mark A string specifying the style of the decimal mark
+#'  in all numeric values. Default is "\code{.}".
 #' @param num_decimal_places A number specifying the number of digits to output
-#'  after the decimal mark. Default is `1`.
-#' @param display_percent_symbol A logical indicating whether you want a percent
-#'  symbol to display in the table. Default is `FALSE`.
-#' @param output_to_csv A logical indicating whether the table will get saved in
-#'  a csv file. Default is `FALSE`.
-#' @param output_dir A path to an output directory. The csv file containing the
+#'  after the decimal mark of all necessary numeric values. Default is \code{1}.
+#' @param display_percent_symbol A logical indicating whether to display a percent symbol
+#' next to percentages table. Default is \code{FALSE}.
+#' @param output_to_csv A logical indicating whether to save the  table in a csv
+#' file. Default is \code{FALSE}.
+#' @param output_dir A path to a directory. The csv file containing the
 #'  table will be saved here if `output_to_csv = TRUE`.
 #'
 #' @details
-#' Data coming from `missing_data_indicators` will be relabelled in two ways:
-#' If the variable is associated with one in `main_data`, it will be labelled "Missing"
-#' If the variable is not assocaited with on in `main_data`, "Missing " will be appended to the front of its label or if no label exists, its variable name
+#' Details on \code{missing_data_indicators}:\cr
+#' Variables associated with those in \code{main_data} must either have the same
+#'  variable name suffixed by "\code{_missing}" or have the same label for it to be
+#'  displayed in the linkage rate table as a value of that variable. In this case,
+#'  the variable will be relabelled "\code{Missing}" and tabbed under the header of
+#'  the variable it's associated with. If the variable is not associated with one
+#'  in \code{main_data} it will be relabelled with its label or variable name
+#'  prefixed by "\code{Missing }".
 #'
-#' @return A `flextable` that was originally a `gtsummary`.
+#' @return A \code{flextable} that was originally a \code{gtsummary}.
+#' @export
 #'
 #' @importFrom gtsummary theme_gtsummary_language tbl_summary as_flex_table modify_header modify_footnote add_overall bold_labels style_number all_categorical all_continuous all_stat_cols
 #' @importFrom dplyr select mutate relocate
