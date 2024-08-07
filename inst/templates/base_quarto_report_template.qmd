@@ -79,34 +79,10 @@ header-includes:
 ```{r load packages, include=FALSE, message=FALSE}
 library(linkrep)
 library(data.table)
-# library(dplyr)
 library(flextable)
-# library(fmsb)
-# library(ggplot2)
-# library(gtsummary)
-# library(Hmisc)
-# library(lubridate)
-# library(rlang)
-# library(systemfonts)
-# library(tidyr)
-# library(tidyselect)
-# library(utils)
 library(xfun)
 ```
 
-```{r load functions}
-# source(system.file("R", "abbreviation_table.R", package = "linkrep"))
-# source(system.file("R", "algorithm_summary_table.R", package = "linkrep"))
-# source(system.file("R", "format_flextables_from_gtsummary.R", package = "linkrep"))
-# source(system.file("R", "formatted_flextable.R", package = "linkrep"))
-# source(system.file("R", "helper_parameter_type_check_functions.R", package = "linkrep"))
-# source(system.file("R", "linkage_rate_table.R", package = "linkrep"))
-# source(system.file("R", "linkage_rates_over_time_plot.R", package = "linkrep"))
-# source(system.file("R", "missingness_table.R", package = "linkrep"))
-# source(system.file("R", "performance_measures_plot.R", package = "linkrep"))
-# source(system.file("R", "performance_measures_table.R", package = "linkrep"))
-# source(system.file("R", "set_table_width.R", package = "linkrep"))
-```
 
 ```{r read_data function}
 #----
