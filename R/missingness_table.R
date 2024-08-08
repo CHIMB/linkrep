@@ -13,7 +13,7 @@
 #'  \code{system_fonts()$name} or \code{system_fonts()$family}. See \code{\link[systemfonts]{system_fonts}}
 #'  for more details.
 #' @param footnotes A character vector of additional footnotes for
-#' the linkage rate table. Each element in the vector will be displayed on a new line.
+#' the missigness table. Each element in the vector will be displayed on a new line.
 #' @param thousands_separator A string specifying the style of the
 #'  thousands separator in all numeric values. Default is "\code{,}".
 #' @param decimal_mark A string specifying the style of the decimal mark
