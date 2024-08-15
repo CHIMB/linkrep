@@ -56,7 +56,6 @@
 #'  prefixed by "\code{Missing }".
 #'
 #' @return A \code{flextable} that was originally a \code{gtsummary}.
-#' @export
 #'
 #' @importFrom gtsummary theme_gtsummary_language tbl_summary as_flex_table modify_header modify_footnote add_overall bold_labels style_number all_categorical all_continuous all_stat_cols
 #' @importFrom dplyr select mutate relocate
@@ -123,7 +122,7 @@ linkage_rate_table <- function(main_data,
   validate_var_in_data(column_var, main_data, "column_var", "main_data")
   if (sum(is.na(main_data[[column_var]])) > 0 |
       sum(main_data[[column_var]] != 0 & main_data[[column_var]] != 1) > 0){
-    stop("Invalid argument: column_var must be binary or logical")
+    stop("Invalid argument: column_var must be a binary or logical variable in 'main_data'")
   }
 
   invalid_strata_vars <- base::setdiff(strata_vars, names(main_data))
@@ -145,6 +144,30 @@ linkage_rate_table <- function(main_data,
   # data_subset will contain the necessary variables to generate the table
   data_subset <- select(main_data, all_of(strata_vars), all_of(column_var))
 
+  #----
+  # We decided to have two separate data frames passed to the linkage rate table
+  # to make it easier to identify missing variables to be used in the missingness
+  # table. If one data frame were passed to the main function then we would need
+  # to ensure all missing values were indicated with NA and then perform computations
+  # in the missignness table function to extract the missing values and make a whole
+  # new data frame to generate that table. We felt by using this strategy, we eliminate
+  # the need for making a new data frame and leave it up to the user to ensure
+  # they provide a missingness data frame if they want missing values output.
+  #
+  # Logic for below:
+  # 1) Loop through main_data, each time trying to identify if there is a corresponding
+  # variable in missing_data_indicators
+  # - a corresponding variable is either one with the same variable name suffixed by "_missing"
+  #   or the same label as the variable in main_data
+  # 2) If a corresponding variable is found, place the variable from missing_data_indicators
+  # next to the one in main_data (this is needed for later on). Remove the
+  # missing_data_indicators variable from missing_data_indicators. Label that variable "Missing".
+  # 3) Once the loop is finished:
+  # - If there are remaining variables in missing_data_indicators, append them to the
+  #   end of main_data and prefix either their label, or if they don't have one their
+  #   variable name, by "Missing "
+  # - All variables provided in missing_data_indicators will be output in the table
+  #----
   if (!is.null(missing_data_indicators)){
     # Match the columns in the two datasets and label the matched missing indicators "Missing"
     i <- 1
@@ -157,8 +180,8 @@ linkage_rate_table <- function(main_data,
       missing_col_name <- paste0(data_subset_col_name, "_missing")
 
       # two options:
-      # 1. The name of the variable in main_data_missing... matches the name variable it's associated with in main_data with '_missing' attached to the end of it
-      # 2. The label of the variable in main_data_missing... matches the label of the variable it's associated with in main_data
+      # 1. The name of the variable in main_data_missing matches the name of the variable in main_data suffixed by '_missing'
+      # 2. The label of the variable in main_data_missing matches the label of the variable in main_data
       if (missing_col_name %in% names(missing_data_indicators)) {
         data_subset <- mutate(data_subset, !!missing_col_name := missing_data_indicators[[missing_col_name]])
         # need variable to be right after the 'main_data' variable to be able to make it a sublevel of it in the table
@@ -249,6 +272,14 @@ linkage_rate_table <- function(main_data,
     )
   }
 
+  #----
+  # Above we moved the missing_data_indicator variables associated with a main_data
+  # variable right next to its corresponding variable in main_data. This was so
+  # we could easily locate the "Missing" variable and make it a 'level' of its
+  # main variable. This way, "Missing" will show up as a subgroup of that variable
+  # in the table and won't be bold alongside the main variables.
+  #----
+
   # make the missing values associated with another variable a sub level of that variable
   table$table_body$row_type <- ifelse(table$table_body$var_label == "Missing", "level", table$table_body$row_type)
 
@@ -257,7 +288,8 @@ linkage_rate_table <- function(main_data,
                                    paste0("\t", table$table_body$label),
                                    table$table_body$label)
 
-  # change odd 0 (NA) output to 0 (0...)
+  # for some reason values of 0 are outputting as 0(NA) automatically therefore,
+  # the code below changes that to 0(0..) depending on the number formatting
   percent_symbol <- ifelse(display_percent_symbol, "%", "")
   stat_to_change <- sprintf("0 (NA%s)", percent_symbol)
   new_stat <- sprintf("0 (%s%s)",
@@ -275,7 +307,7 @@ linkage_rate_table <- function(main_data,
     write.csv(df, out_file)
   }
 
-  # transform gtsummary table into a flextable
+  # transform gtsummary table into a flextable to ensure consistency in report output
   table <- as_flex_table(table)
 
   if (is.null(footnotes)) {
