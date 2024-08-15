@@ -2,12 +2,12 @@
 % Please edit documentation in R/helper_parameter_type_check_functions.R
 \name{validate_df}
 \alias{validate_df}
-\title{Validate Dataframe Parameters}
+\title{Validate Data Frame Parameters}
 \usage{
 validate_df(param, param_name)
 }
 \arguments{
-\item{param}{The dataframe parameter to check.}
+\item{param}{The data frame parameter to check.}
 
 \item{param_name}{The name of the parameter to be used in potential error messages.}
 }

@@ -2,12 +2,12 @@
 % Please edit documentation in R/helper_parameter_type_check_functions.R
 \name{validate_df_binary}
 \alias{validate_df_binary}
-\title{Validate Dataframe is Binary or Logical}
+\title{Validate Data Frame is Binary or Logical}
 \usage{
 validate_df_binary(param, param_name)
 }
 \arguments{
-\item{param}{The dataframe parameter to check.}
+\item{param}{The data frame parameter to check.}
 
 \item{param_name}{The name of the parameter to be used in potential error messages.}
 }

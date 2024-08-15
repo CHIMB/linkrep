@@ -16,5 +16,5 @@ validate_var_in_data(var, data, var_param_name, data_param_name)
 \item{data_param_name}{The name of the data parameter to be used in potential error messages.}
 }
 \description{
-Check if a variable name is present in a dataframe.
+Check if a variable name is present in a data frame.
 }
