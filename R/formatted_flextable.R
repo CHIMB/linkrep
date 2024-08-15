@@ -3,22 +3,25 @@
 #' @param data A data frame.
 #' @param output_format A character string specifying the output format, must be
 #'  one of "`pdf`" or "`docx`".
-#' @param font_size A numeric specifying the font size for the table text.
-#' @param font_style A character string specifying the font. Must be present in
-#'  \code{system_fonts()$name} or \code{system_fonts()$family}. See \code{\link{system_fonts}}
+#' @param font_size A number specifying the font size for the table text.
+#'  Default is \code{12}.
+#' @param font_style A string specifying the font style. Must be present in
+#'  \code{system_fonts()$name} or \code{system_fonts()$family}. See \code{\link[systemfonts]{system_fonts}}
 #'  for more details.
-#' @param footnotes A character vector of additional footnotes. Each element in
-#'  the vector will be displayed on a new line.
-#' @param thousands_separator A character string specifying the thousands separator.
-#' @param decimal_mark A character string specifying the decimal mark.
-#' @param num_decimal_places A numeric specifying the number of digits to output
-#'  after the decimal mark.
-#' @param header_align A character string specifying the alignment of the header,
-#'  must be one of "`right`", "`left`" or "`center`".
-#' @param body_align A character string specifying the alignment of the body, must
-#'  be one of "`right`", "`left`" or "`center`".
+#' @param footnotes A character vector of additional footnotes for
+#' the table. Each element in the vector will be displayed on a new line.
+#' @param thousands_separator A string specifying the style of the
+#'  thousands separator in all numeric values. Default is "\code{,}".
+#' @param decimal_mark A string specifying the style of the decimal mark
+#'  in all numeric values. Default is "\code{.}".
+#' @param num_decimal_places A number specifying the number of digits to output
+#'  after the decimal mark of all necessary numeric values. Default is \code{1}.
+#' @param header_align A string specifying the alignment of the header,
+#'  must be one of "\code{right}", "\code{left}" or "\code{center}".
+#' @param body_align A string specifying the alignment of the body, must
+#'  be one of "\code{right}", "\code{left}" or "\code{center}".
 #'
-#' @return A `flextable`
+#' @return A \code{flextable} object.
 #'
 #' @import flextable
 #'
@@ -27,9 +30,9 @@ formatted_flextable <- function(data,
                                 font_size,
                                 font_style,
                                 footnotes = NULL,
-                                thousands_separator = NULL,
-                                decimal_mark = NULL,
-                                num_decimal_places = NULL,
+                                thousands_separator = ",",
+                                decimal_mark = ".",
+                                num_decimal_places = 1,
                                 header_align = NULL,
                                 body_align = NULL){
 
@@ -90,20 +93,12 @@ formatted_flextable <- function(data,
   }
 
   # format the numbers in the table
-  if (!is.null(thousands_separator)){
-    table <- colformat_double(table,
-                              big.mark = thousands_separator)
-    table <- colformat_int(table,
-                           big.mark = thousands_separator)
-  }
+  table <- colformat_int(table, big.mark = thousands_separator)
+  table <- colformat_double(table,
+                            big.mark = thousands_separator,
+                            decimal.mark = decimal_mark,
+                            digits = num_decimal_places)
 
-  if (!is.null(decimal_mark)){
-    table <- colformat_double(table, decimal.mark = decimal_mark)
-  }
-
-  if (!is.null(num_decimal_places)){
-    table <- colformat_double(table, digits = num_decimal_places)
-  }
 
   if (!is.null(header_align)){
     table <- flextable::align(table, align = header_align, part = "header")

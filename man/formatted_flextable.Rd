@@ -10,9 +10,9 @@ formatted_flextable(
   font_size,
   font_style,
   footnotes = NULL,
-  thousands_separator = NULL,
-  decimal_mark = NULL,
-  num_decimal_places = NULL,
+  thousands_separator = ",",
+  decimal_mark = ".",
+  num_decimal_places = 1,
   header_align = NULL,
   body_align = NULL
 )
@@ -23,30 +23,33 @@ formatted_flextable(
 \item{output_format}{A character string specifying the output format, must be
 one of "`pdf`" or "`docx`".}
 
-\item{font_size}{A numeric specifying the font size for the table text.}
+\item{font_size}{A number specifying the font size for the table text.
+Default is \code{12}.}
 
-\item{font_style}{A character string specifying the font. Must be present in
-\code{system_fonts()$name} or \code{system_fonts()$family}. See \code{\link{system_fonts}}
+\item{font_style}{A string specifying the font style. Must be present in
+\code{system_fonts()$name} or \code{system_fonts()$family}. See \code{\link[systemfonts]{system_fonts}}
 for more details.}
 
-\item{footnotes}{A character vector of additional footnotes. Each element in
-the vector will be displayed on a new line.}
+\item{footnotes}{A character vector of additional footnotes for
+the table. Each element in the vector will be displayed on a new line.}
 
-\item{thousands_separator}{A character string specifying the thousands separator.}
+\item{thousands_separator}{A string specifying the style of the
+thousands separator in all numeric values. Default is "\code{,}".}
 
-\item{decimal_mark}{A character string specifying the decimal mark.}
+\item{decimal_mark}{A string specifying the style of the decimal mark
+in all numeric values. Default is "\code{.}".}
 
-\item{num_decimal_places}{A numeric specifying the number of digits to output
-after the decimal mark.}
+\item{num_decimal_places}{A number specifying the number of digits to output
+after the decimal mark of all necessary numeric values. Default is \code{1}.}
 
-\item{header_align}{A character string specifying the alignment of the header,
-must be one of "`right`", "`left`" or "`center`".}
+\item{header_align}{A string specifying the alignment of the header,
+must be one of "\code{right}", "\code{left}" or "\code{center}".}
 
-\item{body_align}{A character string specifying the alignment of the body, must
-be one of "`right`", "`left`" or "`center`".}
+\item{body_align}{A string specifying the alignment of the body, must
+be one of "\code{right}", "\code{left}" or "\code{center}".}
 }
 \value{
-A `flextable`
+A \code{flextable} object.
 }
 \description{
 Create a Formatted Flextable
