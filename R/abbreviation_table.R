@@ -15,7 +15,7 @@
 #'  column headers in the abbreviation table. Only applied when \code{output_format =}
 #'  "\code{docx}".
 #'
-#' @return A \code{flextable}.
+#' @return A \code{flextable} object.
 #' @export
 #'
 #' @importFrom flextable border_remove delete_part

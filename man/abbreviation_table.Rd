@@ -31,7 +31,7 @@ column headers in the abbreviation table. Only applied when \code{output_format 
 "\code{docx}".}
 }
 \value{
-A \code{flextable}.
+A \code{flextable} object.
 }
 \description{
 Generates a formatted flextable specific to the abbreviation table.
