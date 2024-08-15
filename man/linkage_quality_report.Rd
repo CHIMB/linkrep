@@ -47,11 +47,11 @@ linkage_quality_report(
   content_landscape_page = NULL,
   display_back_cover_page = TRUE,
   back_cover_page = NULL,
+  blank_background = FALSE,
   temp_data_output_dir = tempdir(check = TRUE),
   quarto_report_template = NULL,
   references = NULL,
-  word_template = NULL,
-  set_background_images_template = NULL
+  word_template = NULL
 )
 }
 \arguments{
@@ -189,6 +189,9 @@ cover page in the output.}
 \item{back_cover_page}{A file path to a png, pdf or jpg file that contains the
 desired back cover page. Default is \code{system.file("background_images", "back_cover_page.pdf", package = "linkrep")}.}
 
+\item{blank_background}{A logical indicating whether display report on blank
+white background. Default is \code{FALSE}.}
+
 \item{temp_data_output_dir}{A path to a directory. All data frames must be passed
 into the quarto document (report generator) as an rds file therefore, if any data
 passed in is a data frame, those temporary rds files will be stored in this
@@ -204,9 +207,6 @@ the report, they must be used in a citation elsewhere. Default is
 
 \item{word_template}{A file path a to a word document that specifies the output
 styles for a word report. Default is \code{system.file("templates", "word_template.docx", package = "linkrep")}.}
-
-\item{set_background_images_template}{A file path to a LaTex (tex) document that
-specifies how the background images are laid onto a pdf report.}
 }
 \value{
 Saves either a word or pdf record linkage quality report in the \code{output_dir}.\cr

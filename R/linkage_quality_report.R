@@ -96,6 +96,8 @@
 #'  cover page in the output.
 #' @param back_cover_page A file path to a png, pdf or jpg file that contains the
 #'  desired back cover page. Default is \code{system.file("background_images", "back_cover_page.pdf", package = "linkrep")}.
+#' @param blank_background A logical indicating whether display report on blank
+#'  white background. Default is \code{FALSE}.
 #' @param temp_data_output_dir A path to a directory. All data frames must be passed
 #'  into the quarto document (report generator) as an rds file therefore, if any data
 #'  passed in is a data frame, those temporary rds files will be stored in this
@@ -108,8 +110,6 @@
 #'  \code{system.file("templates", "references.bib", package = "linkrep")}.
 #' @param word_template A file path a to a word document that specifies the output
 #'  styles for a word report. Default is \code{system.file("templates", "word_template.docx", package = "linkrep")}.
-#' @param set_background_images_template A file path to a LaTex (tex) document that
-#'  specifies how the background images are laid onto a pdf report.
 #'
 #' @details
 #' All tables display the variable labels in their headings before reverting to
@@ -154,9 +154,10 @@
 #'
 #' @export
 #'
-#' @importFrom data.table is.data.table
+#' @importFrom data.table is.data.table fread
 #' @importFrom xfun file_ext
 #' @importFrom quarto quarto_render
+#' @importFrom grDevices dev.off png pdf
 #'
 linkage_quality_report <- function(main_data,
                                    report_title,
@@ -200,15 +201,15 @@ linkage_quality_report <- function(main_data,
                                    content_landscape_page = NULL,
                                    display_back_cover_page = TRUE,
                                    back_cover_page = NULL,
+                                   blank_background = FALSE,
                                    temp_data_output_dir = tempdir(check = TRUE),
                                    quarto_report_template = NULL,
                                    references = NULL,
-                                   word_template = NULL,
-                                   set_background_images_template = NULL
+                                   word_template = NULL
 ){
 
 
-  # data input checks
+  # perform parameter input checks
 
   #----
   # generate_data_path
@@ -219,44 +220,47 @@ linkage_quality_report <- function(main_data,
   # if the data is a dataframe it gets saved in a temporary rds file.
   # return: [1] the path to the data, [2] a logical indicating whether a temporary file was generated
   #----
-  generate_data_path <- function(data, parameter) {
-    temp_path <- FALSE
-    if (is.data.frame(data) | is.data.table(data)) {
-      # save dataframe into an rds file temporarily
-      path <- tempfile(tmpdir = temp_data_output_dir, fileext = ".rds")
-      temp_path <- TRUE
-      saveRDS(data, path)
-    } else if (is.character(data)) {
-      if (length(data) != 1){
-        stop(sprintf("Invalid argument: %s. Must be single character string", parameter))
-      }
-      if (!file.exists(data)) {
-        stop(sprintf("Invalid argument: %s. File not found", parameter))
-      }
-      if (file.info(data)$isdir) {
-        stop(sprintf(
-          "Invalid argument: %s. File extension must be either .rds or .csv",
-          parameter
-        ))
-      }
-      if (file_ext(data) != "rds" &
-          file_ext(data) != "csv") {
-        stop(sprintf(
-          "Invalid argument: %s. File extension must be either .rds or .csv",
-          parameter
-        ))
-      }
-      path <- data
-    } else {
-      stop(
-        sprintf(
-          "Invalid argument: %s. %s must be a dataframe or a file path to a csv or rds file",
-          parameter, parameter
-        )
-      )
-    }
-    return(c(path, temp_path))
-  }
+  # generate_data_path <- function(data, parameter) {
+  #   validate_string(parameter, "parameter")
+  #   temp_path <- FALSE
+  #   if (is.data.frame(data) | is.data.table(data)) {
+  #     # save dataframe into an rds file temporarily
+  #     print(sprintf("%s path", parameter))
+  #     path <- tempfile(tmpdir = temp_data_output_dir, fileext = ".rds")
+  #     print(sprintf("path: %s", path))
+  #     temp_path <- TRUE
+  #     saveRDS(data, path)
+  #   } else if (is.character(data)) {
+  #     if (length(data) != 1){
+  #       stop(sprintf("Invalid argument: %s. Must be single character string", parameter))
+  #     }
+  #     if (!file.exists(data)) {
+  #       stop(sprintf("Invalid argument: %s. File not found", parameter))
+  #     }
+  #     if (file.info(data)$isdir) {
+  #       stop(sprintf(
+  #         "Invalid argument: %s. File extension must be either .rds or .csv",
+  #         parameter
+  #       ))
+  #     }
+  #     if (file_ext(data) != "rds" &
+  #         file_ext(data) != "csv") {
+  #       stop(sprintf(
+  #         "Invalid argument: %s. File extension must be either .rds or .csv",
+  #         parameter
+  #       ))
+  #     }
+  #     path <- data
+  #   } else {
+  #     stop(
+  #       sprintf(
+  #         "Invalid argument: %s. %s must be a dataframe or a file path to a csv or rds file",
+  #         parameter, parameter
+  #       )
+  #     )
+  #   }
+  #   return(c(path, temp_path))
+  # }
 
   if (!is.null(temp_data_output_dir)){
     validate_string(temp_data_output_dir, "temp_data_output_dir")
@@ -267,62 +271,60 @@ linkage_quality_report <- function(main_data,
     }
   }
 
-  # main_data
-  path <- generate_data_path(main_data, "main_data")
-  main_data_path <- path[1]
-  main_data_used_temp_path <- path[2]
+  # # main_data
+  # path <- generate_data_path(main_data, "main_data")
+  # main_data_path <- path[1]
+  # main_data_used_temp_path <- path[2]
 
-  # missing_data_indicators
-  if (is.null(missing_data_indicators) & !is.null(missingness_tbl_footnotes)){
-    warning("Footnotes were provided for the missingness table with no 'missing_data_indicators'. Table will not be created.")
-  }
-  mis_data_ind_path <- NULL
-  mis_data_ind_used_temp_path <- NULL
-  if (!is.null(missing_data_indicators)){
-    path <- generate_data_path(missing_data_indicators, "missing_data_indicators")
-    mis_data_ind_path <- path[1]
-    mis_data_ind_used_temp_path <- path[2]
-  }
+  # # missing_data_indicators
+  # if (is.null(missing_data_indicators) & !is.null(missingness_tbl_footnotes)){
+  #   warning("Footnotes were provided for the missingness table with no 'missing_data_indicators'. Table will not be created.")
+  # }
+  # missing_data_indicators_path <- NULL
+  # mis_data_ind_used_temp_path <- NULL
+  # if (!is.null(missing_data_indicators)){
+  #   path <- generate_data_path(missing_data_indicators, "missing_data_indicators")
+  #   missing_data_indicators_path <- path[1]
+  #   mis_data_ind_used_temp_path <- path[2]
+  # }
+  #
+  # # algorithm_summary_data
+  # if (is.null(algorithm_summary_data) & !is.null(algorithm_summary_tbl_footnotes)){
+  #   warning("Footnotes were provided for the algorithm summary table with no 'algorithm_summary_data'. Table will not be created.")
+  # }
+  # algorithm_summary_data_path <- NULL
+  # alg_summ_used_temp_path <- NULL
+  # if (!is.null(algorithm_summary_data)){
+  #   path <- generate_data_path(algorithm_summary_data, "algorithm_summary_data")
+  #   algorithm_summary_data_path <- path[1]
+  #   alg_summ_used_temp_path <- path[2]
+  # }
+  #
+  # # performance_measures_data
+  # if (is.null(performance_measures_data) & !is.null(performance_measures_tbl_footnotes)){
+  #   warning("Footnotes were provided for the performance measures table with no 'performance_measures_data'. Table will not be created.")
+  # }
+  # performance_measures_data_path <- NULL
+  # perf_meas_used_temp_path <- NULL
+  # if (!is.null(performance_measures_data)){
+  #   if (is.null(ground_truth) | is.null(ground_truth_missing_var)){
+  #     stop("Must provide ground_truth and ground_truth_missing_var with 'performance_measures_data'")
+  #   }
+  #   path <- generate_data_path(performance_measures_data, "performance_measures_data")
+  #   performance_measures_data_path <- path[1]
+  #   perf_meas_used_temp_path <- path[2]
+  # }
+  #
+  # # abbreviations
+  # abbreviations_data_path <- NULL
+  # abbrev_tbl_used_temp_path <- NULL
+  # if (!is.null(abbreviations)) {
+  #   validate_boolean(abbreviations_display_header, "abbreviations_display_header")
+  #   path <- generate_data_path(abbreviations, "abbreviations")
+  #   abbreviations_data_path <- path[1]
+  #   abbrev_tbl_used_temp_path <- path[2]
+  # }
 
-  # algorithm_summary_data
-  if (is.null(algorithm_summary_data) & !is.null(algorithm_summary_tbl_footnotes)){
-    warning("Footnotes were provided for the algorithm summary table with no 'algorithm_summary_data'. Table will not be created.")
-  }
-  alg_summ_path <- NULL
-  alg_summ_used_temp_path <- NULL
-  if (!is.null(algorithm_summary_data)){
-    path <- generate_data_path(algorithm_summary_data, "algorithm_summary_data")
-    alg_summ_path <- path[1]
-    alg_summ_used_temp_path <- path[2]
-  }
-
-  # performance_measures_data
-  if (is.null(performance_measures_data) & !is.null(performance_measures_tbl_footnotes)){
-    warning("Footnotes were provided for the performance measures table with no 'performance_measures_data'. Table will not be created.")
-  }
-  perf_meas_path <- NULL
-  perf_meas_used_temp_path <- NULL
-  if (!is.null(performance_measures_data)){
-    if (is.null(ground_truth) | is.null(ground_truth_missing_var)){
-      stop("Must provide ground_truth and ground_truth_missing_var with 'performance_measures_data'")
-    }
-    path <- generate_data_path(performance_measures_data, "performance_measures_data")
-    perf_meas_path <- path[1]
-    perf_meas_used_temp_path <- path[2]
-  }
-
-  # abbreviations
-  abbrev_tbl_path <- NULL
-  abbrev_tbl_used_temp_path <- NULL
-  if (!is.null(abbreviations)) {
-    validate_boolean(abbreviations_display_header, "abbreviations_display_header")
-    path <- generate_data_path(abbreviations, "abbreviations")
-    abbrev_tbl_path <- path[1]
-    abbrev_tbl_used_temp_path <- path[2]
-  }
-
-
-  # other parameter checks
   validate_string(report_title, "report_title")
   validate_string(left_dataset_name, "left_dataset_name")
   validate_string(right_dataset_name, "right_dataset_name")
@@ -349,6 +351,12 @@ linkage_quality_report <- function(main_data,
   }
 
   validate_boolean(save_linkage_rate, "save_linkage_rate")
+
+  if (!is.null(project_id)){
+    if (length(project_id) != 1){
+      stop("Invalid argument: project_id. project_id must be a single input.")
+    }
+  }
 
   if (!is.null(num_records_right_dataset)){
     validate_numeric(num_records_right_dataset, "num_records_right_dataset")
@@ -416,47 +424,65 @@ linkage_quality_report <- function(main_data,
     }
   }
 
-  if (is.null(cover_page)){
-    if (!file.exists(system.file("background_images", "cover_page.pdf", package = "linkrep"))){
-      stop("Default cover page file not found. Check installation or if removed, ensure one is passed to the function.")
-    }
-    cover_page <- system.file("background_images", "cover_page.pdf", package = "linkrep")
-  }
-  check_page_files(cover_page, "cover_page")
-
-  if (is.null(content_portrait_page)){
-    if (!file.exists(system.file("background_images", "content_portrait_page.pdf", package = "linkrep"))){
-      stop("Default content portrait page file not found. Check installation or if removed, ensure one is passed to the function.")
-    }
-    content_portrait_page <- system.file("background_images", "content_portrait_page.pdf", package = "linkrep")
-  }
-  check_page_files(content_portrait_page, "content_portrait_page")
-
-  if (is.null(content_landscape_page)){
-    if (!file.exists(system.file("background_images", "content_landscape_page.pdf", package = "linkrep"))){
-      stop("Default content landscape page file not found. Check installation or if removed, ensure one is passed to the function.")
-    }
-    content_landscape_page <- system.file("background_images", "content_landscape_page.pdf", package = "linkrep")
-  }
-  check_page_files(content_landscape_page, "content_landscape_page")
-
-  validate_boolean(display_back_cover_page, "display_back_cover_page")
-  if (display_back_cover_page){
-    if (is.null(back_cover_page)){
-      if (!file.exists(system.file("background_images", "back_cover_page.pdf", package = "linkrep"))){
-        stop("Default back cover page file not found. Check installation or if removed, ensure one is passed to the function.")
+  # background is only affected in pdf output
+  if (output_format == "pdf"){
+    if (blank_background){
+      if (!file.exists(system.file("background_images", "white_background.pdf", package = "linkrep"))){
+        stop("Default blank page file not found. Check installation.")
       }
-      back_cover_page <- system.file("background_images", "back_cover_page.pdf", package = "linkrep")
+      blank_page <- system.file("background_images", "white_background.pdf", package = "linkrep")
+      cover_page <- blank_page
+      content_portrait_page <- blank_page
+      content_landscape_page <- blank_page
+      back_cover_page <- blank_page
+    } else {
+      if (is.null(cover_page)){
+        if (!file.exists(system.file("background_images", "cover_page.pdf", package = "linkrep"))){
+          stop("Default cover page file not found. Check installation or if removed, ensure one is passed to the function.")
+        }
+        cover_page <- system.file("background_images", "cover_page.pdf", package = "linkrep")
+      }
+
+      if (is.null(content_portrait_page)){
+        if (!file.exists(system.file("background_images", "content_portrait_page.pdf", package = "linkrep"))){
+          stop("Default content portrait page file not found. Check installation or if removed, ensure one is passed to the function.")
+        }
+        content_portrait_page <- system.file("background_images", "content_portrait_page.pdf", package = "linkrep")
+      }
+
+      if (is.null(content_landscape_page)){
+        if (!file.exists(system.file("background_images", "content_landscape_page.pdf", package = "linkrep"))){
+          stop("Default content landscape page file not found. Check installation or if removed, ensure one is passed to the function.")
+        }
+        content_landscape_page <- system.file("background_images", "content_landscape_page.pdf", package = "linkrep")
+      }
+
+      validate_boolean(display_back_cover_page, "display_back_cover_page")
+      if (display_back_cover_page){
+        if (is.null(back_cover_page)){
+          if (!file.exists(system.file("background_images", "back_cover_page.pdf", package = "linkrep"))){
+            stop("Default back cover page file not found. Check installation or if removed, ensure one is passed to the function.")
+          }
+          back_cover_page <- system.file("background_images", "back_cover_page.pdf", package = "linkrep")
+        }
+      }
     }
-    check_page_files(back_cover_page, "back_cover_page")
+
+    check_page_files(cover_page, "cover_page")
+    check_page_files(content_portrait_page, "content_portrait_page")
+    check_page_files(content_landscape_page, "content_landscape_page")
+    if (display_back_cover_page){
+      check_page_files(back_cover_page, "back_cover_page")
+    }
+
+    if (!file.exists(system.file("background_images", "acknowledgements_page.pdf", package = "linkrep"))){
+      stop("Default acknowledgements page file not found. Check installation, ensure file is present in package by checking 'background_images' folder in location produced by `system.file(package = 'linkrep')`.")
+    }
+    acknowledgements_page <- system.file("background_images", "acknowledgements_page.pdf", package = "linkrep")
+    check_page_files(acknowledgements_page, "acknowledgements_page")
   }
 
-  if (!file.exists(system.file("background_images", "acknowledgements_page.pdf", package = "linkrep"))){
-    stop("Default acknowledgements page file not found. Check installation, ensure file is present in package by checking 'background_images' folder in location produced by `system.file(package = 'linkrep')`.")
-  }
-  acknowledgements_page <- system.file("background_images", "acknowledgements_page.pdf", package = "linkrep")
-  check_page_files(acknowledgements_page, "acknowledgements_page")
-
+  # check template files
   if (is.null(quarto_report_template)){
     if (!file.exists(system.file("templates", "base_quarto_report_template.qmd", package = "linkrep"))){
       stop("Default quarto report not found. Check installation or if removed, ensure one is passed to the function.")
@@ -469,20 +495,6 @@ linkage_quality_report <- function(main_data,
   }
   if (file_ext(quarto_report_template) != "qmd"){
     stop("Invalid argument: quarto_report_template. File extension must be .qmd")
-  }
-
-  if (is.null(set_background_images_template)){
-    if (!file.exists(system.file("templates", "set_background_images.tex", package = "linkrep"))){
-      stop("Default set background images files not found. Check installation or if removed, ensure one is passed to the function.")
-    }
-    set_background_images_template <- system.file("templates", "set_background_images.tex", package = "linkrep")
-  }
-  validate_string(set_background_images_template, "set_background_images_template")
-  if (!file.exists(set_background_images_template)){
-    stop("Invalid argument: set_background_images_template. File not found")
-  }
-  if (file_ext(set_background_images_template) != "tex"){
-    stop("Invalid argument: set_background_images_template. File extension must be .tex")
   }
 
   if (is.null(references)){
@@ -513,73 +525,356 @@ linkage_quality_report <- function(main_data,
     stop("Invalid argument: word_template. File extension must be .docx")
   }
 
+
+  # read in data and perform checks
+
+  #----
+  # read_data
+  #
+  # Performs error checking on the file path and reads in the data.
+  #
+  # @param dataset_path A file path to the data.
+  # @param parameter The name of the parameter whose path we're checking.
+  #
+  # @return The read in data.
+  #----
+  # read_data <- function(dataset_path, parameter){
+  #   if (file_ext(dataset_path) == "rds"){
+  #     data <- readRDS(dataset_path)
+  #     if (!is.data.frame(data) & !is.data.table(data)){
+  #       stop(sprintf("Invalid argument: %s. %s must be of type 'data.frame' in your .rds file", parameter, parameter))
+  #     }
+  #   } else {
+  #     data <- read.table(dataset_path, header = TRUE, sep = ",")
+  #   }
+  #   if (nrow(data) == 0){
+  #     stop(sprintf("Invalid argument: %s. %s must be non-empty", parameter, parameter))
+  #   }
+  #   return(data)
+  # }
+
+  read_data <- function(data, parameter){
+    validate_string(parameter, "parameter")
+    if(is.data.frame(data) | is.data.table(data)){
+      read_in_data <- data
+    } else if (is.character(data)){
+      if (length(data) != 1){
+        stop(sprintf("Invalid argument: %s. %s must be a data frame or a file path to a csv or rds file."))
+      }
+      if (!file.exists(data)){
+        stop(sprintf("Invalid argument: %s. File not found", parameter))
+      }
+
+      if (file_ext(data) == "rds"){
+        read_in_data <- readRDS(data)
+      } else if (file_ext(data) == "csv"){
+        read_in_data <- fread(data)
+      } else {
+        stop(sprintf("Invalid argument: %s. File extension must be either .rds or .csv",
+                     parameter))
+      }
+    } else {
+      stop(sprintf("Invalid argument: %s. %s must be a data frame or a file path to a csv or rds file",
+                   parameter, parameter))
+    }
+    return(read_in_data)
+  }
+
+  # main_data <- read_data(main_data_path, "main_data")
+  main_data <- read_data(main_data, "main_data")
+
+  validate_var_in_data(linkage_rate_tbl_column_var, main_data,
+                       "linkage_rate_tbl_column_var", "main_data")
+  if (sum(is.na(main_data[[linkage_rate_tbl_column_var]])) > 0 |
+      sum(main_data[[linkage_rate_tbl_column_var]] != 0 &
+          main_data[[linkage_rate_tbl_column_var]] != 1) > 0){
+    stop("Invalid argument: linkage_rate_tbl_column_var must be a binary or logical variable in 'main_data'")
+  }
+
+  invalid_strata_vars <- base::setdiff(linkage_rate_tbl_strata_vars, names(main_data))
+  if (length(invalid_strata_vars) > 0) {
+    stop("Invalid argument: linkage_rate_tbl_strata_vars. Not all variables provided are present in 'main_data'")
+  }
+  if (length(linkage_rate_tbl_strata_vars) == 1 & is.null(missing_data_indicators)){
+    if (linkage_rate_tbl_strata_vars == linkage_rate_tbl_column_var){
+      stop("linkage_rate_tbl_column_var and linkage_rate_tbl_strata_vars cannot be the same")
+    }
+  }
+
+  acquisition_year <- NULL
+  if (!is.null(acquisition_year_var)){
+    validate_var_in_data(acquisition_year_var, main_data, "acquisition_year_var", "main_data")
+    acquisition_year <- main_data[[acquisition_year_var]]
+    if(!is.numeric(acquisition_year) & !is.integer(acquisition_year)){
+      stop("Invalid argument: acquisition_year_var. acquisition_year_var must be a numeric variable")
+    }
+  }
+
+  acquisition_month <- NULL
+  if (!is.null(acquisition_month_var)){
+    validate_var_in_data(acquisition_month_var, main_data, "acquisition_month_var", "main_data")
+    acquisition_month <- main_data[[acquisition_month_var]]
+    if(!is.numeric(acquisition_month) & !is.integer(acquisition_month)){
+      stop("Invalid argument: acquisition_month_var. acquisition_month_var must be a numeric variable")
+    }
+    if (!all(acquisition_month %in% c(1:12, NA))){
+      stop("acquisition_month_var contains invalid values. Must be either NA or numbers from 1 to 12.")
+    }
+  }
+
+  if (is.null(missing_data_indicators) & !is.null(missingness_tbl_footnotes)){
+    warning("Footnotes were provided for the missingness table with no 'missing_data_indicators'. Table will not be created.")
+  }
+  if (!is.null(missing_data_indicators)){
+    # missing_data_indicators <- read_data(missing_data_indicators_path, "missing_data_indicators")
+    missing_data_indicators <- read_data(missing_data_indicators, "missing_data_indicators")
+    if (nrow(main_data) != nrow(missing_data_indicators)){
+      stop("'main_data' and 'missing_data_indicators' should contain the same number of records")
+    }
+    validate_df_binary(missing_data_indicators, "missing_data_indicators")
+  }
+
+  if (!is.null(abbreviations)){
+    # abbreviations_data <- read_data(abbreviations_data_path, "abbreviations")
+    abbreviations_data <- read_data(abbreviations, "abbreviations")
+    if (ncol(abbreviations_data) != 2){
+      stop("Invalid argument: abbreviations_data. abbreviations_data must have two columns, one for the abbreviations and one for their definitions")
+    }
+  }
+
+  if (is.null(algorithm_summary_data) & !is.null(algorithm_summary_tbl_footnotes)){
+    warning("Footnotes were provided for the algorithm summary table with no 'algorithm_summary_data'. Table will not be created.")
+  }
+  if (!is.null(algorithm_summary_data)){
+    # algorithm_summary_data <- read_data(algorithm_summary_data_path, "algorithm_summary_data")
+    algorithm_summary_data <- read_data(algorithm_summary_data, "algorithm_summary_data")
+    }
+
+  if (is.null(performance_measures_data) & !is.null(performance_measures_tbl_footnotes)){
+    warning("Footnotes were provided for the performance measures table with no 'performance_measures_data'. Table will not be created.")
+  }
+  ground_truth_missing <- NULL
+  if (!is.null(performance_measures_data)){
+    # performance_measures_data <- read_data(performance_measures_data_path, "performance_measures_data")
+    performance_measures_data <- read_data(performance_measures_data, "performance_measures_data")
+    if (is.null(ground_truth_missing_var)){
+      stop("Must provide ground_truth and ground_truth_missing_var with 'performance_measures_data'")
+    }
+    if (ground_truth_missing_var %in% names(main_data)){
+      ground_truth_missing <- main_data[[ground_truth_missing_var]]
+    } else if (ground_truth_missing_var %in% names(missing_data_indicators)){
+      ground_truth_missing <- missing_data_indicators[[ground_truth_missing_var]]
+    } else {
+      stop("Invalid argument: ground_truth_missing_var. ground_truth_missing_var must be a variable present in 'main_data' or 'missing_data_indicators'")
+    }
+    if (!(sum(ground_truth_missing != 0 & ground_truth_missing != 1) == 0 & sum(is.na(ground_truth_missing)) == 0)){
+      stop("Invalid argument: ground_truth_missing_var. ground_truth_missing_var must be a binary or logical variable")
+    }
+  }
+
+  # obtain linkage data dates
+  data_time_period <- NULL
+
+  if (!is.null(acquisition_year)){
+    min_year <- min(acquisition_year, na.rm = TRUE)
+    max_year <- max(acquisition_year, na.rm = TRUE)
+
+    if (!is.null(acquisition_month)){
+      #----
+      # label_month
+      #
+      # assigns the month its English abbreviation
+      #----
+      label_month <- function(month){
+        if (month == 1){
+          month <- "Jan."
+        } else if (month == 2){
+          month <- "Feb."
+        } else if (month == 3){
+          month <- "Mar."
+        } else if (month == 4){
+          month <- "Apr."
+        } else if (month == 5){
+          month <- "May."
+        } else if (month == 6){
+          month <- "June."
+        } else if (month == 7){
+          month <- "July."
+        } else if (month == 8){
+          month <- "Aug."
+        } else if (month == 9){
+          month <- "Sept."
+        } else if (month == 10){
+          month <- "Oct."
+        } else if (month == 11){
+          month <- "Nov."
+        } else {
+          month <- "Dec."
+        }
+        return(month)
+      }
+
+      min_month <- min(acquisition_month[acquisition_year == min_year], na.rm = TRUE)
+      min_month <- label_month(min_month)
+      max_month <- max(acquisition_month[acquisition_year == max_year], na.rm = TRUE)
+      max_month <- label_month(max_month)
+    } else {
+      min_month <- NULL
+      max_month <- NULL
+    }
+
+    if (min_year == max_year){
+      data_time_period <- min_year
+    } else {
+      if (is.null(min_month)){
+        data_time_period <- paste(min_year, "-", max_year)
+      } else {
+        data_time_period <- paste(min_month, min_year, "-", max_month, max_year)
+      }
+    }
+  }
+
+  # calculate values needed throughout the report and format them to match arguments
+  num_records_left_dataset <- nrow(main_data)
+  num_records_left_dataset <- formatC(num_records_left_dataset,
+                                      big.mark = thousands_separator,
+                                      format = "f", digits = 0)
+
+  if (!is.null(num_records_right_dataset)){
+    num_records_right_dataset <- formatC(num_records_right_dataset,
+                                         big.mark = thousands_separator,
+                                         format = "f", digits = 0)
+  }
+
+  num_records_linked <- sum(main_data[[linkage_rate_tbl_column_var]] == 1)
+  num_records_linked <- formatC(num_records_linked,
+                                big.mark = thousands_separator,
+                                format = "f", digits = 0)
+
+  overall_linkage_rate <- sum(main_data[[linkage_rate_tbl_column_var]] == 1)/nrow(main_data) * 100
+  overall_linkage_rate <- formatC(overall_linkage_rate, digits = num_decimal_places,
+                                  big.mark = thousands_separator,
+                                  decimal.mark = decimal_mark, format = "f")
+
+  num_non_missing_ground_truth <- NULL
+  percent_non_missing_ground_truth <- NULL
+  if (!is.null(ground_truth_missing)){
+    num_non_missing_ground_truth <- nrow(main_data) - sum(ground_truth_missing)
+    percent_non_missing_ground_truth <- num_non_missing_ground_truth / nrow(main_data)
+
+    num_non_missing_ground_truth <- formatC(num_non_missing_ground_truth,
+                                            big.mark = thousands_separator,
+                                            format = "f", digits = 0)
+    percent_non_missing_ground_truth <- formatC(percent_non_missing_ground_truth,
+                                                big.mark = thousands_separator,
+                                                decimal.mark = decimal_mark,
+                                                digits = num_decimal_places,
+                                                format = "f")
+  }
+
+  report_generation_date <- Sys.Date()
+  report_generation_date <- format(report_generation_date, "%b. %d, %Y")
+
+  #----
   # substitute values into placeholders
+  #
+  # The LaTeX file that sets up the background images needs to know the image paths
+  # but, LaTeX files don't take parameters therefore, we put "placeholders" in the
+  # file to indicate where a value needs to substituted. To substitute the image paths
+  # into the function we read the lines of the LaTeX file and use gsub to sub the
+  # file paths into their corresponding placeholders. Then we write the updated
+  # lines into a new file for use in the quarto report.
+  #----
+  if (!file.exists(system.file("templates", "set_background_images.tex", package = "linkrep"))){
+    stop("Set background images files not found. Check installation and ensure file is present in package.")
+  }
+  set_background_images_template <- system.file("templates", "set_background_images.tex", package = "linkrep")
+  validate_string(set_background_images_template, "set_background_images_template")
+  if (!file.exists(set_background_images_template)){
+    stop("Invalid argument: set_background_images_template. File not found")
+  }
+  if (file_ext(set_background_images_template) != "tex"){
+    stop("Invalid argument: set_background_images_template. File extension must be .tex")
+  }
 
-  # ensure the file paths work in the LaTex commands as LaTex doesn't read '\\' as a file path separator
-  cover_page <- gsub("\\\\", "/", cover_page)
-  content_portrait_page <- gsub("\\\\", "/", content_portrait_page)
-  content_landscape_page <- gsub("\\\\", "/", content_landscape_page)
-  set_bg_images_lines <- readLines(set_background_images_template)
+  # background is only affected in pdf output
+  new_set_background_images_template <- NULL
+  if (output_format == "pdf"){
+    # ensure the file paths work in the LaTex commands as LaTex doesn't read '\\' as a file path separator
+    cover_page <- gsub("\\\\", "/", cover_page)
+    content_portrait_page <- gsub("\\\\", "/", content_portrait_page)
+    content_landscape_page <- gsub("\\\\", "/", content_landscape_page)
+    set_bg_images_lines <- readLines(set_background_images_template)
 
-  if (display_back_cover_page){
-    # set the command within the LaTex file
-    if (!any(grepl("fancy_header_cmd", set_bg_images_lines))) {
-      stop("In the file setting the background images, the placeholder for the fancy header command must be 'fancy_header_cmd'")
+    if (display_back_cover_page){
+      # set the command within the LaTex file
+      if (!any(grepl("fancy_header_cmd", set_bg_images_lines))) {
+        stop("In the file setting the background images, the placeholder for the fancy header command must be 'fancy_header_cmd'")
+      }
+      set_bg_images_lines <- gsub("fancy_header_cmd", "\\\\setbgimagewithback", set_bg_images_lines)
+
+      back_cover_page <- gsub("\\\\", "/", back_cover_page)
+      if (!any(grepl("back_page", set_bg_images_lines))) {
+        stop("In the file setting the background images, the placeholder for the back cover page must be 'back_cover'")
+      }
+      set_bg_images_lines <- gsub("back_page", back_cover_page, set_bg_images_lines)
+
+      # placeholders used within the LaTex file for the \setbgimagewithback command
+      cover <- "cover_page_with_back"
+      content_port <- "content_portrait_page_with_back"
+      content_land <- "content_landscape_page_with_back"
+    } else {
+      # set the command within the LaTex file
+      if (!any(grepl("fancy_header_cmd", set_bg_images_lines))) {
+        stop("In the file setting the background images, the placeholder for the fancy header command must be 'fancy_header_cmd'")
+      }
+      set_bg_images_lines <- gsub("fancy_header_cmd", "\\\\setbgimagenoback", set_bg_images_lines)
+
+      # placeholders used within the LaTex file for the \setbgimagewithback command
+      cover <- "cover_page_no_back"
+      content_port <- "content_portrait_page_no_back"
+      content_land <- "content_landscape_page_no_back"
     }
-    set_bg_images_lines <- gsub("fancy_header_cmd", "\\\\setbgimagewithback", set_bg_images_lines)
 
-    back_cover_page <- gsub("\\\\", "/", back_cover_page)
-    if (!any(grepl("back_page", set_bg_images_lines))) {
-      stop("In the file setting the background images, the placeholder for the back cover page must be 'back_cover'")
+    if (!any(grepl(cover, set_bg_images_lines))) {
+      stop("In the file setting the background images, the placeholder for the cover page must be either 'cover_page_with_back' or 'cover_page_no_back'")
     }
-    set_bg_images_lines <- gsub("back_page", back_cover_page, set_bg_images_lines)
+    set_bg_images_lines <- gsub(cover, cover_page, set_bg_images_lines)
 
-    # placeholders used within the LaTex file for the \setbgimagewithback command
-    cover <- "cover_page_with_back"
-    content_port <- "content_portrait_page_with_back"
-    content_land <- "content_landscape_page_with_back"
-  } else {
-    # set the command within the LaTex file
-    if (!any(grepl("fancy_header_cmd", set_bg_images_lines))) {
-      stop("In the file setting the background images, the placeholder for the fancy header command must be 'fancy_header_cmd'")
+    if (!any(grepl(content_port, set_bg_images_lines))) {
+      stop("In the file setting the background images, the placeholder for the content portrait page must be either 'content_portrait_page_with_back' or 'content_portrait_page_no_back'")
     }
-    set_bg_images_lines <- gsub("fancy_header_cmd", "\\\\setbgimagenoback", set_bg_images_lines)
+    set_bg_images_lines <- gsub(content_port, content_portrait_page, set_bg_images_lines)
 
-    # placeholders used within the LaTex file for the \setbgimagewithback command
-    cover <- "cover_page_no_back"
-    content_port <- "content_portrait_page_no_back"
-    content_land <- "content_landscape_page_no_back"
+    if (!any(grepl(content_land, set_bg_images_lines))) {
+      stop("In the file setting the background images, the placeholder for the content landscape page must be either 'content_landscape_page_with_back' or 'content_landscape_page_no_back'")
+    }
+    set_bg_images_lines <- gsub(content_land, content_landscape_page, set_bg_images_lines)
+
+    if (!any(grepl("acknowledgements_page", set_bg_images_lines))) {
+      stop("In the file setting the background images, the placeholder for the acknowledgements page must be 'acknowledgements'")
+    }
+    set_bg_images_lines <- gsub("acknowledgements_page", acknowledgements_page, set_bg_images_lines)
+
+    dir <- system.file("templates", package = "linkrep")
+    if (!dir.exists(dir)){
+      stop("Trying to save updated setting background images file in non-existent directory. Ensure 'templates' folder exists in package.")
+    }
+
+    new_set_background_images_template <- file.path(dir, "updated_set_bg_images.tex")
+    writeLines(set_bg_images_lines, new_set_background_images_template)
   }
 
-  if (!any(grepl(cover, set_bg_images_lines))) {
-    stop("In the file setting the background images, the placeholder for the cover page must be either 'cover_page_with_back' or 'cover_page_no_back'")
-  }
-  set_bg_images_lines <- gsub(cover, cover_page, set_bg_images_lines)
-
-  if (!any(grepl(content_port, set_bg_images_lines))) {
-    stop("In the file setting the background images, the placeholder for the content portrait page must be either 'content_portrait_page_with_back' or 'content_portrait_page_no_back'")
-  }
-  set_bg_images_lines <- gsub(content_port, content_portrait_page, set_bg_images_lines)
-
-  if (!any(grepl(content_land, set_bg_images_lines))) {
-    stop("In the file setting the background images, the placeholder for the content landscape page must be either 'content_landscape_page_with_back' or 'content_landscape_page_no_back'")
-  }
-  set_bg_images_lines <- gsub(content_land, content_landscape_page, set_bg_images_lines)
-
-  if (!any(grepl("acknowledgements_page", set_bg_images_lines))) {
-    stop("In the file setting the background images, the placeholder for the acknowledgements page must be 'acknowledgements'")
-  }
-  set_bg_images_lines <- gsub("acknowledgements_page", acknowledgements_page, set_bg_images_lines)
-
-  dir <- system.file("templates", package = "linkrep")
-  if (!dir.exists(dir)){
-    stop("Trying to save updated setting background images file in non-existent directory. Ensure 'templates' folder exists in package.")
-  }
-
-  new_set_background_images_template <- file.path(dir, "updated_set_bg_images.tex")
-  writeLines(set_bg_images_lines, new_set_background_images_template)
-
-  # set values in quarto template
+  #----
+  # substitute values into placeholders
+  #
+  # All options in the YAML header cannot have parameters passed to them (ex. mainfont)
+  # so we had to revert to use "placeholders" (ex. {mainfont}). To insert values into
+  # the YAML header like the font or the file paths to the necessary files like the
+  # references file we first read the lines of the quarto document, then gsub the
+  # values into their corresponding placeholders and finally, write the new lines
+  # back to a new file that's then used in quarto_render()
+  #----
   quarto_report <- readLines(quarto_report_template)
   text_font_size <- paste0(text_font_size, "pt")
 
@@ -597,7 +892,9 @@ linkage_quality_report <- function(main_data,
   if (!any(grepl("\\{background_images\\}", quarto_report))) {
     stop("In the quarto template report file, the placeholder for the LaTex file that sets the background images must be '{background_images}' in the YAML header")
   }
-  quarto_report <- gsub("\\{background_images\\}", new_set_background_images_template, quarto_report)
+  quarto_report <- gsub("\\{background_images\\}",
+                        ifelse(output_format == "pdf", new_set_background_images_template, set_background_images_template),
+                               quarto_report)
 
   if (!any(grepl("\\{references\\}", quarto_report))) {
     stop("In the quarto template report file, the placeholder for the word template must be '{references}' in the YAML header")
@@ -617,63 +914,248 @@ linkage_quality_report <- function(main_data,
   writeLines(quarto_report, updated_quarto_report)
 
 
-  quarto_render(
-    input = updated_quarto_report,
+  # generate report elements
+
+  #----
+  # generate_element_paths
+  #
+  # save elements in an rds file to be passed to the Quarto file
+  # This must be done as Quarto doesn't recorgize R specific types
+  #----
+  generate_element_paths <- function(element){
+    # save element into an rds file temporarily
+    path <- tempfile(tmpdir = temp_data_output_dir, fileext = ".rds")
+    saveRDS(element, path)
+    return(path)
+  }
+
+  # abbreviations???????????????????????????????
+
+  # linkage rate table
+  linkage_rate_tbl <- linkage_rate_table(
+    main_data = main_data,
     output_format = output_format,
-    execute_params = list(
-      main_data_path = main_data_path,
-      main_data_used_temp_path = main_data_used_temp_path,
-      report_title = report_title,
-      left_dataset_name = left_dataset_name,
-      right_dataset_name = right_dataset_name,
-      output_dir = output_dir,
-      data_linker = data_linker,
-      linkage_rate_tbl_col_var = linkage_rate_tbl_column_var,
-      linkage_rate_tbl_strata_vars = linkage_rate_tbl_strata_vars,
-      linkage_rate_tbl_footnotes = linkage_rate_tbl_footnotes,
-      linkage_rate_tbl_display_total_column = linkage_rate_tbl_display_total_column,
-      linkage_rate_tbl_display_mean_not_median_stats = linkage_rate_tbl_display_mean_not_median_stats,
-      linkage_rate_tbl_display_alphabetically = linkage_rate_tbl_display_alphabetically,
-      linkage_rate_tbl_output_to_csv = linkage_rate_tbl_output_to_csv,
-      missing_data_indicators_path = mis_data_ind_path,
-      missing_data_indicators_used_temp_path = mis_data_ind_used_temp_path,
-      missingness_tbl_footnotes = missingness_tbl_footnotes,
-      output_format = output_format,
-      save_linkage_rate = save_linkage_rate,
-      project_id = project_id,
-      num_records_right_dataset = num_records_right_dataset,
+    column_var = linkage_rate_tbl_column_var,
+    strata_vars = linkage_rate_tbl_strata_vars,
+    missing_data_indicators = missing_data_indicators,
+    display_total_column = linkage_rate_tbl_display_total_column,
+    display_mean_not_median_stats = linkage_rate_tbl_display_mean_not_median_stats,
+    display_alphabetically = linkage_rate_tbl_display_alphabetically,
+    font_size = table_font_size,
+    font_style = font_style,
+    footnotes = linkage_rate_tbl_footnotes,
+    thousands_separator = thousands_separator,
+    decimal_mark = decimal_mark,
+    num_decimal_places = num_decimal_places,
+    display_percent_symbol = display_percent_symbol,
+    output_to_csv = linkage_rate_tbl_output_to_csv,
+    output_dir = output_dir
+  )
+  linkage_rate_table_path <- generate_element_paths(linkage_rate_tbl)
+
+  # linkage rates over time plot
+  linkage_rates_plot_path <- NULL
+  if(!is.null(acquisition_year) & !is.null(acquisition_month)){
+    linkage_rates_plot <- linkage_rates_over_time_plot(
+      data = main_data,
+      link_indicator_var =  linkage_rate_tbl_column_var,
       acquisition_year_var = acquisition_year_var,
-      acquisition_month_var = acquisition_month_var,
-      algorithm_summary_data_path = alg_summ_path,
-      algorithm_summary_data_used_temp_path = alg_summ_used_temp_path,
-      algorithm_summary_tbl_footnotes = algorithm_summary_tbl_footnotes,
-      performance_measures_data_path = perf_meas_path,
-      performance_measures_data_used_temp_path = perf_meas_used_temp_path,
-      performance_measures_tbl_footnotes = performance_measures_tbl_footnotes,
-      classification_metrics_used = classification_metrics_used,
-      ground_truth = ground_truth,
-      ground_truth_missing_var = ground_truth_missing_var,
-      abbreviations_data_path = abbrev_tbl_path,
-      abbreviations_data_used_temp_path = abbrev_tbl_used_temp_path,
-      abbreviations_display_header = abbreviations_display_header,
+      acquisition_month_var = acquisition_month_var)
+    if (!is.null(linkage_rates_plot)){
+      linkage_rates_plot_path <- generate_element_paths(linkage_rates_plot)
+    }
+  }
+
+  # algorithm summary
+  algorithm_summary_table_path <- NULL
+  if (!is.null(algorithm_summary_data)) {
+    alg_summ_tbl <- algorithm_summary_table(
+      data = algorithm_summary_data,
+      output_format = output_format,
+      font_size = table_font_size,
+      font_style = font_style,
+      footnotes = algorithm_summary_tbl_footnotes,
+      thousands_separator = thousands_separator,
+      decimal_mark = decimal_mark,
+      num_decimal_places = num_decimal_places
+    )
+    algorithm_summary_table_path <- generate_element_paths(alg_summ_tbl)
+  }
+
+  # performance measures table
+  performance_measures_table_path <- NULL
+  performance_measures_plot_path <- NULL
+  if (!is.null(performance_measures_data)) {
+    perf_meas_tbl <- performance_measures_table(
+      data = performance_measures_data,
+      output_format = output_format,
+      font_size = table_font_size,
+      font_style = font_style,
+      footnotes = performance_measures_tbl_footnotes,
+      thousands_separator = thousands_separator,
+      decimal_mark = decimal_mark,
+      num_decimal_places = num_decimal_places
+    )
+    performance_measures_table_path <- generate_element_paths(perf_meas_tbl)
+
+    # performance measures plot
+    performance_measures_plot_path <- tempfile(tmpdir = temp_data_output_dir,
+                                               fileext = ifelse(output_format == "pdf", ".pdf", ".png"))
+    if (output_format == "pdf"){
+      pdf(performance_measures_plot_path, width = 5, height = 5)
+      perf_meas_plot <- performance_measures_plot(performance_measures_data)
+      dev.off()
+    } else {
+      png(performance_measures_plot_path, units = "in", width = 5, height = 5,
+          res = 350)
+      perf_meas_plot <- performance_measures_plot(performance_measures_data)
+      dev.off()
+    }
+    if (length(perf_meas_plot) > 0){
+      unlink(performance_measures_plot_path)
+      performance_measures_plot_path <- NULL
+    }
+  }
+
+  # missingness table
+  missingness_table_path <- NULL
+  if (!is.null(missing_data_indicators)){
+    missingness_tbl <- missingness_table(
+      data = missing_data_indicators,
+      output_format = output_format,
+      font_size = table_font_size,
+      font_style = font_style,
+      footnotes = missingness_tbl_footnotes,
       thousands_separator = thousands_separator,
       decimal_mark = decimal_mark,
       num_decimal_places = num_decimal_places,
-      display_percent_symbol = display_percent_symbol,
-      table_font_size = table_font_size,
-      font_style = font_style,
-      display_back_cover_page = display_back_cover_page
+      display_percent_symbol = display_percent_symbol
     )
-  )
+    missingness_table_path <- generate_element_paths(missingness_tbl)
+  }
 
+  # save linkage rate
+  if (save_linkage_rate){
+    save_linkage_rate_sqlite_file(output_dir,
+                                  report_generation_date,
+                                  data_linker,
+                                  left_dataset_name,
+                                  right_dataset_name,
+                                  overall_linkage_rate,
+                                  data_time_period,
+                                  project_id)
+  }
+
+
+  # quarto_render(
+  #   input = updated_quarto_report,
+  #   output_format = output_format,
+  #   execute_params = list(
+  #     main_data_path = main_data_path,
+  #     main_data_used_temp_path = main_data_used_temp_path,
+  #     report_title = report_title,
+  #     left_dataset_name = left_dataset_name,
+  #     right_dataset_name = right_dataset_name,
+  #     output_dir = output_dir,
+  #     data_linker = data_linker,
+  #     linkage_rate_tbl_col_var = linkage_rate_tbl_column_var,
+  #     linkage_rate_tbl_strata_vars = linkage_rate_tbl_strata_vars,
+  #     linkage_rate_tbl_footnotes = linkage_rate_tbl_footnotes,
+  #     linkage_rate_tbl_display_total_column = linkage_rate_tbl_display_total_column,
+  #     linkage_rate_tbl_display_mean_not_median_stats = linkage_rate_tbl_display_mean_not_median_stats,
+  #     linkage_rate_tbl_display_alphabetically = linkage_rate_tbl_display_alphabetically,
+  #     linkage_rate_tbl_output_to_csv = linkage_rate_tbl_output_to_csv,
+  #     missing_data_indicators_path = missing_data_indicators_path,
+  #     missing_data_indicators_used_temp_path = mis_data_ind_used_temp_path,
+  #     missingness_tbl_footnotes = missingness_tbl_footnotes,
+  #     output_format = output_format,
+  #     save_linkage_rate = save_linkage_rate,
+  #     project_id = project_id,
+  #     num_records_right_dataset = num_records_right_dataset,
+  #     acquisition_year_var = acquisition_year_var,
+  #     acquisition_month_var = acquisition_month_var,
+  #     algorithm_summary_data_path = algorithm_summary_data_path,
+  #     algorithm_summary_data_used_temp_path = alg_summ_used_temp_path,
+  #     algorithm_summary_tbl_footnotes = algorithm_summary_tbl_footnotes,
+  #     performance_measures_data_path = performance_measures_data_path,
+  #     performance_measures_data_used_temp_path = perf_meas_used_temp_path,
+  #     performance_measures_tbl_footnotes = performance_measures_tbl_footnotes,
+  #     classification_metrics_used = classification_metrics_used,
+  #     ground_truth = ground_truth,
+  #     ground_truth_missing_var = ground_truth_missing_var,
+  #     abbreviations_data_path = abbreviations_data_path,
+  #     abbreviations_data_used_temp_path = abbrev_tbl_used_temp_path,
+  #     abbreviations_display_header = abbreviations_display_header,
+  #     thousands_separator = thousands_separator,
+  #     decimal_mark = decimal_mark,
+  #     num_decimal_places = num_decimal_places,
+  #     display_percent_symbol = display_percent_symbol,
+  #     table_font_size = table_font_size,
+  #     font_style = font_style,
+  #     display_back_cover_page = display_back_cover_page
+  #   )
+  # )
+
+  quarto_render(
+      input = updated_quarto_report,
+      output_format = output_format,
+      execute_params = list(
+        linkage_rate_table_path = linkage_rate_table_path,
+        linkage_rates_plot_path = linkage_rates_plot_path,
+        algorithm_summary_table_path = algorithm_summary_table_path,
+        performance_measures_table_path = performance_measures_table_path,
+        performance_measures_plot_path = performance_measures_plot_path,
+        missingness_table_path = missingness_table_path,
+        report_title = report_title,
+        left_dataset_name = left_dataset_name,
+        right_dataset_name = right_dataset_name,
+        data_linker = data_linker,
+        output_format = output_format,
+        project_id = project_id,
+        num_records_left_dataset = num_records_left_dataset,
+        num_records_right_dataset = num_records_right_dataset,
+        ground_truth = ground_truth,
+        classification_metrics_used = classification_metrics_used,
+        data_time_period = data_time_period,
+        num_records_linked = num_records_linked,
+        overall_linkage_rate = overall_linkage_rate,
+        num_non_missing_ground_truth = num_non_missing_ground_truth,
+        percent_non_missing_ground_truth = percent_non_missing_ground_truth,
+        report_generation_date = report_generation_date,
+        display_back_cover_page = display_back_cover_page
+      ))
+
+  # Format final output:
+
+  # change file name and location
+  # file automatically saves in calling location therefore need to manually move it to output_dir
   file_name <- paste0("Record Linkage Quality Report.", output_format)
   src <- gsub("qmd", output_format, updated_quarto_report)
   result <- file.rename(src, paste0(output_dir, "/", file_name))
   message(paste0("Ignore above, output created: ", file_name))
+
+  # delete extra files that were created
   unlink(updated_quarto_report)
-
+  if (!is.null(new_set_background_images_template)){
+    unlink(new_set_background_images_template)
+  }
+  unlink(linkage_rate_table_path)
+  if (!is.null(linkage_rates_plot_path)){
+    unlink(linkage_rates_plot_path)
+  }
+  if (!is.null(algorithm_summary_table_path)){
+    unlink(algorithm_summary_table_path)
+  }
+  if (!is.null(performance_measures_table_path)){
+    unlink(performance_measures_table_path)
+  }
+  if (!is.null(performance_measures_plot_path)){
+    unlink(performance_measures_plot_path)
+  }
+  if (!is.null(missingness_table_path)){
+    unlink(missingness_table_path)
+  }
 }
-
 
 
 
