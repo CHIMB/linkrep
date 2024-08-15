@@ -7,6 +7,7 @@
 
 \newif\iflandscape
 
+% command to check if a page is in landscape orientation
 \newcommand{\checklandscape}{
   \ifdim\pdfpagewidth>\pdfpageheight
     \landscapetrue
@@ -15,15 +16,25 @@
   \fi
 }
 
+% page style with page numbers
 \pagestyle{fancy}
 \fancyhf{}
+% fancy_header_cmd is a placeholder. The linkage_quality report reads in the lines
+% of this document and replaces all the placeholders with your function inputs.
+% In this case, if display_back_cover_page = TRUE, fancy_header_cmd is set to \setbgimagewithback
+% otherwise, it's set to \setbgimagenoback (you can view those commands below)
+% You may change this and manually insert a command. linkage_quality_report will not
+% overwrite your command.
 \fancyhead[L]{fancy_header_cmd}
 \fancyfoot[C]{%
   \checklandscape
   \iflandscape
-    \hspace*{3cm}\raisebox{0.5cm}{\makebox[\textwidth]{\thepage}} % Centered page number for landscape
+    % Centered page number for landscape. Landscape orientation wasn't shifting
+    % the page number to the centre so it's manually done here.
+    \hspace*{3cm}\raisebox{0.5cm}{\makebox[\textwidth]{\thepage}}
   \else
-    \raisebox{0.5cm}{\thepage} % Regular centered page number for portrait
+    % Regular centered page number for portrait
+    \raisebox{0.5cm}{\thepage}
   \fi
 }
 
@@ -36,13 +47,22 @@
 \renewcommand{\headrulewidth}{0pt}
 \renewcommand{\footrulewidth}{0pt}
 
+% if you choose to manually place image paths into this file in place of the placeholders,
+% linkage_quality_report will not modify them. Do not change the placeholders
+% acknowledgements_page. If you do, linkage_quality_report will produce an error
+
 % use this command when display_back_cover_page = FALSE
+% placeholders and they're corresponding parameters:
+% content_landscape_page_no_back = content_landscape_page
+% cover_page_no_back = cover_page
+% acknowledgements_page = a page design kept in the package (cannot be changed)
+% content_portrait_page_no_back = content_portrait_page
 \newcommand{\setbgimagenoback}{
   \checklandscape
   \iflandscape
     \AddToShipoutPictureBG*{
       \put(\LenToUnit{0cm},\LenToUnit{2.5in}){%
-        \includegraphics[width=11in,height=8.5in]{content_landscape_page_no_back} 
+        \includegraphics[width=11in,height=8.5in]{content_landscape_page_no_back}
       }
     }
   \else
@@ -64,13 +84,19 @@
           \put(\LenToUnit{0cm},\LenToUnit{0cm}){%
             \includegraphics[width=8.5in,height=11in]{content_portrait_page_no_back}
           }
-        }  
+        }
       }
     }
   \fi
 }
 
 % use this command when display_back_cover_page = TRUE
+% placeholders and they're corresponding parameters:
+% content_landscape_page_with_back = content_landscape_page
+% cover_page_with_back = cover_page
+% back_page = back_cover_page
+% acknowledgements_page = a page design kept in the package (cannot be changed)
+% content_portrait_page_with_back = content_portrait_page
 \newcommand{\setbgimagewithback}{
   \checklandscape
   \iflandscape
@@ -105,7 +131,7 @@
             \put(\LenToUnit{0cm},\LenToUnit{0cm}){%
               \includegraphics[width=8.5in,height=11in]{content_portrait_page_with_back}
             }
-          }  
+          }
         }
       }
     }
