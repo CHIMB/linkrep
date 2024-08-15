@@ -30,8 +30,8 @@ Default is \code{12}.}
 \code{system_fonts()$name} or \code{system_fonts()$family}. See \code{\link[systemfonts]{system_fonts}}
 for more details.}
 
-\item{footnotes}{A character vector of additional footnotes for
-the table. Each element in the vector will be displayed on a new line.}
+\item{footnotes}{A character vector of additional footnotes for the performance
+measures table. Each element in the vector will be displayed on a new line.}
 
 \item{thousands_separator}{A string specifying the style of the
 thousands separator in all numeric values. Default is "\code{,}".}

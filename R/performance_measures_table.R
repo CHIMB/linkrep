@@ -12,8 +12,8 @@
 #' @param font_style A string specifying the font style. Must be present in
 #'  \code{system_fonts()$name} or \code{system_fonts()$family}. See \code{\link[systemfonts]{system_fonts}}
 #'  for more details.
-#' @param footnotes A character vector of additional footnotes for
-#' the table. Each element in the vector will be displayed on a new line.
+#' @param footnotes A character vector of additional footnotes for the performance
+#'  measures table. Each element in the vector will be displayed on a new line.
 #' @param thousands_separator A string specifying the style of the
 #'  thousands separator in all numeric values. Default is "\code{,}".
 #' @param decimal_mark A string specifying the style of the decimal mark
@@ -22,7 +22,6 @@
 #'  after the decimal mark of all necessary numeric values. Default is \code{1}.
 #'
 #' @return A \code{flextable}.
-#' @export
 #'
 performance_measures_table <- function(data,
                                        output_format,
