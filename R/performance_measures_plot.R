@@ -3,7 +3,6 @@
 #' @param data A single row data frame with values ranging from 0 to 100.
 #'
 #' @return A radar chart.
-#' @export
 #'
 #' @importFrom fmsb radarchartcirc
 #'
@@ -60,3 +59,6 @@ performance_measures_plot <- function(data){
                    vlabels = labels)
   }
 }
+
+
+
