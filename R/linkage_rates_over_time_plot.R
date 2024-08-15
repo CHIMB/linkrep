@@ -20,7 +20,6 @@
 #' dates to produce at least five bars in the barplot.
 #'
 #' @return A barplot of linkage rates by acquisition date.
-#' @export
 #'
 #' @import ggplot2
 #' @importFrom dplyr mutate summarise group_by ungroup select
