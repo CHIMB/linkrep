@@ -205,7 +205,8 @@ linkage_quality_report <- function(main_data,
                                    temp_data_output_dir = tempdir(check = TRUE),
                                    quarto_report_template = NULL,
                                    references = NULL,
-                                   word_template = NULL
+                                   word_template = NULL,
+                                   set_background_images_template = NULL # NEWWWWWWWWWW
 ){
 
 
@@ -878,33 +879,31 @@ linkage_quality_report <- function(main_data,
   quarto_report <- readLines(quarto_report_template)
   text_font_size <- paste0(text_font_size, "pt")
 
-  if (!any(grepl("\\{fontsize\\}", quarto_report))) {
-    stop("In the quarto template report file, the placeholder for the text font size must be '{fontsize}' in the YAML header")
+  if (any(grepl("\\{fontsize\\}", quarto_report))) {
+    quarto_report <- gsub("\\{fontsize\\}", text_font_size, quarto_report)
   }
-  quarto_report <- gsub("\\{fontsize\\}", text_font_size, quarto_report)
 
-  if (!any(grepl("\\{mainfont\\}", quarto_report)) | !any(grepl("\\{sansfont\\}", quarto_report))) {
-    stop("In the quarto template report file, the placeholders for the font type must be '{mainfont}' and '{sansfont}' in the YAML header")
+  if (any(grepl("\\{mainfont\\}", quarto_report))){
+    quarto_report <- gsub("\\{mainfont\\}", font_style, quarto_report)
   }
-  quarto_report <- gsub("\\{mainfont\\}", font_style, quarto_report)
-  quarto_report <- gsub("\\{sansfont\\}", font_style, quarto_report)
 
-  if (!any(grepl("\\{background_images\\}", quarto_report))) {
-    stop("In the quarto template report file, the placeholder for the LaTex file that sets the background images must be '{background_images}' in the YAML header")
+  if (any(grepl("\\{sansfont\\}", quarto_report))){
+    quarto_report <- gsub("\\{sansfont\\}", font_style, quarto_report)
   }
-  quarto_report <- gsub("\\{background_images\\}",
-                        ifelse(output_format == "pdf", new_set_background_images_template, set_background_images_template),
-                               quarto_report)
 
-  if (!any(grepl("\\{references\\}", quarto_report))) {
-    stop("In the quarto template report file, the placeholder for the word template must be '{references}' in the YAML header")
+  if (any(grepl("\\{background_images\\}", quarto_report))) {
+    quarto_report <- gsub("\\{background_images\\}",
+                          ifelse(output_format == "pdf", new_set_background_images_template, set_background_images_template),
+                          quarto_report)
   }
-  quarto_report <- gsub("\\{references\\}", references, quarto_report)
 
-  if (!any(grepl("\\{word_template\\}", quarto_report))) {
-    stop("In the quarto template report file, the placeholder for the word template must be '{word_template}' in the YAML header")
+  if (any(grepl("\\{references\\}", quarto_report))) {
+    quarto_report <- gsub("\\{references\\}", references, quarto_report)
   }
-  quarto_report <- gsub("\\{word_template\\}", word_template, quarto_report)
+
+  if (any(grepl("\\{word_template\\}", quarto_report))) {
+    quarto_report <- gsub("\\{word_template\\}", word_template, quarto_report)
+  }
 
   dir <- system.file("templates", package = "linkrep")
   if (!dir.exists(dir)){
