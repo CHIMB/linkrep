@@ -1,12 +1,12 @@
 Package: linkrep
 Type: Package
-Title: What the Package Does (Title Case)
+Title: Record Linkage Quality Reports
 Version: 0.1.0
 Authors@R: c(
-            person(given=c("Elizabeth"), family="Stoughton", email="stoughte@myumanitoba.ca", role=c("aut", "cre")),
-            person(given=c("Barret", "A."), family="Monchka", email="Barret.Monchka@umanitoba.ca", role="aut")
+            person(given="Elizabeth", family="Stoughton", email="stoughte@myumanitoba.ca", role="aut"),
+            person(given=c("Barret", "A."), family="Monchka", email="Barret.Monchka@umanitoba.ca", role="aut"),
+            person(given="George & Fay Yee Centre for Healthcare Innovation", email="data.linkage@umanitoba.ca", role="cre")
           )
-Maintainer: The package maintainer <yourself@somewhere.net>
 Description: More about what it does (maybe more than one line)
     Use four spaces when indenting paragraphs within the Description.
 License: MIT + file LICENSE
@@ -15,15 +15,18 @@ LazyData: true
 RoxygenNote: 7.3.1
 Imports: 
     data.table,
+    DBI,
     dplyr,
     flextable,
     fmsb,
     ggplot2,
+    grDevices,
     gtsummary,
     Hmisc,
     lubridate,
     quarto,
     rlang,
+    RSQLite,
     systemfonts,
     tidyr,
     tidyselect,
