@@ -23,7 +23,6 @@ validate_string <- function(param, param_name){
 #' @param param_name The name of the parameter to be used in potential error messages.
 #'
 validate_string_vector <- function(param, param_name){
-  validate_string(param_name, "param_name")
   if (!is.character(param)) {
     stop(sprintf("Invalid argument: %s. %s must be a character string vector", param_name, param_name))
   }
@@ -38,7 +37,6 @@ validate_string_vector <- function(param, param_name){
 #' @param param_name The name of the parameter to be used in potential error messages.
 #'
 validate_boolean <- function(param, param_name){
-  validate_string(param_name, "param_name")
   if(is.null(param) | length(param) != 1){
     stop(sprintf("Invalid argument: %s. %s must be TRUE or FALSE", param_name, param_name))
   }
@@ -79,11 +77,11 @@ validate_numeric_vector <- function(param, param_name){
 
 
 
-#' Validate Dataframe Parameters
+#' Validate Data Frame Parameters
 #'
 #' Check if parameter is a `data.frame` or `data.table` object and make sure it's not empty.
 #'
-#' @param param The dataframe parameter to check.
+#' @param param The data frame parameter to check.
 #' @param param_name The name of the parameter to be used in potential error messages.
 #'
 #' @importFrom data.table is.data.table data.table
@@ -101,14 +99,12 @@ validate_df <- function(param, param_name){
 
 #' Validate a Variable is Present in the Data
 #'
-#' Check if a variable name is present in a dataframe.
+#' Check if a variable name is present in a data frame.
 #'
 #' @param var The name of the variable to check its presence `data`.
 #' @param data The dataframe that should contain the variable name passed in.
 #' @param var_param_name The name of the variable parameter to be used in potential error messages.
 #' @param data_param_name The name of the data parameter to be used in potential error messages.
-#'
-#' @export
 #'
 validate_var_in_data <- function(var, data, var_param_name, data_param_name){
   validate_string(var, "var")
@@ -121,14 +117,12 @@ validate_var_in_data <- function(var, data, var_param_name, data_param_name){
 }
 
 
-#' Validate Dataframe is Binary or Logical
+#' Validate Data Frame is Binary or Logical
 #'
 #' Check if all the variables in a data frame are binary or logical
 #'
-#' @param param The dataframe parameter to check.
+#' @param param The data frame parameter to check.
 #' @param param_name The name of the parameter to be used in potential error messages.
-#'
-#' @export
 #'
 validate_df_binary <- function(param, param_name){
   validate_df(param, "param")
