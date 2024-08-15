@@ -24,7 +24,6 @@
 #' next to percentages table. Default is \code{FALSE}.
 #'
 #' @return A \code{flextable} that was originally a \code{gtsummary}.
-#' @export
 #'
 #' @importFrom gtsummary theme_gtsummary_language tbl_summary as_flex_table modify_header modify_footnote all_categorical everything all_stat_cols
 #'

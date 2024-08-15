@@ -32,7 +32,7 @@ Default is \code{12}.}
 for more details.}
 
 \item{footnotes}{A character vector of additional footnotes for
-the linkage rate table. Each element in the vector will be displayed on a new line.}
+the missigness table. Each element in the vector will be displayed on a new line.}
 
 \item{thousands_separator}{A string specifying the style of the
 thousands separator in all numeric values. Default is "\code{,}".}
