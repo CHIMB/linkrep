@@ -526,6 +526,17 @@ linkage_quality_report <- function(main_data,
     stop("Invalid argument: word_template. File extension must be .docx")
   }
 
+  if (is.null(set_background_images_template)){
+    if (!file.exists(system.file("templates", "set_background_images.tex", package = "linkrep"))){
+      stop("Default LaTeX background images template file not found. Check installation or if removed, ensure one is passed to the function.")
+    }
+    set_background_images_template <- system.file("templates", "set_background_images.tex", package = "linkrep")
+  }
+  validate_string(set_background_images_template, "set_background_images_template")
+  if (file_ext(set_background_images_template) != "tex"){
+    stop("Invalid argument: set_background_images_template. File extension must be .tex")
+  }
+
 
   # read in data and perform checks
 
@@ -786,17 +797,6 @@ linkage_quality_report <- function(main_data,
   # file paths into their corresponding placeholders. Then we write the updated
   # lines into a new file for use in the quarto report.
   #----
-  if (!file.exists(system.file("templates", "set_background_images.tex", package = "linkrep"))){
-    stop("Set background images files not found. Check installation and ensure file is present in package.")
-  }
-  set_background_images_template <- system.file("templates", "set_background_images.tex", package = "linkrep")
-  validate_string(set_background_images_template, "set_background_images_template")
-  if (!file.exists(set_background_images_template)){
-    stop("Invalid argument: set_background_images_template. File not found")
-  }
-  if (file_ext(set_background_images_template) != "tex"){
-    stop("Invalid argument: set_background_images_template. File extension must be .tex")
-  }
 
   # background is only affected in pdf output
   new_set_background_images_template <- NULL
@@ -809,16 +809,14 @@ linkage_quality_report <- function(main_data,
 
     if (display_back_cover_page){
       # set the command within the LaTex file
-      if (!any(grepl("fancy_header_cmd", set_bg_images_lines))) {
-        stop("In the file setting the background images, the placeholder for the fancy header command must be 'fancy_header_cmd'")
+      if (any(grepl("fancy_header_cmd", set_bg_images_lines))) {
+        set_bg_images_lines <- gsub("fancy_header_cmd", "\\\\setbgimagewithback", set_bg_images_lines)
       }
-      set_bg_images_lines <- gsub("fancy_header_cmd", "\\\\setbgimagewithback", set_bg_images_lines)
 
       back_cover_page <- gsub("\\\\", "/", back_cover_page)
-      if (!any(grepl("back_page", set_bg_images_lines))) {
-        stop("In the file setting the background images, the placeholder for the back cover page must be 'back_cover'")
+      if (any(grepl("back_page", set_bg_images_lines))) {
+        set_bg_images_lines <- gsub("back_page", back_cover_page, set_bg_images_lines)
       }
-      set_bg_images_lines <- gsub("back_page", back_cover_page, set_bg_images_lines)
 
       # placeholders used within the LaTex file for the \setbgimagewithback command
       cover <- "cover_page_with_back"
@@ -826,10 +824,9 @@ linkage_quality_report <- function(main_data,
       content_land <- "content_landscape_page_with_back"
     } else {
       # set the command within the LaTex file
-      if (!any(grepl("fancy_header_cmd", set_bg_images_lines))) {
-        stop("In the file setting the background images, the placeholder for the fancy header command must be 'fancy_header_cmd'")
+      if (any(grepl("fancy_header_cmd", set_bg_images_lines))) {
+        set_bg_images_lines <- gsub("fancy_header_cmd", "\\\\setbgimagenoback", set_bg_images_lines)
       }
-      set_bg_images_lines <- gsub("fancy_header_cmd", "\\\\setbgimagenoback", set_bg_images_lines)
 
       # placeholders used within the LaTex file for the \setbgimagewithback command
       cover <- "cover_page_no_back"
@@ -837,32 +834,24 @@ linkage_quality_report <- function(main_data,
       content_land <- "content_landscape_page_no_back"
     }
 
-    if (!any(grepl(cover, set_bg_images_lines))) {
-      stop("In the file setting the background images, the placeholder for the cover page must be either 'cover_page_with_back' or 'cover_page_no_back'")
+    if (any(grepl(cover, set_bg_images_lines))) {
+      set_bg_images_lines <- gsub(cover, cover_page, set_bg_images_lines)
     }
-    set_bg_images_lines <- gsub(cover, cover_page, set_bg_images_lines)
 
-    if (!any(grepl(content_port, set_bg_images_lines))) {
-      stop("In the file setting the background images, the placeholder for the content portrait page must be either 'content_portrait_page_with_back' or 'content_portrait_page_no_back'")
+    if (any(grepl(content_port, set_bg_images_lines))) {
+      set_bg_images_lines <- gsub(content_port, content_portrait_page, set_bg_images_lines)
     }
-    set_bg_images_lines <- gsub(content_port, content_portrait_page, set_bg_images_lines)
 
-    if (!any(grepl(content_land, set_bg_images_lines))) {
-      stop("In the file setting the background images, the placeholder for the content landscape page must be either 'content_landscape_page_with_back' or 'content_landscape_page_no_back'")
+    if (any(grepl(content_land, set_bg_images_lines))) {
+      set_bg_images_lines <- gsub(content_land, content_landscape_page, set_bg_images_lines)
     }
-    set_bg_images_lines <- gsub(content_land, content_landscape_page, set_bg_images_lines)
 
     if (!any(grepl("acknowledgements_page", set_bg_images_lines))) {
       stop("In the file setting the background images, the placeholder for the acknowledgements page must be 'acknowledgements'")
     }
     set_bg_images_lines <- gsub("acknowledgements_page", acknowledgements_page, set_bg_images_lines)
 
-    dir <- system.file("templates", package = "linkrep")
-    if (!dir.exists(dir)){
-      stop("Trying to save updated setting background images file in non-existent directory. Ensure 'templates' folder exists in package.")
-    }
-
-    new_set_background_images_template <- file.path(dir, "updated_set_bg_images.tex")
+    new_set_background_images_template <- file.path(temp_data_output_dir, "updated_set_bg_images.tex")
     writeLines(set_bg_images_lines, new_set_background_images_template)
   }
 
@@ -905,11 +894,7 @@ linkage_quality_report <- function(main_data,
     quarto_report <- gsub("\\{word_template\\}", word_template, quarto_report)
   }
 
-  dir <- system.file("templates", package = "linkrep")
-  if (!dir.exists(dir)){
-    stop("Trying to save updated quarto file in non-existent directory. Ensure 'templates' folder exists in package.")
-  }
-  updated_quarto_report <- file.path(dir, "updated_quarto_report.qmd")
+  updated_quarto_report <- file.path(temp_data_output_dir, "updated_quarto_report.qmd")
   writeLines(quarto_report, updated_quarto_report)
 
 
