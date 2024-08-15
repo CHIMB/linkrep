@@ -7,13 +7,20 @@
 set_table_width(flextable)
 }
 \arguments{
-\item{flextable}{A `flextable` object.}
+\item{flextable}{A \code{flextable} object.}
 }
 \value{
-The `flextable` adjusted to the desired width.
+The \code{flextable} adjusted to the desired width.
 }
 \description{
-Sets the width of the table based on its desired width (\code{\link{dim_pretty}})
+Sets the width of the table based on its desired width (\code{\link[flextable]{dim_pretty}})
 and the max width the table can be based on the page size. The column widths
 are adjusted as needed to fit the page.
+}
+\details{
+The maximum width for a table to fit into a portrait page is 6.5in and the
+maximum width for a table to fit into a landscape page is 9in.
+
+The table will be given a width of \code{\link[flextable]{autofit}} unless it
+exceeds 9in. In that case, the table columns are adjusted to fit the max width.
 }

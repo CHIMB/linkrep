@@ -1,12 +1,19 @@
 #' Set the Width of a Flextable
 #'
-#' Sets the width of the table based on its desired width (\code{\link{dim_pretty}})
+#' Sets the width of the table based on its desired width (\code{\link[flextable]{dim_pretty}})
 #' and the max width the table can be based on the page size. The column widths
 #' are adjusted as needed to fit the page.
 #'
-#' @param flextable A `flextable` object.
+#' @param flextable A \code{flextable} object.
 #'
-#' @return The `flextable` adjusted to the desired width.
+#' @details
+#' The maximum width for a table to fit into a portrait page is 6.5in and the
+#' maximum width for a table to fit into a landscape page is 9in.
+#'
+#' The table will be given a width of \code{\link[flextable]{autofit}} unless it
+#' exceeds 9in. In that case, the table columns are adjusted to fit the max width.
+#'
+#' @return The \code{flextable} adjusted to the desired width.
 #'
 #' @import flextable
 #'
@@ -58,7 +65,7 @@ set_table_width <- function(flextable){
         flextable <- width(flextable, col_num, new_width)
       }
     }
-
   }
+
   return(flextable)
 }
