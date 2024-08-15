@@ -13,21 +13,24 @@ format_flextables_from_gtsummary(
 )
 }
 \arguments{
-\item{flextable}{A `flextable` object.}
+\item{flextable}{A \code{flextable} object.}
 
-\item{output_format}{A character string specifying the output format, must be
-one of "`pdf`" or "`docx`".}
+\item{output_format}{String specifying the desired output format. Allowed values
+are "\code{pdf}" or "\code{docx}".}
 
-\item{font_size}{A numeric specifying the font size for the table text.}
+\item{font_size}{A number specifying the font size for the table text.
+Default is \code{12}.}
 
-\item{font_style}{A character string specifying the font. Must be present in
-\code{system_fonts()$name} or \code{system_fonts()$family}. See \code{\link{system_fonts}}
+\item{font_style}{A string specifying the font style. Must be present in
+\code{system_fonts()$name} or \code{system_fonts()$family}. See \code{\link[systemfonts]{system_fonts}}
 for more details.}
 
-\item{footnotes}{A character string of footnotes. Must be one string when called with this function.}
+\item{footnotes}{A character vector of additional footnotes for
+the table. Each element in the vector will be displayed on a new line.}
 }
 \value{
-A `flextable`.
+A \code{flextable} object: the result of the modifications applied to the
+ \code{flextable} input.
 }
 \description{
 Formats the provided flextable with the modifications.
