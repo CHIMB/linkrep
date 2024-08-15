@@ -19,6 +19,9 @@ algorithm_summary_table(
 \item{data}{A data frame that data contains information on the linkage algorithm
 (ex. linking variables on each pass).}
 
+\item{output_format}{String specifying the desired output format. Allowed values
+are "\code{pdf}" or "\code{docx}".}
+
 \item{font_size}{A number specifying the font size for the table text.
 Default is \code{12}.}
 
@@ -26,8 +29,8 @@ Default is \code{12}.}
 \code{system_fonts()$name} or \code{system_fonts()$family}. See \code{\link[systemfonts]{system_fonts}}
 for more details.}
 
-\item{footnotes}{A character vector of additional footnotes for
-the table. Each element in the vector will be displayed on a new line.}
+\item{footnotes}{A character vector of additional footnotes for the algorithm
+summary table. Each element in the vector will be displayed on a new line.}
 
 \item{thousands_separator}{A string specifying the style of the
 thousands separator in all numeric values. Default is "\code{,}".}
@@ -37,12 +40,9 @@ in all numeric values. Default is "\code{.}".}
 
 \item{num_decimal_places}{A number specifying the number of digits to output
 after the decimal mark of all necessary numeric values. Default is \code{1}.}
-
-\item{output_formatString}{specifying the desired output format. Allowed values
-are "\code{pdf}" or "\code{docx}".}
 }
 \value{
-A \code{flextable}.
+A \code{flextable} object.
 }
 \description{
 Generates a formatted flextable specific to the algorithm summary table.
