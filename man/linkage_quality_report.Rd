@@ -51,7 +51,9 @@ linkage_quality_report(
   temp_data_output_dir = tempdir(check = TRUE),
   quarto_report_template = NULL,
   references = NULL,
-  word_template = NULL
+  word_template = NULL,
+  set_background_images_template = NULL,
+  citation_style = NULL
 )
 }
 \arguments{
@@ -149,8 +151,7 @@ contains a data frame or a file path to a csv file. Data must contain two column
 the list of abbreviations in the first and their definitions in the second.}
 
 \item{abbreviations_display_header}{A logical indicating whether to display the
-column headers in the abbreviation table. Only applied when \code{output_format =}
-"\code{docx}".}
+column headers in the abbreviation table. Only applied when \code{output_format = "docx"}.}
 
 \item{thousands_separator}{A string specifying the style of the
 thousands separator in all numeric values. Default is "\code{,}".}
@@ -207,6 +208,15 @@ the report, they must be used in a citation elsewhere. Default is
 
 \item{word_template}{A file path a to a word document that specifies the output
 styles for a word report. Default is \code{system.file("templates", "word_template.docx", package = "linkrep")}.}
+
+\item{set_background_images_template}{A file path to a LaTeX file that specifies
+how the background images are placed onto a PDF report. Default is
+\code{system.file("templates", "set_background_images.tex", package = "linkrep")}.}
+
+\item{citation_style}{A file path to a csl file containing the citation style.
+To find different styles visit \url{https://github.com/citation-style-language/styles/blob/master/american-medical-association.csl}
+If the location of the citation must change in the text you must modify its
+location in the quarto report template.}
 }
 \value{
 Saves either a word or pdf record linkage quality report in the \code{output_dir}.\cr

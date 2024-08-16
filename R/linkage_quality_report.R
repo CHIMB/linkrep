@@ -69,8 +69,7 @@
 #'  contains a data frame or a file path to a csv file. Data must contain two columns:
 #'  the list of abbreviations in the first and their definitions in the second.
 #' @param abbreviations_display_header A logical indicating whether to display the
-#'  column headers in the abbreviation table. Only applied when \code{output_format =}
-#'  "\code{docx}".
+#'  column headers in the abbreviation table. Only applied when \code{output_format = "docx"}.
 #' @param thousands_separator A string specifying the style of the
 #'  thousands separator in all numeric values. Default is "\code{,}".
 #' @param decimal_mark A string specifying the style of the decimal mark
@@ -110,6 +109,13 @@
 #'  \code{system.file("templates", "references.bib", package = "linkrep")}.
 #' @param word_template A file path a to a word document that specifies the output
 #'  styles for a word report. Default is \code{system.file("templates", "word_template.docx", package = "linkrep")}.
+#' @param set_background_images_template A file path to a LaTeX file that specifies
+#'  how the background images are placed onto a PDF report. Default is
+#'  \code{system.file("templates", "set_background_images.tex", package = "linkrep")}.
+#' @param citation_style A file path to a csl file containing the citation style.
+#'  To find different styles visit \url{https://github.com/citation-style-language/styles/blob/master/american-medical-association.csl}
+#'  If the location of the citation must change in the text you must modify its
+#'  location in the quarto report template.
 #'
 #' @details
 #' All tables display the variable labels in their headings before reverting to
@@ -206,7 +212,8 @@ linkage_quality_report <- function(main_data,
                                    quarto_report_template = NULL,
                                    references = NULL,
                                    word_template = NULL,
-                                   set_background_images_template = NULL # NEWWWWWWWWWW
+                                   set_background_images_template = NULL,
+                                   citation_style = NULL
 ){
 
 
@@ -271,6 +278,8 @@ linkage_quality_report <- function(main_data,
       )
     }
   }
+  # to word in quarto file path must be formatted as aa/aa/a and not aa\\aa\\a
+  temp_data_output_dir <- gsub("\\\\", "/", temp_data_output_dir)
 
   # # main_data
   # path <- generate_data_path(main_data, "main_data")
@@ -535,6 +544,17 @@ linkage_quality_report <- function(main_data,
   validate_string(set_background_images_template, "set_background_images_template")
   if (file_ext(set_background_images_template) != "tex"){
     stop("Invalid argument: set_background_images_template. File extension must be .tex")
+  }
+
+  if (is.null(citation_style)){
+    if (!file.exists(system.file("templates", "american-medical-association.csl", package = "linkrep"))){
+      stop("Default citation style file not found. Check installation or if removed, ensure one is passed to the function.")
+    }
+    citation_style <- system.file("templates", "american-medical-association.csl", package = "linkrep")
+  }
+  validate_string(citation_style, "citation_style")
+  if (file_ext(citation_style) != "csl"){
+    stop("Invalid argument: citation_style. File extension must be .csl")
   }
 
 
@@ -809,14 +829,10 @@ linkage_quality_report <- function(main_data,
 
     if (display_back_cover_page){
       # set the command within the LaTex file
-      if (any(grepl("fancy_header_cmd", set_bg_images_lines))) {
-        set_bg_images_lines <- gsub("fancy_header_cmd", "\\\\setbgimagewithback", set_bg_images_lines)
-      }
+      set_bg_images_lines <- gsub("fancy_header_cmd", "\\\\setbgimagewithback", set_bg_images_lines)
 
       back_cover_page <- gsub("\\\\", "/", back_cover_page)
-      if (any(grepl("back_page", set_bg_images_lines))) {
-        set_bg_images_lines <- gsub("back_page", back_cover_page, set_bg_images_lines)
-      }
+      set_bg_images_lines <- gsub("back_page", back_cover_page, set_bg_images_lines)
 
       # placeholders used within the LaTex file for the \setbgimagewithback command
       cover <- "cover_page_with_back"
@@ -824,9 +840,7 @@ linkage_quality_report <- function(main_data,
       content_land <- "content_landscape_page_with_back"
     } else {
       # set the command within the LaTex file
-      if (any(grepl("fancy_header_cmd", set_bg_images_lines))) {
-        set_bg_images_lines <- gsub("fancy_header_cmd", "\\\\setbgimagenoback", set_bg_images_lines)
-      }
+      set_bg_images_lines <- gsub("fancy_header_cmd", "\\\\setbgimagenoback", set_bg_images_lines)
 
       # placeholders used within the LaTex file for the \setbgimagewithback command
       cover <- "cover_page_no_back"
@@ -834,24 +848,17 @@ linkage_quality_report <- function(main_data,
       content_land <- "content_landscape_page_no_back"
     }
 
-    if (any(grepl(cover, set_bg_images_lines))) {
-      set_bg_images_lines <- gsub(cover, cover_page, set_bg_images_lines)
-    }
-
-    if (any(grepl(content_port, set_bg_images_lines))) {
-      set_bg_images_lines <- gsub(content_port, content_portrait_page, set_bg_images_lines)
-    }
-
-    if (any(grepl(content_land, set_bg_images_lines))) {
-      set_bg_images_lines <- gsub(content_land, content_landscape_page, set_bg_images_lines)
-    }
+    set_bg_images_lines <- gsub(cover, cover_page, set_bg_images_lines)
+    set_bg_images_lines <- gsub(content_port, content_portrait_page, set_bg_images_lines)
+    set_bg_images_lines <- gsub(content_land, content_landscape_page, set_bg_images_lines)
 
     if (!any(grepl("acknowledgements_page", set_bg_images_lines))) {
       stop("In the file setting the background images, the placeholder for the acknowledgements page must be 'acknowledgements'")
     }
     set_bg_images_lines <- gsub("acknowledgements_page", acknowledgements_page, set_bg_images_lines)
 
-    new_set_background_images_template <- file.path(temp_data_output_dir, "updated_set_bg_images.tex")
+    # new_set_background_images_template <- tempfile(tmpdir = temp_data_output_dir, fileext = ".tex")
+    new_set_background_images_template <- file.path(temp_data_output_dir, "updated_set_background_images.tex")
     writeLines(set_bg_images_lines, new_set_background_images_template)
   }
 
@@ -868,33 +875,23 @@ linkage_quality_report <- function(main_data,
   quarto_report <- readLines(quarto_report_template)
   text_font_size <- paste0(text_font_size, "pt")
 
-  if (any(grepl("\\{fontsize\\}", quarto_report))) {
-    quarto_report <- gsub("\\{fontsize\\}", text_font_size, quarto_report)
-  }
-
-  if (any(grepl("\\{mainfont\\}", quarto_report))){
-    quarto_report <- gsub("\\{mainfont\\}", font_style, quarto_report)
-  }
-
-  if (any(grepl("\\{sansfont\\}", quarto_report))){
-    quarto_report <- gsub("\\{sansfont\\}", font_style, quarto_report)
-  }
-
-  if (any(grepl("\\{background_images\\}", quarto_report))) {
-    quarto_report <- gsub("\\{background_images\\}",
+  quarto_report <- gsub("\\{fontsize\\}", text_font_size, quarto_report)
+  quarto_report <- gsub("\\{mainfont\\}", font_style, quarto_report)
+  quarto_report <- gsub("\\{sansfont\\}", font_style, quarto_report)
+  quarto_report <- gsub("\\{background_images\\}",
                           ifelse(output_format == "pdf", new_set_background_images_template, set_background_images_template),
                           quarto_report)
-  }
 
-  if (any(grepl("\\{references\\}", quarto_report))) {
-    quarto_report <- gsub("\\{references\\}", references, quarto_report)
-  }
+  references <- gsub("\\\\", "/", references)
+  quarto_report <- gsub("\\{references\\}", references, quarto_report)
 
-  if (any(grepl("\\{word_template\\}", quarto_report))) {
-    quarto_report <- gsub("\\{word_template\\}", word_template, quarto_report)
-  }
+  word_template <- gsub("\\\\", "/", word_template)
+  quarto_report <- gsub("\\{word_template\\}", word_template, quarto_report)
 
-  updated_quarto_report <- file.path(temp_data_output_dir, "updated_quarto_report.qmd")
+  citation_style <- gsub("\\\\", "/", citation_style)
+  quarto_report <- gsub("\\{citation_style\\}", citation_style, quarto_report)
+
+  updated_quarto_report <- tempfile(tmpdir = temp_data_output_dir, fileext = ".qmd")
   writeLines(quarto_report, updated_quarto_report)
 
 
@@ -904,7 +901,7 @@ linkage_quality_report <- function(main_data,
   # generate_element_paths
   #
   # save elements in an rds file to be passed to the Quarto file
-  # This must be done as Quarto doesn't recorgize R specific types
+  # This must be done as Quarto doesn't recognize R specific types
   #----
   generate_element_paths <- function(element){
     # save element into an rds file temporarily
@@ -913,7 +910,50 @@ linkage_quality_report <- function(main_data,
     return(path)
   }
 
-  # abbreviations???????????????????????????????
+  # abbreviations
+  # the abbreviations get output with LaTeX in PDF output because when using
+  # a table, the table numbers get messed up in the report output.
+  # So for word output we have a flextable and for pdf output we have LaTeX.
+  # This is why the code below creates a function that gets passed to the quarto doc.
+  # The function needs either the table or the data to generate the output so this
+  # gets passed to the quarto doc as well.
+  abbreviations_generator_function_path <- NULL
+  if (!is.null(abbreviations)){
+
+    # if output is docx the data path holds the flextable result from abbreviation_table()
+    # if output is pdf the data path holds the abbreviations data
+    if (output_format == "docx"){
+      abbrev_table <- abbreviation_table(
+        data = abbreviations_data,
+        output_format = output_format,
+        font_size = table_font_size,
+        font_style = font_style,
+        display_headers = abbreviations_display_header)
+      abbreviations_data_path <- generate_element_paths(abbrev_table)
+    } else {
+      abbreviations_data_path <- generate_element_paths(abbreviations_data)
+    }
+
+    generate_abbreviations_output <- function(data, output_format){
+      if (output_format == "docx"){
+        if (!("flextable" %in% class(data))){
+          stop("Invalid input: data. data must be a flextable when output_format = 'docx'")
+        }
+        data
+      } else {
+        if (!is.data.frame(data)){
+          stop("invalid input: data. data must be data frame when output_format = 'pdf'")
+        }
+        cat("\\begin{description}")
+        for (i in 1:nrow(data)){
+          cat("\\item[", data[[1]][i], "]")
+          cat(data[[2]][i])
+        }
+        cat("\\end{description}")
+      }
+    }
+    abbreviations_generator_function_path <- generate_element_paths(generate_abbreviations_output)
+  }
 
   # linkage rate table
   linkage_rate_tbl <- linkage_rate_table(
@@ -1084,6 +1124,8 @@ linkage_quality_report <- function(main_data,
       input = updated_quarto_report,
       output_format = output_format,
       execute_params = list(
+        abbreviations_data_path = abbreviations_data_path,
+        abbreviations_generator_function_path = abbreviations_generator_function_path,
         linkage_rate_table_path = linkage_rate_table_path,
         linkage_rates_plot_path = linkage_rates_plot_path,
         algorithm_summary_table_path = algorithm_summary_table_path,
@@ -1122,6 +1164,12 @@ linkage_quality_report <- function(main_data,
   unlink(updated_quarto_report)
   if (!is.null(new_set_background_images_template)){
     unlink(new_set_background_images_template)
+  }
+  if (!is.null(abbreviations_data_path)){
+    unlink(abbreviations_data_path)
+  }
+  if (!is.null(abbreviations_generator_function_path)){
+    unlink(abbreviations_generator_function_path)
   }
   unlink(linkage_rate_table_path)
   if (!is.null(linkage_rates_plot_path)){
