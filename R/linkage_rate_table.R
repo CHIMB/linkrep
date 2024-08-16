@@ -22,9 +22,6 @@
 #'  as either mean \eqn{\pm} standard deviation or median (Q1, Q3), where Q1 is
 #'  the 25\eqn{^{th}} percentile, and Q3 is the 75\eqn{^{th}} percentile. Default
 #'  is \code{FALSE}.
-#'
-#' @param display_alphabetically STILL NEED TO IMPLEMENT
-#'
 #' @param font_size A number specifying the font size for the table text.
 #'  Default is \code{12}.
 #' @param font_style A string specifying the font style. Must be present in
@@ -71,7 +68,6 @@ linkage_rate_table <- function(main_data,
                                missing_data_indicators = NULL,
                                display_total_column = TRUE,
                                display_mean_not_median_stats = FALSE,
-                               display_alphabetically = FALSE, # need to implement!!
                                font_size = 12,
                                font_style = "Times New Roman",
                                footnotes = NULL,
@@ -109,7 +105,6 @@ linkage_rate_table <- function(main_data,
 
   validate_boolean(display_total_column, "display_total_column")
   validate_boolean(display_mean_not_median_stats, "display_mean_not_median_stats")
-  validate_boolean(display_alphabetically, "display_alphabetically")
   validate_boolean(output_to_csv, "output_to_csv")
 
   if (!is.null(output_dir)){
