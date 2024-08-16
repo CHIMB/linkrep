@@ -18,13 +18,14 @@ format:
 editor: visual
 
 bibliography: {references}
-# csl: "`r system.file('templates', 'bibliography_output_style', package = 'linkrep')`"
-csl: "C:/Users/stoughte/Downloads/american-medical-association.csl"
+csl: {citation_style}
 
 execute:
   echo: false
   
 params: 
+  abbreviations_data_path: null
+  abbreviations_generator_function_path: null
   linkage_rate_table_path: null
   linkage_rates_plot_path: null
   algorithm_summary_table_path: null
@@ -96,6 +97,8 @@ read_data <- function(data_path, parameter){
 
 ```{r read in report elements}
 # if one of these is NULL it means it wasn't supplied to the function so don't output it
+abbreviations_data <- read_data(params$abbreviations_data_path, "abbreviations_data_path")
+abbreviations_function <- read_data(params$abbreviations_generator_function_path, "abbreviations_generator_function_path")
 linkage_rate_table <- read_data(params$linkage_rate_table_path, "linkage_rate_table_path")
 linkage_rates_over_time_plot <- read_data(params$linkage_rates_plot_path, "linkage_rates_plot_path")
 algorithm_summary_table <- read_data(params$algorithm_summary_table_path, "algorithm_summary_tabl_path")
@@ -231,44 +234,41 @@ For additional questions regarding this linkage, please e-mail [data.linkage\@um
 ```
 :::
 
+`r if(!is.null(abbreviations_data) & !is.null(abbreviations_function)) "::: {.content-visible}" else "::: {.content-hidden}"`
+
 {{< pagebreak >}}
 
-
 ::: {.content-visible when-format="pdf"}
+
 ```{=tex}
 \section*{List of Abbreviations}
 \addcontentsline{toc}{section}{List of Abbreviations}
 ```
 
-```{r abbreviations pdf output, results='asis'}
-# if (!is.null(abbreviations_data) & params$output_format == "pdf"){
-#   cat("\\begin{description}")
-#   for (i in 1:nrow(abbreviations_data)){
-#     cat("\\item[", abbreviations_data[[1]][i], "]")
-#     cat(abbreviations_data[[2]][i])
-#   }
-#   cat("\\end{description}")
-# }
 
+```{r abbreviations pdf output, results='asis'}
+if (!is.null(abbreviations_data) & !is.null(abbreviations_function) & params$output_format == "pdf"){
+  abbreviations_function(
+    data = abbreviations_data, 
+    output_format = params$output_format)
+}
 ```
 :::
 
 ::: {.content-visible when-format="docx"}
+
 # List of Abbreviations {.unnumbered}
 
 \addcontentsline{toc}{section}{List of Abbreviations}
 
 ```{r abbreviations word output, ft.align="left"}
-# if (!is.null(abbreviations_data) & params$output_format == "docx"){
-# abbreviation_table(
-# data = abbreviations_data,
-# output_format = params$output_format,
-# font_size = params$table_font_size,
-# font_style = params$font_style,
-# display_headers = params$abbreviations_display_header)
-# }
+if (!is.null(abbreviations_data) & !is.null(abbreviations_function) & params$output_format == "docx"){
+  abbreviations_function(
+    data = abbreviations_data, 
+    output_format = params$output_format)
+}
 ```
-
+:::
 :::
 
 {{< pagebreak >}}
