@@ -101,7 +101,6 @@ linkage_rates_over_time_plot <- function(data,
                                date),
                       linkage_rate = mean(.data[[link_indicator_var]]) * 100) |> ungroup()
     data <- drop_na(data)
-
     num_bars <- nrow(data)
     if (num_bars >= MIN_NUM_BARS){
       plot <- ggplot(data, aes(x = date, y = linkage_rate)) +
