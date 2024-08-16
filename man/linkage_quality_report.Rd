@@ -16,7 +16,6 @@ linkage_quality_report(
   linkage_rate_tbl_footnotes = NULL,
   linkage_rate_tbl_display_total_column = TRUE,
   linkage_rate_tbl_display_mean_not_median_stats = FALSE,
-  linkage_rate_tbl_display_alphabetically = FALSE,
   linkage_rate_tbl_output_to_csv = FALSE,
   missing_data_indicators = NULL,
   missingness_tbl_footnotes = NULL,
@@ -89,8 +88,6 @@ to display the statistics for continuous variables in the linkage rate table
 as either mean \eqn{\pm} standard deviation or median (Q1, Q3), where Q1 is
 the 25\eqn{^{th}} percentile, and Q3 is the 75\eqn{^{th}} percentile. Default is \code{FALSE}.}
 
-\item{linkage_rate_tbl_display_alphabetically}{a}
-
 \item{linkage_rate_tbl_output_to_csv}{A logical indicating whether to save the
 linkage rate table in a csv file. Default is \code{FALSE}.}
 
@@ -112,7 +109,7 @@ saved in the file.}
 
 \item{project_id}{String indicating the project ID.}
 
-\item{num_records_right_dataset}{The number of records in the right dataset of the linkage}
+\item{num_records_right_dataset}{The number of records in the right dataset of the linkage.}
 
 \item{acquisition_year_var}{A string of the name of the numeric variable in
 \code{main_data} that represents the acquisition year.}
@@ -190,20 +187,21 @@ cover page in the output.}
 \item{back_cover_page}{A file path to a png, pdf or jpg file that contains the
 desired back cover page. Default is \code{system.file("background_images", "back_cover_page.pdf", package = "linkrep")}.}
 
-\item{blank_background}{A logical indicating whether display report on blank
+\item{blank_background}{A logical indicating whether to display the report on blank
 white background. Default is \code{FALSE}.}
 
-\item{temp_data_output_dir}{A path to a directory. All data frames must be passed
-into the quarto document (report generator) as an rds file therefore, if any data
-passed in is a data frame, those temporary rds files will be stored in this
-directory. Default is \code{tempdir(check = TRUE)}}
+\item{temp_data_output_dir}{A path to a directory. All complex data (ex. tables)
+must be passed into the quarto report through an rds file therefore, all
+temporarily generated rds files containing the report elements will be stored
+in this directory. Default is \code{tempdir(check = TRUE)}}
 
 \item{quarto_report_template}{A file path to a quarto (qmd) file that renders
-the report. Default is \code{system.file("templates", "base_quarto_report_template.qmd", package = "linkrep")}.}
+the report. Use this parameter to apply additional customization to the report
+output. Default is \code{system.file("templates", "base_quarto_report_template.qmd", package = "linkrep")}.}
 
 \item{references}{A file path to a BibTex (bib) file that contains the references
 used in the report. For references to be displayed in the References section of
-the report, they must be used in a citation elsewhere. Default is
+the report, they must be cited in the quarto document. Default is
 \code{system.file("templates", "references.bib", package = "linkrep")}.}
 
 \item{word_template}{A file path a to a word document that specifies the output
