@@ -218,57 +218,6 @@ linkage_quality_report <- function(main_data,
 
   # perform parameter input checks
 
-  #----
-  # generate_data_path
-  #
-  # data: data to validate
-  # parameter: name of the parameter being checked
-  # validates the data -> data must be a path to a csv or rds file or a dataframe.
-  # if the data is a dataframe it gets saved in a temporary rds file.
-  # return: [1] the path to the data, [2] a logical indicating whether a temporary file was generated
-  #----
-  # generate_data_path <- function(data, parameter) {
-  #   validate_string(parameter, "parameter")
-  #   temp_path <- FALSE
-  #   if (is.data.frame(data) | is.data.table(data)) {
-  #     # save dataframe into an rds file temporarily
-  #     print(sprintf("%s path", parameter))
-  #     path <- tempfile(tmpdir = temp_data_output_dir, fileext = ".rds")
-  #     print(sprintf("path: %s", path))
-  #     temp_path <- TRUE
-  #     saveRDS(data, path)
-  #   } else if (is.character(data)) {
-  #     if (length(data) != 1){
-  #       stop(sprintf("Invalid argument: %s. Must be single character string", parameter))
-  #     }
-  #     if (!file.exists(data)) {
-  #       stop(sprintf("Invalid argument: %s. File not found", parameter))
-  #     }
-  #     if (file.info(data)$isdir) {
-  #       stop(sprintf(
-  #         "Invalid argument: %s. File extension must be either .rds or .csv",
-  #         parameter
-  #       ))
-  #     }
-  #     if (file_ext(data) != "rds" &
-  #         file_ext(data) != "csv") {
-  #       stop(sprintf(
-  #         "Invalid argument: %s. File extension must be either .rds or .csv",
-  #         parameter
-  #       ))
-  #     }
-  #     path <- data
-  #   } else {
-  #     stop(
-  #       sprintf(
-  #         "Invalid argument: %s. %s must be a dataframe or a file path to a csv or rds file",
-  #         parameter, parameter
-  #       )
-  #     )
-  #   }
-  #   return(c(path, temp_path))
-  # }
-
   if (!is.null(temp_data_output_dir)){
     validate_string(temp_data_output_dir, "temp_data_output_dir")
     if (!dir.exists(temp_data_output_dir)) {
@@ -279,60 +228,6 @@ linkage_quality_report <- function(main_data,
   }
   # to word in quarto file path must be formatted as aa/aa/a and not aa\\aa\\a
   temp_data_output_dir <- gsub("\\\\", "/", temp_data_output_dir)
-
-  # # main_data
-  # path <- generate_data_path(main_data, "main_data")
-  # main_data_path <- path[1]
-  # main_data_used_temp_path <- path[2]
-
-  # # missing_data_indicators
-  # if (is.null(missing_data_indicators) & !is.null(missingness_tbl_footnotes)){
-  #   warning("Footnotes were provided for the missingness table with no 'missing_data_indicators'. Table will not be created.")
-  # }
-  # missing_data_indicators_path <- NULL
-  # mis_data_ind_used_temp_path <- NULL
-  # if (!is.null(missing_data_indicators)){
-  #   path <- generate_data_path(missing_data_indicators, "missing_data_indicators")
-  #   missing_data_indicators_path <- path[1]
-  #   mis_data_ind_used_temp_path <- path[2]
-  # }
-  #
-  # # algorithm_summary_data
-  # if (is.null(algorithm_summary_data) & !is.null(algorithm_summary_tbl_footnotes)){
-  #   warning("Footnotes were provided for the algorithm summary table with no 'algorithm_summary_data'. Table will not be created.")
-  # }
-  # algorithm_summary_data_path <- NULL
-  # alg_summ_used_temp_path <- NULL
-  # if (!is.null(algorithm_summary_data)){
-  #   path <- generate_data_path(algorithm_summary_data, "algorithm_summary_data")
-  #   algorithm_summary_data_path <- path[1]
-  #   alg_summ_used_temp_path <- path[2]
-  # }
-  #
-  # # performance_measures_data
-  # if (is.null(performance_measures_data) & !is.null(performance_measures_tbl_footnotes)){
-  #   warning("Footnotes were provided for the performance measures table with no 'performance_measures_data'. Table will not be created.")
-  # }
-  # performance_measures_data_path <- NULL
-  # perf_meas_used_temp_path <- NULL
-  # if (!is.null(performance_measures_data)){
-  #   if (is.null(ground_truth) | is.null(ground_truth_missing_var)){
-  #     stop("Must provide ground_truth and ground_truth_missing_var with 'performance_measures_data'")
-  #   }
-  #   path <- generate_data_path(performance_measures_data, "performance_measures_data")
-  #   performance_measures_data_path <- path[1]
-  #   perf_meas_used_temp_path <- path[2]
-  # }
-  #
-  # # abbreviations
-  # abbreviations_data_path <- NULL
-  # abbrev_tbl_used_temp_path <- NULL
-  # if (!is.null(abbreviations)) {
-  #   validate_boolean(abbreviations_display_header, "abbreviations_display_header")
-  #   path <- generate_data_path(abbreviations, "abbreviations")
-  #   abbreviations_data_path <- path[1]
-  #   abbrev_tbl_used_temp_path <- path[2]
-  # }
 
   validate_string(report_title, "report_title")
   validate_string(left_dataset_name, "left_dataset_name")
@@ -568,21 +463,6 @@ linkage_quality_report <- function(main_data,
   #
   # @return The read in data.
   #----
-  # read_data <- function(dataset_path, parameter){
-  #   if (file_ext(dataset_path) == "rds"){
-  #     data <- readRDS(dataset_path)
-  #     if (!is.data.frame(data) & !is.data.table(data)){
-  #       stop(sprintf("Invalid argument: %s. %s must be of type 'data.frame' in your .rds file", parameter, parameter))
-  #     }
-  #   } else {
-  #     data <- read.table(dataset_path, header = TRUE, sep = ",")
-  #   }
-  #   if (nrow(data) == 0){
-  #     stop(sprintf("Invalid argument: %s. %s must be non-empty", parameter, parameter))
-  #   }
-  #   return(data)
-  # }
-
   read_data <- function(data, parameter){
     validate_string(parameter, "parameter")
     if(is.data.frame(data) | is.data.table(data)){
@@ -610,7 +490,6 @@ linkage_quality_report <- function(main_data,
     return(read_in_data)
   }
 
-  # main_data <- read_data(main_data_path, "main_data")
   main_data <- read_data(main_data, "main_data")
 
   validate_var_in_data(linkage_rate_tbl_column_var, main_data,
@@ -908,13 +787,16 @@ linkage_quality_report <- function(main_data,
     return(path)
   }
 
+  #----
   # abbreviations
+  #
   # the abbreviations get output with LaTeX in PDF output because when using
   # a table, the table numbers get messed up in the report output.
   # So for word output we have a flextable and for pdf output we have LaTeX.
   # This is why the code below creates a function that gets passed to the quarto doc.
   # The function needs either the table or the data to generate the output so this
   # gets passed to the quarto doc as well.
+  #----
   abbreviations_generator_function_path <- NULL
   if (!is.null(abbreviations)){
 
@@ -1066,56 +948,6 @@ linkage_quality_report <- function(main_data,
                                   data_time_period,
                                   project_id)
   }
-
-
-  # quarto_render(
-  #   input = updated_quarto_report,
-  #   output_format = output_format,
-  #   execute_params = list(
-  #     main_data_path = main_data_path,
-  #     main_data_used_temp_path = main_data_used_temp_path,
-  #     report_title = report_title,
-  #     left_dataset_name = left_dataset_name,
-  #     right_dataset_name = right_dataset_name,
-  #     output_dir = output_dir,
-  #     data_linker = data_linker,
-  #     linkage_rate_tbl_col_var = linkage_rate_tbl_column_var,
-  #     linkage_rate_tbl_strata_vars = linkage_rate_tbl_strata_vars,
-  #     linkage_rate_tbl_footnotes = linkage_rate_tbl_footnotes,
-  #     linkage_rate_tbl_display_total_column = linkage_rate_tbl_display_total_column,
-  #     linkage_rate_tbl_display_mean_not_median_stats = linkage_rate_tbl_display_mean_not_median_stats,
-  #     linkage_rate_tbl_display_alphabetically = linkage_rate_tbl_display_alphabetically,
-  #     linkage_rate_tbl_output_to_csv = linkage_rate_tbl_output_to_csv,
-  #     missing_data_indicators_path = missing_data_indicators_path,
-  #     missing_data_indicators_used_temp_path = mis_data_ind_used_temp_path,
-  #     missingness_tbl_footnotes = missingness_tbl_footnotes,
-  #     output_format = output_format,
-  #     save_linkage_rate = save_linkage_rate,
-  #     project_id = project_id,
-  #     num_records_right_dataset = num_records_right_dataset,
-  #     acquisition_year_var = acquisition_year_var,
-  #     acquisition_month_var = acquisition_month_var,
-  #     algorithm_summary_data_path = algorithm_summary_data_path,
-  #     algorithm_summary_data_used_temp_path = alg_summ_used_temp_path,
-  #     algorithm_summary_tbl_footnotes = algorithm_summary_tbl_footnotes,
-  #     performance_measures_data_path = performance_measures_data_path,
-  #     performance_measures_data_used_temp_path = perf_meas_used_temp_path,
-  #     performance_measures_tbl_footnotes = performance_measures_tbl_footnotes,
-  #     classification_metrics_used = classification_metrics_used,
-  #     ground_truth = ground_truth,
-  #     ground_truth_missing_var = ground_truth_missing_var,
-  #     abbreviations_data_path = abbreviations_data_path,
-  #     abbreviations_data_used_temp_path = abbrev_tbl_used_temp_path,
-  #     abbreviations_display_header = abbreviations_display_header,
-  #     thousands_separator = thousands_separator,
-  #     decimal_mark = decimal_mark,
-  #     num_decimal_places = num_decimal_places,
-  #     display_percent_symbol = display_percent_symbol,
-  #     table_font_size = table_font_size,
-  #     font_style = font_style,
-  #     display_back_cover_page = display_back_cover_page
-  #   )
-  # )
 
   quarto_render(
       input = updated_quarto_report,
