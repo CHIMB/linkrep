@@ -20,8 +20,8 @@ save_linkage_rate_sqlite_file <- function(output_dir,
                                           left_dataset_name,
                                           right_dataset_name,
                                           overall_linkage_rate,
-                                          data_time_period,
-                                          project_id){
+                                          data_time_period = NULL,
+                                          project_id = NULL){
 
   # parameter checks
 
@@ -34,21 +34,21 @@ save_linkage_rate_sqlite_file <- function(output_dir,
   validate_string(left_dataset_name, "left_dataset_name")
   validate_string(right_dataset_name, "right_dataset_name")
   validate_string(overall_linkage_rate, "overall_linkage_rate")
-  validate_string(data_time_period, "data_time_period")
-  if (length(project_id) != 1){
-    stop("Invalid argument: project_id. project_id must be a single input.")
+  if (!is.null(data_time_period)){
+    validate_string(data_time_period, "data_time_period")
+  } else {
+    data_time_period <- NA
+  }
+  if (!is.null(project_id)){
+    if (length(project_id) != 1){
+      stop("Invalid argument: project_id. project_id must be a single input.")
+    }
+  } else {
+    project_id <- NA
   }
 
   sqlite_file <- file.path(output_dir, "linkage_rate.sqlite")
   con <- dbConnect(SQLite(), sqlite_file)
-
-  if (is.null(project_id)){
-    project_id <- NA
-  }
-
-  if (is.null(data_time_period)){
-    data_time_period <- NA
-  }
 
   data <- data.frame(
     report_generation_date = report_generation_date,
