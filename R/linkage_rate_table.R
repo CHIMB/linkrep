@@ -260,8 +260,8 @@ linkage_rate_table <- function(main_data,
   table <- modify_header(
     table,
     label = "",
-    update = all_stat_cols() ~ sprintf("**{level}**\n(N = {style_number(n)}, {style_percent(p, digits = %d)}%%)",
-                                       num_decimal_places)
+    all_stat_cols() ~ sprintf("**{level}**\n(N = {style_number(n)}, {style_percent(p, digits = %d)}%%)",
+                              num_decimal_places)
   )
 
   # display percent if percent type is "column"
