@@ -804,6 +804,7 @@ linkage_quality_report <- function(main_data,
   # The function needs either the table or the data to generate the output so this
   # gets passed to the quarto doc as well.
   #----
+  abbreviations_data_path <- NULL
   abbreviations_generator_function_path <- NULL
   if (!is.null(abbreviations)){
 
