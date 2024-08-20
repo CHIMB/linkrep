@@ -11,8 +11,8 @@ save_linkage_rate_sqlite_file(
   left_dataset_name,
   right_dataset_name,
   overall_linkage_rate,
-  data_time_period,
-  project_id
+  data_time_period = NULL,
+  project_id = NULL
 )
 }
 \arguments{
