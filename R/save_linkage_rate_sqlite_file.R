@@ -50,6 +50,8 @@ save_linkage_rate_sqlite_file <- function(output_dir,
   sqlite_file <- file.path(output_dir, "linkage_rate.sqlite")
   con <- dbConnect(SQLite(), sqlite_file)
 
+  on.exit(dbDisconnect(con))
+
   data <- data.frame(
     report_generation_date = report_generation_date,
     report_generation_year = as.numeric(format(Sys.Date(), "%Y")),
@@ -62,6 +64,5 @@ save_linkage_rate_sqlite_file <- function(output_dir,
   )
 
   dbWriteTable(con, 'linkage_rate', data, overwrite = TRUE)
-  dbDisconnect(con)
 }
 
