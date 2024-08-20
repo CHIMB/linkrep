@@ -22,6 +22,8 @@
 #'  as either mean \eqn{\pm} standard deviation or median (Q1, Q3), where Q1 is
 #'  the 25\eqn{^{th}} percentile, and Q3 is the 75\eqn{^{th}} percentile. Default
 #'  is \code{FALSE}.
+#' @param percent_type String specifying the desired percent type. Allowed values
+#'  are "\code{row}" or "\code{column}".
 #' @param font_size A number specifying the font size for the table text.
 #'  Default is \code{12}.
 #' @param font_style A string specifying the font style. Must be present in
@@ -68,6 +70,7 @@ linkage_rate_table <- function(main_data,
                                missing_data_indicators = NULL,
                                display_total_column = TRUE,
                                display_mean_not_median_stats = FALSE,
+                               percent_type = "row",
                                font_size = 12,
                                font_style = "Times New Roman",
                                footnotes = NULL,
@@ -105,6 +108,10 @@ linkage_rate_table <- function(main_data,
 
   validate_boolean(display_total_column, "display_total_column")
   validate_boolean(display_mean_not_median_stats, "display_mean_not_median_stats")
+  validate_string(percent_type, "percent_type")
+  if (percent_type != "row" & percent_type != "column"){
+    stop("Invalid argument: percent_type. Options: 'row' or 'column'")
+  }
   validate_boolean(output_to_csv, "output_to_csv")
 
   if (!is.null(output_dir)){
@@ -246,7 +253,7 @@ linkage_rate_table <- function(main_data,
       all_categorical() ~ c(0, num_decimal_places),
       all_continuous() ~ num_decimal_places
     ),
-    percent = "row",
+    percent = percent_type,
     missing = "no"
   )
 
@@ -257,13 +264,14 @@ linkage_rate_table <- function(main_data,
                                        num_decimal_places)
   )
 
+  # display percent if percent type is "column"
+  total_col_stat <- ifelse(percent_type == "row", "{n}", categorical_stat)
   if (display_total_column) {
     table <- add_overall(
       table,
       last = TRUE,
-      col_label = "**Total**\n(N = {style_number(n)})", #changed <br> to \n
-      statistic = list(all_categorical() ~ "{N}",
-                       all_continuous() ~ continuous_stat),
+      col_label = "**Total**\n(N = {style_number(n)})",
+      statistic = list(all_categorical() ~ total_col_stat),
     )
   }
 

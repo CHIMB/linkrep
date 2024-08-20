@@ -12,6 +12,7 @@ linkage_rate_table(
   missing_data_indicators = NULL,
   display_total_column = TRUE,
   display_mean_not_median_stats = FALSE,
+  percent_type = "row",
   font_size = 12,
   font_style = "Times New Roman",
   footnotes = NULL,
@@ -50,6 +51,9 @@ to display the statistics for continuous variables in the table
 as either mean \eqn{\pm} standard deviation or median (Q1, Q3), where Q1 is
 the 25\eqn{^{th}} percentile, and Q3 is the 75\eqn{^{th}} percentile. Default
 is \code{FALSE}.}
+
+\item{percent_type}{String specifying the desired percent type. Allowed values
+are "\code{row}" or "\code{column}".}
 
 \item{font_size}{A number specifying the font size for the table text.
 Default is \code{12}.}

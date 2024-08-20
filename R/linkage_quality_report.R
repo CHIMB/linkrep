@@ -25,6 +25,8 @@
 #'  to display the statistics for continuous variables in the linkage rate table
 #'  as either mean \eqn{\pm} standard deviation or median (Q1, Q3), where Q1 is
 #'  the 25\eqn{^{th}} percentile, and Q3 is the 75\eqn{^{th}} percentile. Default is \code{FALSE}.
+#' @param linkage_rate_tbl_percent_type String specifying the desired percent type
+#'  in the linkage rate table. Allowed values are "\code{row}" or "\code{column}".
 #' @param linkage_rate_tbl_output_to_csv A logical indicating whether to save the
 #'  linkage rate table in a csv file. Default is \code{FALSE}.
 #' @param missing_data_indicators A data frame, a file path to an rds file that
@@ -176,6 +178,7 @@ linkage_quality_report <- function(main_data,
                                    linkage_rate_tbl_footnotes = NULL,
                                    linkage_rate_tbl_display_total_column = TRUE,
                                    linkage_rate_tbl_display_mean_not_median_stats = FALSE,
+                                   linkage_rate_tbl_percent_type = "row",
                                    linkage_rate_tbl_output_to_csv = FALSE,
                                    missing_data_indicators = NULL,
                                    missingness_tbl_footnotes = NULL,
@@ -247,6 +250,10 @@ linkage_quality_report <- function(main_data,
   }
   validate_boolean(linkage_rate_tbl_display_total_column, "linkage_rate_tbl_display_total_column")
   validate_boolean(linkage_rate_tbl_display_mean_not_median_stats, "linkage_rate_tbl_display_mean_not_median_stats")
+  validate_string(linkage_rate_tbl_percent_type, "linkage_rate_tbl_percent_type")
+  if (linkage_rate_tbl_percent_type != "row" & linkage_rate_tbl_percent_type != "column"){
+    stop("Invalid argument: linkage_rate_tbl_percent_type. Options: 'row' or 'column'")
+  }
   validate_boolean(linkage_rate_tbl_output_to_csv, "linkage_rate_tbl_output_to_csv")
 
   if (!is.null(missingness_tbl_footnotes)){
@@ -844,6 +851,7 @@ linkage_quality_report <- function(main_data,
     missing_data_indicators = missing_data_indicators,
     display_total_column = linkage_rate_tbl_display_total_column,
     display_mean_not_median_stats = linkage_rate_tbl_display_mean_not_median_stats,
+    percent_type = linkage_rate_tbl_percent_type,
     font_size = table_font_size,
     font_style = font_style,
     footnotes = linkage_rate_tbl_footnotes,

@@ -16,6 +16,7 @@ linkage_quality_report(
   linkage_rate_tbl_footnotes = NULL,
   linkage_rate_tbl_display_total_column = TRUE,
   linkage_rate_tbl_display_mean_not_median_stats = FALSE,
+  linkage_rate_tbl_percent_type = "row",
   linkage_rate_tbl_output_to_csv = FALSE,
   missing_data_indicators = NULL,
   missingness_tbl_footnotes = NULL,
@@ -87,6 +88,9 @@ display a total (overall) column in the table. Default is \code{TRUE}.}
 to display the statistics for continuous variables in the linkage rate table
 as either mean \eqn{\pm} standard deviation or median (Q1, Q3), where Q1 is
 the 25\eqn{^{th}} percentile, and Q3 is the 75\eqn{^{th}} percentile. Default is \code{FALSE}.}
+
+\item{linkage_rate_tbl_percent_type}{String specifying the desired percent type
+in the linkage rate table. Allowed values are "\code{row}" or "\code{column}".}
 
 \item{linkage_rate_tbl_output_to_csv}{A logical indicating whether to save the
 linkage rate table in a csv file. Default is \code{FALSE}.}
