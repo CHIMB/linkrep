@@ -53,9 +53,9 @@ save_linkage_rate_sqlite_file <- function(output_dir,
   data <- data.frame(
     report_generation_date = report_generation_date,
     report_generation_year = as.numeric(format(Sys.Date(), "%Y")),
-    data_linker = params$data_linker,
-    left_dataset_name = params$left_dataset_name,
-    right_dataset_name = params$right_dataset_name,
+    data_linker = data_linker,
+    left_dataset_name = left_dataset_name,
+    right_dataset_name = right_dataset_name,
     overall_linkage_rate = overall_linkage_rate,
     acquisition_dates_left_dataset = data_time_period,
     project_id = project_id
