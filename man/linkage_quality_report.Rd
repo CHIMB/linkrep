@@ -221,13 +221,13 @@ If the location of the citation must change in the text you must modify its
 location in the quarto report template.}
 }
 \value{
-Saves either a word or pdf record linkage quality report in the \code{output_dir}.\cr
+Saves either a word or pdf record linkage quality report to the \code{output_dir}.\cr
 
  If \code{save_linkage_rate = TRUE}, an SQLite file (linkage_rate.sqlite) containing
- the linkage rate and other important information will be saved in the same location.\cr
+ the linkage rate and other important information will be saved in \code{output_dir}.\cr
 
  If \code{linkage_rate_tbl_output_to_csv = TRUE}, a csv file (linkage_rate_table.csv)
- containing the linkage rate table will be saved in the same location.
+ containing the linkage rate table will be saved in \code{output_dir}.
 }
 \description{
 The \code{linkage_quality_report} function takes in data from a linkage and
