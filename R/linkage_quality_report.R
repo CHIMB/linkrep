@@ -152,13 +152,13 @@
 #'  - The acquisition dates of the left dataset\cr
 #'  - The project ID\cr
 #'
-#' @return Saves either a word or pdf record linkage quality report in the \code{output_dir}.\cr
+#' @return Saves either a word or pdf record linkage quality report to the \code{output_dir}.\cr
 #'
 #'  If \code{save_linkage_rate = TRUE}, an SQLite file (linkage_rate.sqlite) containing
-#'  the linkage rate and other important information will be saved in the same location.\cr
+#'  the linkage rate and other important information will be saved in \code{output_dir}.\cr
 #'
 #'  If \code{linkage_rate_tbl_output_to_csv = TRUE}, a csv file (linkage_rate_table.csv)
-#'  containing the linkage rate table will be saved in the same location.
+#'  containing the linkage rate table will be saved in \code{output_dir}.
 #'
 #' @export
 #'
