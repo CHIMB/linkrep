@@ -15,7 +15,7 @@ format:
       toc: true
       number-sections: true
       fig-align: left
-editor: visual
+editor: source
 
 bibliography: {references}
 csl: {citation_style}
@@ -62,8 +62,6 @@ header-includes:
 ---
 
 ```{r load packages, include=FALSE, message=FALSE}
-library(linkrep)
-library(data.table)
 library(flextable)
 library(xfun)
 ```
@@ -120,7 +118,6 @@ if (!is.null(params$performance_measures_plot_path)){
 }
 ```
 
-
 ```{r set_page_width function}
 #----
 # set_page_width
@@ -163,7 +160,6 @@ requires_landscape_page <- function(table){
 }
 ```
 
-
 ::: {.content-visible when-format="pdf"}
 ```{=tex}
 \begin{titlepage}
@@ -187,8 +183,10 @@ requires_landscape_page <- function(table){
     \end{flushright}
 \end{titlepage}
 ```
+```{=tex}
 \hypersetup{linkcolor=black}
 \thispagestyle{nopagenumbers}
+```
 :::
 
 ::: {.content-visible when-format="pdf"}
@@ -198,17 +196,16 @@ requires_landscape_page <- function(table){
 :::
 
 ::: {.content-visible when-format="docx"}
-{{< pagebreak >}} 
+{{< pagebreak >}}
+
 # Acknowledgements {.unnumbered}
 :::
 
 This report was generated using software developed by Elizabeth Stoughton at the George & Fay Yee Centre for Healthcare Innovation (CHI), in partnership with the Manitoba Centre for Health Policy (MCHP), and the Provincial Information Management and Analytics (PIMA) department at Manitoba Health (MH). Graphics were designed by Karan Singh and Patrick Faucher of CHI Knowledge Translation. Barret Monchka conceptualized and led the design and development of the report-generating software.
 
-
 The linkrep R package (<https://github.com/CHIMB/linkrep>), which produced this report, is available for use under an MIT license, provided this acknowledgement remains intact.
 
-
-© 2024 George & Fay Yee Centre for Healthcare Innovation 
+© 2024 George & Fay Yee Centre for Healthcare Innovation
 
 ::: {.content-visible when-format="pdf"}
 ```{=tex}
@@ -221,7 +218,6 @@ The linkrep R package (<https://github.com/CHIMB/linkrep>), which produced this 
 :::
 
 If you would like to discuss the results of this report and the potential impact of linkage error on your research study, or require guidance on adjusting for linkage error in your data analysis, please request a consultation with CHI by visiting <https://umanitoba.ca/centre-for-healthcare-innovation/> and selecting "Request a free consultation."
-
 
 For additional questions regarding this linkage, please e-mail [data.linkage\@umanitoba.ca](data.linkage@umanitoba.ca).
 
@@ -239,12 +235,10 @@ For additional questions regarding this linkage, please e-mail [data.linkage\@um
 {{< pagebreak >}}
 
 ::: {.content-visible when-format="pdf"}
-
 ```{=tex}
 \section*{List of Abbreviations}
 \addcontentsline{toc}{section}{List of Abbreviations}
 ```
-
 
 ```{r abbreviations pdf output, results='asis'}
 if (!is.null(abbreviations_data) & !is.null(abbreviations_function) & params$output_format == "pdf"){
@@ -256,7 +250,6 @@ if (!is.null(abbreviations_data) & !is.null(abbreviations_function) & params$out
 :::
 
 ::: {.content-visible when-format="docx"}
-
 # List of Abbreviations {.unnumbered}
 
 \addcontentsline{toc}{section}{List of Abbreviations}
@@ -269,6 +262,7 @@ if (!is.null(abbreviations_data) & !is.null(abbreviations_function) & params$out
 }
 ```
 :::
+
 :::
 
 {{< pagebreak >}}
@@ -347,7 +341,6 @@ if (requires_landscape_page(linkage_rate_table)){
 }
 ```
 
-
 `r if(!is.null(linkage_rates_over_time_plot)) "::: {.content-visible}" else "::: {.content-hidden}"`
 
 ```{r linkage rates over time plot}
@@ -357,8 +350,8 @@ if (!is.null(linkage_rates_over_time_plot)){
   linkage_rates_over_time_plot
 }
 ```
-:::
 
+:::
 
 {{< pagebreak >}}
 
@@ -390,6 +383,7 @@ if (!is.null(algorithm_summary_table)){
   }
 }
 ```
+
 :::
 
 ```{r performance measures page orientation before, results='asis'}
@@ -423,12 +417,6 @@ if (!is.null(performance_measures_table)){
 
 :::
 
-```{r}
-# if (!is.null(params$performance_measures_plot_path))  {
-#   unlink(params$performance_measures_plot_path)
-# }
-```
-
 ```{r performance measures page orientation after, results='asis'}
 if (!is.null(performance_measures_table)){
   if (requires_landscape_page(performance_measures_table)){
@@ -436,12 +424,10 @@ if (!is.null(performance_measures_table)){
   }
 }
 ```
+
 :::
 
-`r if (is.null(algorithm_summary_table) & is.null(performance_measures_table) &!is.null(missingness_table)) "::: {.content-visible}" else "::: {.content-hidden}"`
-{{< pagebreak >}}
-:::
-
+`r if (is.null(algorithm_summary_table) & is.null(performance_measures_table) &!is.null(missingness_table)) "::: {.content-visible}" else "::: {.content-hidden}"` {{< pagebreak >}} :::
 
 `r if (!is.null(missingness_table)) "::: {.content-visible}" else "::: {.content-hidden}"`
 
@@ -471,6 +457,7 @@ if (!is.null(missingness_table)){
   }
 }
 ```
+
 :::
 
 {{< pagebreak >}}
