@@ -427,7 +427,11 @@ if (!is.null(performance_measures_table)){
 
 :::
 
-`r if (is.null(algorithm_summary_table) & is.null(performance_measures_table) &!is.null(missingness_table)) "::: {.content-visible}" else "::: {.content-hidden}"` {{< pagebreak >}} :::
+`r if (is.null(algorithm_summary_table) & is.null(performance_measures_table) &!is.null(missingness_table)) "::: {.content-visible}" else "::: {.content-hidden}"` 
+
+{{< pagebreak >}} 
+
+:::
 
 `r if (!is.null(missingness_table)) "::: {.content-visible}" else "::: {.content-hidden}"`
 
