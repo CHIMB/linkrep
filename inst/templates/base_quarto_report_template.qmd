@@ -24,8 +24,9 @@ execute:
   echo: false
   
 params: 
+  definitions_data_path: null
   abbreviations_data_path: null
-  abbreviations_generator_function_path: null
+  listed_elements_generator_function_path: null
   linkage_rate_table_path: null
   linkage_rates_plot_path: null
   algorithm_summary_table_path: null
@@ -41,7 +42,6 @@ params:
   num_records_left_dataset: null
   num_records_right_dataset: null
   ground_truth: null
-  classification_metrics_used: null
   data_time_period: null
   num_records_linked: null
   overall_linkage_rate: null
@@ -95,13 +95,23 @@ read_data <- function(data_path, parameter){
 
 ```{r read in report elements}
 # if one of these is NULL it means it wasn't supplied to the function so don't output it
+
+listed_output_function <- read_data(params$listed_elements_generator_function_path, "listed_elements_generator_function_path")
+
+definitions_data <- read_data(params$definitions_data_path, "definitions_data_path")
+
 abbreviations_data <- read_data(params$abbreviations_data_path, "abbreviations_data_path")
-abbreviations_function <- read_data(params$abbreviations_generator_function_path, "abbreviations_generator_function_path")
+
 linkage_rate_table <- read_data(params$linkage_rate_table_path, "linkage_rate_table_path")
+
 linkage_rates_over_time_plot <- read_data(params$linkage_rates_plot_path, "linkage_rates_plot_path")
+
 algorithm_summary_table <- read_data(params$algorithm_summary_table_path, "algorithm_summary_tabl_path")
+
 performance_measures_table <- read_data(params$performance_measures_table_path, "performance_measures_table_path")
+
 missingness_table <- read_data(params$missingness_table_path, "missingness_table_path")
+
 if (!is.null(params$performance_measures_plot_path)){
   if (!file.exists(params$performance_measures_plot_path)){
     stop("Invalid argument: performance_measures_plot-path. Could not find file")
@@ -230,7 +240,43 @@ For additional questions regarding this linkage, please e-mail [data.linkage\@um
 ```
 :::
 
-`r if(!is.null(abbreviations_data) & !is.null(abbreviations_function)) "::: {.content-visible}" else "::: {.content-hidden}"`
+`r if(!is.null(definitions_data) & !is.null(listed_output_function)) "::: {.content-visible}" else "::: {.content-hidden}"`
+
+{{< pagebreak >}}
+
+::: {.content-visible when-format="pdf"}
+```{=tex}
+\section*{Definition of Terms}
+\addcontentsline{toc}{section}{List of Definition of Terms}
+```
+
+```{r definitions pdf output, results='asis'}
+if (!is.null(definitions_data) & !is.null(listed_output_function) & params$output_format == "pdf"){
+  listed_output_function(
+    data = definitions_data, 
+    output_format = params$output_format)
+}
+```
+:::
+
+::: {.content-visible when-format="docx"}
+# Definition of Terms {.unnumbered}
+
+\addcontentsline{toc}{section}{Definition of Terms}
+
+```{r definitions word output, ft.align="left"}
+if (!is.null(definitions_data) & !is.null(listed_output_function) & params$output_format == "docx"){
+  listed_output_function(
+    data = definitions_data, 
+    output_format = params$output_format)
+}
+```
+:::
+
+:::
+
+
+`r if(!is.null(abbreviations_data) & !is.null(listed_output_function)) "::: {.content-visible}" else "::: {.content-hidden}"`
 
 {{< pagebreak >}}
 
@@ -241,8 +287,8 @@ For additional questions regarding this linkage, please e-mail [data.linkage\@um
 ```
 
 ```{r abbreviations pdf output, results='asis'}
-if (!is.null(abbreviations_data) & !is.null(abbreviations_function) & params$output_format == "pdf"){
-  abbreviations_function(
+if (!is.null(abbreviations_data) & !is.null(listed_output_function) & params$output_format == "pdf"){
+  listed_output_function(
     data = abbreviations_data, 
     output_format = params$output_format)
 }
@@ -255,8 +301,8 @@ if (!is.null(abbreviations_data) & !is.null(abbreviations_function) & params$out
 \addcontentsline{toc}{section}{List of Abbreviations}
 
 ```{r abbreviations word output, ft.align="left"}
-if (!is.null(abbreviations_data) & !is.null(abbreviations_function) & params$output_format == "docx"){
-  abbreviations_function(
+if (!is.null(abbreviations_data) & !is.null(listed_output_function) & params$output_format == "docx"){
+  listed_output_function(
     data = abbreviations_data, 
     output_format = params$output_format)
 }
