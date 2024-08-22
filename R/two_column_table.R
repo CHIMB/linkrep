@@ -1,9 +1,8 @@
-#' Generate Abbreviation Table
+#' Generate a Two Column Table
 #'
-#' Generates a formatted flextable specific to the abbreviation table.
+#' Generates a formatted flextable.
 #'
-#' @param data A data frame. Data must contain two columns:
-#'  the list of abbreviations in the first and their definitions in the second.
+#' @param data A data frame. Data must contain two columns.
 #' @param output_format String specifying the desired output format. Allowed values
 #'  are "\code{pdf}" or "\code{docx}".
 #' @param font_size A number specifying the font size for the table text.
@@ -16,15 +15,14 @@
 #'  "\code{docx}".
 #'
 #' @return A \code{flextable} object.
-#' @export
 #'
 #' @importFrom flextable border_remove delete_part
 #'
-abbreviation_table <- function(data,
-                               output_format,
-                               font_size = 12,
-                               font_style = "Times New Roman",
-                               display_headers = TRUE){
+two_column_table <- function(data,
+                             output_format,
+                             font_size = 12,
+                             font_style = "Times New Roman",
+                             display_headers = TRUE){
   HEADER_ALIGNMENT <- "left"
   BODY_ALIGNMENT <- "left"
 
@@ -37,6 +35,9 @@ abbreviation_table <- function(data,
                                font_style,
                                header_align = HEADER_ALIGNMENT,
                                body_align = BODY_ALIGNMENT)
+  if (ncol(data) != 2){
+    stop("Invalid argument: data. data must have two columns")
+  }
 
   validate_boolean(display_headers, "display_headers")
 
