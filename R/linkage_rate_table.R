@@ -281,6 +281,8 @@ linkage_rate_table <- function(main_data,
   # we could easily locate the "Missing" variable and make it a 'level' of its
   # main variable. This way, "Missing" will show up as a subgroup of that variable
   # in the table and won't be bold alongside the main variables.
+  # If the 'gtsummary' package gets updated and the structure of the table changes, the
+  # following lines of code will most likely need to be modified.
   #----
 
   # make the missing values associated with another variable a sub level of that variable
