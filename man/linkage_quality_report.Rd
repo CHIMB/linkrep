@@ -30,9 +30,10 @@ linkage_quality_report(
   algorithm_summary_tbl_footnotes = NULL,
   performance_measures_data = NULL,
   performance_measures_tbl_footnotes = NULL,
-  classification_metrics_used = NULL,
   ground_truth = NULL,
   ground_truth_missing_var = NULL,
+  definitions = NULL,
+  definitions_display_header = TRUE,
   abbreviations = NULL,
   abbreviations_display_header = TRUE,
   thousands_separator = ",",
@@ -136,10 +137,6 @@ in percentages with values between 0 and 100 when using the default quarto templ
 \item{performance_measures_tbl_footnotes}{A character vector of additional footnotes for
 the performance measures table. Each element in the vector will be displayed on a new line.}
 
-\item{classification_metrics_used}{A character vector of the names of the classification
-metrics used to evaluate the linkage algorithm. Will be used in the Summary
-and Methods sections of the report.}
-
 \item{ground_truth}{String indicating the ground truth used to produce the
 performance meassures.}
 
@@ -147,9 +144,13 @@ performance meassures.}
 the missingness of the ground truth variable. Must be present in either \code{main_data}
 or \code{missing_data_indicators}.}
 
+\item{definitions}{A data frame, a file path to an rds file that
+contains a data frame or a file path to a csv file. Data must contain two columns:
+the list of terms in the first and their definitions in the second.}
+
 \item{abbreviations}{A data frame, a file path to an rds file that
 contains a data frame or a file path to a csv file. Data must contain two columns:
-the list of abbreviations in the first and their definitions in the second.}
+the list of abbreviations in the first and their meaning in the second.}
 
 \item{abbreviations_display_header}{A logical indicating whether to display the
 column headers in the abbreviation table. Only applied when \code{output_format = "docx"}.}

@@ -58,17 +58,17 @@
 #'  in percentages with values between 0 and 100 when using the default quarto template.
 #' @param performance_measures_tbl_footnotes A character vector of additional footnotes for
 #' the performance measures table. Each element in the vector will be displayed on a new line.
-#' @param classification_metrics_used A character vector of the names of the classification
-#'  metrics used to evaluate the linkage algorithm. Will be used in the Summary
-#'  and Methods sections of the report.
 #' @param ground_truth String indicating the ground truth used to produce the
 #'  performance meassures.
 #' @param ground_truth_missing_var A string of the name of the variable indicating
 #'  the missingness of the ground truth variable. Must be present in either \code{main_data}
 #'  or \code{missing_data_indicators}.
+#' @param definitions A data frame, a file path to an rds file that
+#'  contains a data frame or a file path to a csv file. Data must contain two columns:
+#'  the list of terms in the first and their definitions in the second.
 #' @param abbreviations A data frame, a file path to an rds file that
 #'  contains a data frame or a file path to a csv file. Data must contain two columns:
-#'  the list of abbreviations in the first and their definitions in the second.
+#'  the list of abbreviations in the first and their meaning in the second.
 #' @param abbreviations_display_header A logical indicating whether to display the
 #'  column headers in the abbreviation table. Only applied when \code{output_format = "docx"}.
 #' @param thousands_separator A string specifying the style of the
@@ -192,9 +192,10 @@ linkage_quality_report <- function(main_data,
                                    algorithm_summary_tbl_footnotes = NULL,
                                    performance_measures_data = NULL,
                                    performance_measures_tbl_footnotes = NULL,
-                                   classification_metrics_used = NULL,
                                    ground_truth = NULL,
                                    ground_truth_missing_var = NULL,
+                                   definitions = NULL,
+                                   definitions_display_header = TRUE,
                                    abbreviations = NULL,
                                    abbreviations_display_header = TRUE,
                                    thousands_separator = ",",
@@ -292,9 +293,6 @@ linkage_quality_report <- function(main_data,
   if (!is.null(performance_measures_tbl_footnotes)){
     validate_string_vector(performance_measures_tbl_footnotes, "performance_measures_tbl_footnotes")
   }
-  if (!is.null(classification_metrics_used)){
-    validate_string_vector(classification_metrics_used, "classification_metrics_used")
-  }
 
   if (!is.null(ground_truth)){
     validate_string(ground_truth, "ground_truth")
@@ -302,6 +300,10 @@ linkage_quality_report <- function(main_data,
   if (!is.null(ground_truth_missing_var)){
     validate_string(ground_truth_missing_var, "ground_truth_missing_var")
   }
+
+  validate_boolean(abbreviations_display_header, "abbreviations_display_header")
+  validate_boolean(definitions_display_header, "definitions_display_header")
+  validate_boolean(blank_background, "blank_background")
 
   validate_common_parameters(output_format = output_format,
                       thousands_separator = thousands_separator,
@@ -392,7 +394,7 @@ linkage_quality_report <- function(main_data,
     check_page_files(acknowledgements_page, "acknowledgements_page")
   }
 
-  # check template files
+  # # check template files
   if (is.null(quarto_report_template)){
     if (!file.exists(system.file("templates", "base_quarto_report_template.qmd", package = "linkrep"))){
       stop("Default quarto report not found. Check installation or if removed, ensure one is passed to the function.")
@@ -542,7 +544,6 @@ linkage_quality_report <- function(main_data,
     warning("Footnotes were provided for the missingness table with no 'missing_data_indicators'. Table will not be created.")
   }
   if (!is.null(missing_data_indicators)){
-    # missing_data_indicators <- read_data(missing_data_indicators_path, "missing_data_indicators")
     missing_data_indicators <- read_data(missing_data_indicators, "missing_data_indicators")
     if (nrow(main_data) != nrow(missing_data_indicators)){
       stop("'main_data' and 'missing_data_indicators' should contain the same number of records")
@@ -550,8 +551,14 @@ linkage_quality_report <- function(main_data,
     validate_df_binary(missing_data_indicators, "missing_data_indicators")
   }
 
+  if (!is.null(definitions)){
+    definitions_data <- read_data(definitions, "definitions")
+    if (ncol(definitions_data) != 2){
+      stop("Invalid argument: abbreviations_data. abbreviations_data must have two columns, one for the abbreviations and one for their definitions")
+    }
+  }
+
   if (!is.null(abbreviations)){
-    # abbreviations_data <- read_data(abbreviations_data_path, "abbreviations")
     abbreviations_data <- read_data(abbreviations, "abbreviations")
     if (ncol(abbreviations_data) != 2){
       stop("Invalid argument: abbreviations_data. abbreviations_data must have two columns, one for the abbreviations and one for their definitions")
@@ -562,7 +569,6 @@ linkage_quality_report <- function(main_data,
     warning("Footnotes were provided for the algorithm summary table with no 'algorithm_summary_data'. Table will not be created.")
   }
   if (!is.null(algorithm_summary_data)){
-    # algorithm_summary_data <- read_data(algorithm_summary_data_path, "algorithm_summary_data")
     algorithm_summary_data <- read_data(algorithm_summary_data, "algorithm_summary_data")
     }
 
@@ -571,7 +577,6 @@ linkage_quality_report <- function(main_data,
   }
   ground_truth_missing <- NULL
   if (!is.null(performance_measures_data)){
-    # performance_measures_data <- read_data(performance_measures_data_path, "performance_measures_data")
     performance_measures_data <- read_data(performance_measures_data, "performance_measures_data")
     if (is.null(ground_truth_missing_var)){
       stop("Must provide ground_truth and ground_truth_missing_var with 'performance_measures_data'")
@@ -744,9 +749,10 @@ linkage_quality_report <- function(main_data,
     # new_set_background_images_template <- tempfile(tmpdir = temp_data_output_dir, fileext = ".tex")
     new_set_background_images_template <- file.path(temp_data_output_dir, "updated_set_background_images.tex")
     writeLines(set_bg_images_lines, new_set_background_images_template)
+    rm(set_bg_images_lines)
   }
 
-  #----
+  # ----
   # substitute values into placeholders
   #
   # All options in the YAML header cannot have parameters passed to them (ex. mainfont)
@@ -755,7 +761,7 @@ linkage_quality_report <- function(main_data,
   # references file we first read the lines of the quarto document, then gsub the
   # values into their corresponding placeholders and finally, write the new lines
   # back to a new file that's then used in quarto_render()
-  #----
+  # ----
   quarto_report <- readLines(quarto_report_template)
   text_font_size <- paste0(text_font_size, "pt")
 
@@ -777,6 +783,7 @@ linkage_quality_report <- function(main_data,
 
   updated_quarto_report <- tempfile(tmpdir = temp_data_output_dir, fileext = ".qmd")
   writeLines(quarto_report, updated_quarto_report)
+  rm(quarto_report)
 
 
   # generate report elements
@@ -795,23 +802,72 @@ linkage_quality_report <- function(main_data,
   }
 
   #----
-  # abbreviations
-  #
-  # the abbreviations get output with LaTeX in PDF output because when using
-  # a table, the table numbers get messed up in the report output.
-  # So for word output we have a flextable and for pdf output we have LaTeX.
-  # This is why the code below creates a function that gets passed to the quarto doc.
-  # The function needs either the table or the data to generate the output so this
-  # gets passed to the quarto doc as well.
+  # The definitions and abbreviations get output with LaTeX when output_format = "pdf".
+  # If we used a table, the table numbers tend to output incorrectly in the report
+  # even without assigning these tables a label. Therefore, the solution was
+  # to generate the list of items using LaTeX, solving this issue.
+  # A flextable is output when output_format = "docx" because in Word, the
+  # above issue does not arise.
+  # To make this possible, a function needed to be passed to the Quarto file to generate
+  # the correct output based on the output_format.
+  # The function needs to be supplied the flextable for docx output and the raw data
+  # for pdf output therefore, the data (table or raw) also needed to be passed to the
+  # Quarto file in order for it to be available to the function.
+  # Hence, two data paths get created for both 'definitions' and 'abbreviations':
+  # one for the function and one for the data.
   #----
-  abbreviations_data_path <- NULL
-  abbreviations_generator_function_path <- NULL
-  if (!is.null(abbreviations)){
 
-    # if output is docx the data path holds the flextable result from abbreviation_table()
-    # if output is pdf the data path holds the abbreviations data
+  #----
+  # generate_element_based_on_output_format
+  #
+  # If output_format = "docx" a flextable is output.
+  # If output_format = "pdf", LaTeX commands are output to generate a list of items and descriptions.
+  #----
+  generate_element_based_on_output_format <- function(data, output_format){
     if (output_format == "docx"){
-      abbrev_table <- abbreviation_table(
+      if (!("flextable" %in% class(data))){
+        stop("Invalid input: data. data must be a flextable when output_format = 'docx'")
+      }
+      data
+    } else {
+      if (!is.data.frame(data)){
+        stop("Invalid input: data. data must be data frame when output_format = 'pdf'")
+      }
+      cat("\\begin{description}")
+      for (i in 1:nrow(data)){
+        cat("\\item[", data[[1]][i], "]")
+        cat(data[[2]][i])
+      }
+      cat("\\end{description}")
+    }
+  }
+
+  listed_elements_generator_function_path <- NULL
+  if (!is.null(definitions) | !is.null(abbreviations)){
+    listed_elements_generator_function_path <- generate_element_paths(generate_element_based_on_output_format)
+  }
+
+  # definitions
+  definitions_data_path <- NULL
+  if (!is.null(definitions)){
+    if (output_format == "docx"){
+      definitions_table <- two_column_table(
+        data = abbreviations_data,
+        output_format = output_format,
+        font_size = table_font_size,
+        font_style = font_style,
+        display_headers = definitions_display_header)
+      definitions_data_path <- generate_element_paths(definitions_table)
+    } else {
+      definitions_data_path <- generate_element_paths(definitions_data)
+    }
+  }
+
+  # abbreviations
+  abbreviations_data_path <- NULL
+  if (!is.null(abbreviations)){
+    if (output_format == "docx"){
+      abbrev_table <- two_column_table(
         data = abbreviations_data,
         output_format = output_format,
         font_size = table_font_size,
@@ -821,26 +877,6 @@ linkage_quality_report <- function(main_data,
     } else {
       abbreviations_data_path <- generate_element_paths(abbreviations_data)
     }
-
-    generate_abbreviations_output <- function(data, output_format){
-      if (output_format == "docx"){
-        if (!("flextable" %in% class(data))){
-          stop("Invalid input: data. data must be a flextable when output_format = 'docx'")
-        }
-        data
-      } else {
-        if (!is.data.frame(data)){
-          stop("invalid input: data. data must be data frame when output_format = 'pdf'")
-        }
-        cat("\\begin{description}")
-        for (i in 1:nrow(data)){
-          cat("\\item[", data[[1]][i], "]")
-          cat(data[[2]][i])
-        }
-        cat("\\end{description}")
-      }
-    }
-    abbreviations_generator_function_path <- generate_element_paths(generate_abbreviations_output)
   }
 
   # linkage rate table
@@ -959,35 +995,35 @@ linkage_quality_report <- function(main_data,
   }
 
   quarto_render(
-      input = updated_quarto_report,
-      output_format = output_format,
-      execute_params = list(
-        abbreviations_data_path = abbreviations_data_path,
-        abbreviations_generator_function_path = abbreviations_generator_function_path,
-        linkage_rate_table_path = linkage_rate_table_path,
-        linkage_rates_plot_path = linkage_rates_plot_path,
-        algorithm_summary_table_path = algorithm_summary_table_path,
-        performance_measures_table_path = performance_measures_table_path,
-        performance_measures_plot_path = performance_measures_plot_path,
-        missingness_table_path = missingness_table_path,
-        report_title = report_title,
-        left_dataset_name = left_dataset_name,
-        right_dataset_name = right_dataset_name,
-        data_linker = data_linker,
-        output_format = output_format,
-        project_id = project_id,
-        num_records_left_dataset = num_records_left_dataset,
-        num_records_right_dataset = num_records_right_dataset,
-        ground_truth = ground_truth,
-        classification_metrics_used = classification_metrics_used,
-        data_time_period = data_time_period,
-        num_records_linked = num_records_linked,
-        overall_linkage_rate = overall_linkage_rate,
-        num_non_missing_ground_truth = num_non_missing_ground_truth,
-        percent_non_missing_ground_truth = percent_non_missing_ground_truth,
-        report_generation_date = report_generation_date,
-        display_back_cover_page = display_back_cover_page
-      ))
+  input = updated_quarto_report,
+  output_format = output_format,
+  execute_params = list(
+  definitions_data_path = definitions_data_path,
+  abbreviations_data_path = abbreviations_data_path,
+  listed_elements_generator_function_path = listed_elements_generator_function_path,
+  linkage_rate_table_path = linkage_rate_table_path,
+  linkage_rates_plot_path = linkage_rates_plot_path,
+  algorithm_summary_table_path = algorithm_summary_table_path,
+  performance_measures_table_path = performance_measures_table_path,
+  performance_measures_plot_path = performance_measures_plot_path,
+  missingness_table_path = missingness_table_path,
+  report_title = report_title,
+  left_dataset_name = left_dataset_name,
+  right_dataset_name = right_dataset_name,
+  data_linker = data_linker,
+  output_format = output_format,
+  project_id = project_id,
+  num_records_left_dataset = num_records_left_dataset,
+  num_records_right_dataset = num_records_right_dataset,
+  ground_truth = ground_truth,
+  data_time_period = data_time_period,
+  num_records_linked = num_records_linked,
+  overall_linkage_rate = overall_linkage_rate,
+  num_non_missing_ground_truth = num_non_missing_ground_truth,
+  percent_non_missing_ground_truth = percent_non_missing_ground_truth,
+  report_generation_date = report_generation_date,
+  display_back_cover_page = display_back_cover_page
+  ))
 
   # Format final output:
 
@@ -1003,11 +1039,14 @@ linkage_quality_report <- function(main_data,
   if (!is.null(new_set_background_images_template)){
     unlink(new_set_background_images_template)
   }
+  if (!is.null(definitions_data_path)){
+    unlink(definitions_data_path)
+  }
   if (!is.null(abbreviations_data_path)){
     unlink(abbreviations_data_path)
   }
-  if (!is.null(abbreviations_generator_function_path)){
-    unlink(abbreviations_generator_function_path)
+  if (!is.null(listed_elements_generator_function_path)){
+    unlink(listed_elements_generator_function_path)
   }
   unlink(linkage_rate_table_path)
   if (!is.null(linkage_rates_plot_path)){
