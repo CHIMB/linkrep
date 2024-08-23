@@ -87,15 +87,15 @@
 #'  \code{system_fonts()$name} or \code{system_fonts()$family}. See \code{\link[systemfonts]{system_fonts}}
 #'  for more details.
 #' @param cover_page A file path to a png, pdf or jpg file that contains the
-#'  desired cover page. Default is \code{system.file("background_images", "cover_page.pdf", package = "linkrep")}.
+#'  desired cover page. Default is \url{https://github.com/CHIMB/linkrep/blob/main/inst/background_images/cover_page.pdf}.
 #' @param content_portrait_page A file path to a png, pdf or jpg file that contains the
-#'  desired content portrait page. Default is \code{system.file("background_images", "content_portrait_page.pdf", package = "linkrep")}.
+#'  desired content portrait page. Default is \url{https://github.com/CHIMB/linkrep/blob/main/inst/background_images/content_portrait_page.pdf}.
 #' @param content_landscape_page A file path to a png, pdf or jpg file that contains the
-#'  desired content landscape page. Default is \code{system.file("background_images", "content_landscape_page.pdf", package = "linkrep")}.
+#'  desired content landscape page. Default is \url{https://github.com/CHIMB/linkrep/blob/main/inst/background_images/content_landscape_page.pdf}.
 #' @param display_back_cover_page A logical indicating whether to display the back
 #'  cover page in the output.
 #' @param back_cover_page A file path to a png, pdf or jpg file that contains the
-#'  desired back cover page. Default is \code{system.file("background_images", "back_cover_page.pdf", package = "linkrep")}.
+#'  desired back cover page. Default is \url{https://github.com/CHIMB/linkrep/blob/main/inst/background_images/back_cover_page.pdf}.
 #' @param blank_background A logical indicating whether to display the report on blank
 #'  white background. Default is \code{FALSE}.
 #' @param temp_data_output_dir A path to a directory. All complex data (ex. tables)
@@ -183,6 +183,7 @@ linkage_quality_report <- function(main_data,
                                    missing_data_indicators = NULL,
                                    missingness_tbl_footnotes = NULL,
                                    output_format = "pdf",
+                                   comprehensive_report = FALSE, ##### F or T??
                                    save_linkage_rate = TRUE,
                                    project_id = NULL,
                                    num_records_right_dataset = NULL,
@@ -213,6 +214,7 @@ linkage_quality_report <- function(main_data,
                                    blank_background = FALSE,
                                    temp_data_output_dir = tempdir(check = TRUE),
                                    quarto_report_template = NULL,
+                                   extra_textual_content_quarto_template = NULL,############
                                    references = NULL,
                                    word_template = NULL,
                                    set_background_images_template = NULL,
@@ -394,70 +396,39 @@ linkage_quality_report <- function(main_data,
     check_page_files(acknowledgements_page, "acknowledgements_page")
   }
 
-  # # check template files
-  if (is.null(quarto_report_template)){
-    if (!file.exists(system.file("templates", "base_quarto_report_template.qmd", package = "linkrep"))){
-      stop("Default quarto report not found. Check installation or if removed, ensure one is passed to the function.")
+  #----
+  # check_template_files
+  #
+  # @param file The template file
+  # @param extension The file extension
+  # @param default_name The name of the default file for that template
+  # @param param The name of the parameter being checked
+  #
+  # @return Either an error message or the file path
+  #----
+  check_template_files <- function(file, extension, default_name, param){
+    if (is.null(file)){
+      if (!file.exists(system.file("templates", default_name, package = "linkrep"))){
+        stop(sprintf("Default %s filr not found. Check installation or if removed, ensure one is passed to the functoin.", param))
+      }
+      file <- system.file("templates", default_name, package = "linkrep")
     }
-    quarto_report_template <- system.file("templates", "base_quarto_report_template.qmd", package = "linkrep")
-  }
-  validate_string(quarto_report_template, "quarto_report_template")
-  if (!file.exists(quarto_report_template)){
-    stop("Invalid argument: quarto_report_template. File not found")
-  }
-  if (file_ext(quarto_report_template) != "qmd"){
-    stop("Invalid argument: quarto_report_template. File extension must be .qmd")
+    validate_string(file, param)
+    if (!file.exists(file)){
+      stop(sprintf("Invalid argument: %s. File not found.", param))
+    }
+    if (file_ext(file) != extension){
+      stop(sprintf("Invalid argument: %s. File extension must be .%s", param, extension))
+    }
+    return(file)
   }
 
-  if (is.null(references)){
-    if (!file.exists(system.file("templates", "references.bib", package = "linkrep"))){
-      stop("Default references file not found. Check installation or if removed, ensure one is passed to the function.")
-    }
-    references <- system.file("templates", "references.bib", package = "linkrep")
-  }
-  validate_string(references, "references")
-  if (!file.exists(references)){
-    stop("Invalid argument: references. File not found")
-  }
-  if (file_ext(references) != "bib"){
-    stop("Invalid argument: references. File extension must be .bib")
-  }
-
-  if (is.null(word_template)){
-    if (!file.exists(system.file("templates", "word_template.docx", package = "linkrep"))){
-      stop("Default word template not found. Check installation or if removed, ensure one is passed to the function.")
-    }
-    word_template <- system.file("templates", "word_template.docx", package = "linkrep")
-  }
-  validate_string(word_template, "word_template")
-  if (!file.exists(word_template)){
-    stop("Invalid argument: word_template. File not found")
-  }
-  if (file_ext(word_template) != "docx"){
-    stop("Invalid argument: word_template. File extension must be .docx")
-  }
-
-  if (is.null(set_background_images_template)){
-    if (!file.exists(system.file("templates", "set_background_images.tex", package = "linkrep"))){
-      stop("Default LaTeX background images template file not found. Check installation or if removed, ensure one is passed to the function.")
-    }
-    set_background_images_template <- system.file("templates", "set_background_images.tex", package = "linkrep")
-  }
-  validate_string(set_background_images_template, "set_background_images_template")
-  if (file_ext(set_background_images_template) != "tex"){
-    stop("Invalid argument: set_background_images_template. File extension must be .tex")
-  }
-
-  if (is.null(citation_style)){
-    if (!file.exists(system.file("templates", "american-medical-association.csl", package = "linkrep"))){
-      stop("Default citation style file not found. Check installation or if removed, ensure one is passed to the function.")
-    }
-    citation_style <- system.file("templates", "american-medical-association.csl", package = "linkrep")
-  }
-  validate_string(citation_style, "citation_style")
-  if (file_ext(citation_style) != "csl"){
-    stop("Invalid argument: citation_style. File extension must be .csl")
-  }
+  quarto_report_template <- check_template_files(quarto_report_template, "qmd", "base_quarto_report_template.qmd", "quarto_report_template")
+  extra_textual_content_quarto_template <- check_template_files(extra_textual_content_quarto_template, "qmd", "extra_textual_content.qmd", "extra_textual_content_quarto_template")
+  references <- check_template_files(references, "bib", "references.bib", "references")
+  word_template <- check_template_files(word_template, "docx", "word_template.docx", "word_template")
+  set_background_images_template <- check_template_files(set_background_images_template, "tex", "set_background_images.tex", "set_background_images_template")
+  citation_style <- check_template_files(citation_style, "csl", "american-medical-association.csl", "citation_style")
 
 
   # read in data and perform checks
