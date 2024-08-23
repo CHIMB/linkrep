@@ -21,6 +21,7 @@ linkage_quality_report(
   missing_data_indicators = NULL,
   missingness_tbl_footnotes = NULL,
   output_format = "pdf",
+  comprehensive_report = TRUE,
   save_linkage_rate = TRUE,
   project_id = NULL,
   num_records_right_dataset = NULL,
@@ -51,6 +52,7 @@ linkage_quality_report(
   blank_background = FALSE,
   temp_data_output_dir = tempdir(check = TRUE),
   quarto_report_template = NULL,
+  extra_textual_content_quarto_template = NULL,
   references = NULL,
   word_template = NULL,
   set_background_images_template = NULL,
@@ -107,6 +109,9 @@ the missingness table. Each element in the vector will be displayed on a new lin
 
 \item{output_format}{String specifying the desired output format. Allowed values
 are "\code{pdf}" or "\code{docx}".}
+
+\item{comprehensive_report}{A logical indicating whether to output a comprehensive
+report. A comprehensive report includes the Background and Methods sections.}
 
 \item{save_linkage_rate}{A logical indicating whether to save information on
 the linkage in an SQLite file. See Details section for details on what is
@@ -202,19 +207,23 @@ in this directory. Default is \code{tempdir(check = TRUE)}}
 
 \item{quarto_report_template}{A file path to a quarto (qmd) file that renders
 the report. Use this parameter to apply additional customization to the report
-output. Default is \code{system.file("templates", "base_quarto_report_template.qmd", package = "linkrep")}.}
+output. Default is \url{https://github.com/CHIMB/linkrep/blob/main/inst/templates/base_quarto_report_template.qmd}.}
+
+\item{extra_textual_content_quarto_template}{A file path to a quarto (qmd) file
+that contains the Background and Methods sections of the report.Default is
+\code{system.file("templates", "base_quarto_report_template.qmd", package = "linkrep")}.}
 
 \item{references}{A file path to a BibTex (bib) file that contains the references
 used in the report. For references to be displayed in the References section of
 the report, they must be cited in the quarto document. Default is
-\code{system.file("templates", "references.bib", package = "linkrep")}.}
+\url{https://github.com/CHIMB/linkrep/blob/main/inst/templates/references.bib}.}
 
 \item{word_template}{A file path a to a word document that specifies the output
-styles for a word report. Default is \code{system.file("templates", "word_template.docx", package = "linkrep")}.}
+styles for a word report. Default is \url{https://github.com/CHIMB/linkrep/blob/main/inst/templates/word_template.docx}.}
 
 \item{set_background_images_template}{A file path to a LaTeX file that specifies
 how the background images are placed onto a PDF report. Default is
-\code{system.file("templates", "set_background_images.tex", package = "linkrep")}.}
+\url{https://github.com/CHIMB/linkrep/blob/main/inst/templates/set_background_images.tex}.}
 
 \item{citation_style}{A file path to a csl file containing the citation style.
 To find different styles visit \url{https://github.com/citation-style-language/styles/blob/master/american-medical-association.csl}

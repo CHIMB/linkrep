@@ -102,7 +102,7 @@ Following each linkage step, matched record pairs were removed from contention b
 
 To evaluate the quality of the linkage algorithm, we stratified linkage rates by sociodemographic fields (@tbl-linkage_rates), allowing us to examine the algorithm's performance and consistency across different demographic categories. We examined linkage rate trends over time (@fig-linkage_rate_dist) to provide insights into the algorithm’s performance across acquisition dates and to assess how changes in data capture may have affected linkage rates over time.
 
-`r if(!is.null(params$performance_measures_data_path)) "::: {.content-visible}" else "::: {.content-hidden}"`
+`r if(!is.null(performance_measures_table)) "::: {.content-visible}" else "::: {.content-hidden}"`
 
 The evaluation of the probabilistic portion of the linkage algorithm was performed on the entire subset of records that had non-missing values for the gold standard field, `r params$left_dataset_name`, before executing the linkage algorithm. Classification metrics---\[metrics provided by the classification metrics parameter\] (@tbl-performance_measures_tbl)---were derived using `r params$ground_truth` to classify pairs of records as matches or non-matches.
 

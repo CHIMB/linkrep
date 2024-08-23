@@ -188,7 +188,7 @@ linkage_quality_report <- function(main_data,
                                    missing_data_indicators = NULL,
                                    missingness_tbl_footnotes = NULL,
                                    output_format = "pdf",
-                                   comprehensive_report = FALSE, ##### F or T??
+                                   comprehensive_report = TRUE, ##### F or T??
                                    save_linkage_rate = TRUE,
                                    project_id = NULL,
                                    num_records_right_dataset = NULL,
@@ -750,6 +750,9 @@ linkage_quality_report <- function(main_data,
                           ifelse(output_format == "pdf", new_set_background_images_template, set_background_images_template),
                           quarto_report)
 
+  extra_textual_content_quarto_template <- gsub("\\\\", "/", extra_textual_content_quarto_template)
+  quarto_report <- gsub("\\{extra_textual_content\\}", extra_textual_content_quarto_template, quarto_report)
+
   references <- gsub("\\\\", "/", references)
   quarto_report <- gsub("\\{references\\}", references, quarto_report)
 
@@ -1000,7 +1003,8 @@ linkage_quality_report <- function(main_data,
   num_non_missing_ground_truth = num_non_missing_ground_truth,
   percent_non_missing_ground_truth = percent_non_missing_ground_truth,
   report_generation_date = report_generation_date,
-  display_back_cover_page = display_back_cover_page
+  display_back_cover_page = display_back_cover_page,
+  comprehensive_report = comprehensive_report
   ))
 
   # Format final output:
