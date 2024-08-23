@@ -38,6 +38,8 @@
 #' the missingness table. Each element in the vector will be displayed on a new line.
 #' @param output_format String specifying the desired output format. Allowed values
 #'  are "\code{pdf}" or "\code{docx}".
+#' @param comprehensive_report A logical indicating whether to output a comprehensive
+#'  report. A comprehensive report includes the Background and Methods sections.
 #' @param save_linkage_rate A logical indicating whether to save information on
 #'  the linkage in an SQLite file. See Details section for details on what is
 #'  saved in the file.
@@ -104,16 +106,19 @@
 #'  in this directory. Default is \code{tempdir(check = TRUE)}
 #' @param quarto_report_template A file path to a quarto (qmd) file that renders
 #'  the report. Use this parameter to apply additional customization to the report
-#'  output. Default is \code{system.file("templates", "base_quarto_report_template.qmd", package = "linkrep")}.
+#'  output. Default is \url{https://github.com/CHIMB/linkrep/blob/main/inst/templates/base_quarto_report_template.qmd}.
+#' @param extra_textual_content_quarto_template A file path to a quarto (qmd) file
+#'  that contains the Background and Methods sections of the report.Default is
+#'  \code{system.file("templates", "base_quarto_report_template.qmd", package = "linkrep")}.
 #' @param references A file path to a BibTex (bib) file that contains the references
 #'  used in the report. For references to be displayed in the References section of
 #'  the report, they must be cited in the quarto document. Default is
-#'  \code{system.file("templates", "references.bib", package = "linkrep")}.
+#'  \url{https://github.com/CHIMB/linkrep/blob/main/inst/templates/references.bib}.
 #' @param word_template A file path a to a word document that specifies the output
-#'  styles for a word report. Default is \code{system.file("templates", "word_template.docx", package = "linkrep")}.
+#'  styles for a word report. Default is \url{https://github.com/CHIMB/linkrep/blob/main/inst/templates/word_template.docx}.
 #' @param set_background_images_template A file path to a LaTeX file that specifies
 #'  how the background images are placed onto a PDF report. Default is
-#'  \code{system.file("templates", "set_background_images.tex", package = "linkrep")}.
+#'  \url{https://github.com/CHIMB/linkrep/blob/main/inst/templates/set_background_images.tex}.
 #' @param citation_style A file path to a csl file containing the citation style.
 #'  To find different styles visit \url{https://github.com/citation-style-language/styles/blob/master/american-medical-association.csl}
 #'  If the location of the citation must change in the text you must modify its
@@ -270,6 +275,8 @@ linkage_quality_report <- function(main_data,
       stop("Invalid argument: project_id. project_id must be a single input.")
     }
   }
+
+  validate_boolean(comprehensive_report, "comprehensive_report")
 
   if (!is.null(num_records_right_dataset)){
     validate_numeric(num_records_right_dataset, "num_records_right_dataset")

@@ -178,19 +178,19 @@ Default is \code{12}.}
 for more details.}
 
 \item{cover_page}{A file path to a png, pdf or jpg file that contains the
-desired cover page. Default is \code{system.file("background_images", "cover_page.pdf", package = "linkrep")}.}
+desired cover page. Default is \url{https://github.com/CHIMB/linkrep/blob/main/inst/background_images/cover_page.pdf}.}
 
 \item{content_portrait_page}{A file path to a png, pdf or jpg file that contains the
-desired content portrait page. Default is \code{system.file("background_images", "content_portrait_page.pdf", package = "linkrep")}.}
+desired content portrait page. Default is \url{https://github.com/CHIMB/linkrep/blob/main/inst/background_images/content_portrait_page.pdf}.}
 
 \item{content_landscape_page}{A file path to a png, pdf or jpg file that contains the
-desired content landscape page. Default is \code{system.file("background_images", "content_landscape_page.pdf", package = "linkrep")}.}
+desired content landscape page. Default is \url{https://github.com/CHIMB/linkrep/blob/main/inst/background_images/content_landscape_page.pdf}.}
 
 \item{display_back_cover_page}{A logical indicating whether to display the back
 cover page in the output.}
 
 \item{back_cover_page}{A file path to a png, pdf or jpg file that contains the
-desired back cover page. Default is \code{system.file("background_images", "back_cover_page.pdf", package = "linkrep")}.}
+desired back cover page. Default is \url{https://github.com/CHIMB/linkrep/blob/main/inst/background_images/back_cover_page.pdf}.}
 
 \item{blank_background}{A logical indicating whether to display the report on blank
 white background. Default is \code{FALSE}.}

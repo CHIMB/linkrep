@@ -1,0 +1,109 @@
+---
+editor: source
+---
+{{< pagebreak >}}
+
+# Background
+
+## Record Linkage
+
+Record linkage is the process of determining which records, either from different data sources or within the same database, correspond to the same individual (or entity) (which is better to use throughout?). Records identified as belonging to the same individual---classified as a matched record pair---are joined into a single file, facilitating research. For example, linking project-specific data with a data repository creates a comprehensive dataset for researchers to work with.
+
+Linkage algorithms are iterative, identifying matched record pairs through multiple passes of data analysis.
+
+### Blocking
+
+To identify all matching record pairs, you may think to examine all possible combinations and classify each as either a match or a non-match based on specific criteria. This, unfortunately, is not feasible given the enormity of current databases. For instance, if you’re linking two datasets, each containing one million(format this how they’d like) records, you would end up with 1,000,000 x 1,000,000 = 1,000,000,000,000, i.e. one trillion, candidate record pairs that need to be classified (took example from file:///C:/Users/stoughte/Downloads/pdfcoffee.com-peter-christen-auth-data-matching-concepts-abook4youorg.pdf). This approach is impractical due to excessive computation time and memory requirements. Instead, blocking is used to reduce the search space of candidate record pairs. Blocking involves selecting one or more variables common to both datasets and exclusively considering record pairs with an exact match on those variables. For example, if birth year is the blocking variable, only record pairs sharing the same birth year are considered; all other potential pairs are disregarded during that pass of the linkage algorithm. Blocking aims to reduce the number of clear non-matches being checked by requiring at least one matching attribute between pairs of records, thereby reducing the computational time and memory requirements needed for the linkage process. While blocking reduces the time and memory required for the process, limiting the pairs being examined may also result in missed matches, thereby introducing linkage errors.
+
+### Variable Selection
+
+In each iteration of the linkage algorithm, a different set of blocking and matching variables are selected. After records are blocked based on the blocking variables, candidate record pairs are assessed against each matching variable. Depending on the type of linkage being performed, they are classified as either a match or a non-match. Blocking and matching variables are common to the datasets being linked and vary in discriminating power---their ability to effectively differentiate between different records within the dataset. For example, surname exhibits high discriminating power due to the multitude of unique surnames in a dataset. In contrast, sex exhibits low discriminating power due to its lack of unique values---usually only two or three---in a dataset, making it less effective for identifying matches based solely on this attribute. A combination of these variables is chosen in each iteration to encompass a broad range of attributes, aiming to enhance the matching process.
+
+### Types of Record Linkage
+
+There are two main linking techniques, deterministic and probabilistic. In deterministic linkage, records are classified as a match if they have an exact match on the considered fields. When a unique identifier, such as PHIN, is available, a deterministic pass with this variable as the matching variable will be the first pass in the linkage algorithm. This pass typically yields the majority of matches in the dataset.\
+In probabilistic linkage, statistics are used to calculate the probability that two records belong to the same individual.\
+This approach is essential in two main scenarios:
+
+1)  When unique identifiers are available, potential missed matches may occur in the deterministic pass due to entry errors like typos or missing values in the matching field. Therefore, probabilistic linkage helps by matching record pairs on other fields, increasing the number of matches identified.
+
+2)  When no unique identifiers are available, probabilistic linkage becomes necessary to match record pairs based on other fields, such as surname, birth year, and given name.
+
+### Probabilistic Linkage
+
+Probabilistic linkage is performed using the Fellegi-Sunter model where match weights are calculated as log-likelihood ratios of M and U conditional probabilities @fellegisunter. The M (Matched) probability is the probability of field values agreeing, given that record pairs refer to the same entity (i.e., a true match); whereas, the U (Unmatched) probability is the probability of field values agreeing, given that record pairs refer to different entities (i.e., a true non-match). Extensions like the Jaro-Winkler distance metric @jarowinkler for approximate string matching are often used with the Fellegi-Sunter model to enhance the matching process. Record pairs are classified as a match if they are above a chosen threshold.
+
+In the Fellegi-Sunter model, two thresholds are set. Record pairs with match weights below the lower threshold are classified as non-matches, while those above the higher threshold are classified as potential matches. Pairs with weights between these thresholds are manually reviewed and classified as appropriate. Due to the high volume of record pairs, a single-threshold approach is often used instead of the two-threshold method. This approach eliminates the need for manual review by classifying pairs as potential matches if their weights exceed the set threshold and non-matches if they do not. If multiple record pairs containing the same record meet the acceptance threshold, the pair with the highest match weight is selected as the match. After each pass of the linkage algorithm, all matched record pairs are removed from consideration before the next iteration begins.
+
+### Limitations
+
+Every linkage process has its limitations. There are two types of linkage errors: false links and missed links. These can arise from: data entry errors, such as misspelled names; incomplete information, such as missing PHIN; and changed information, such as a new last name after marriage. Linkage errors can introduce biases, leading researchers to under- or overestimate their conclusions. For example, women often change their last name after marriage, and if their maiden name is not included in the data, they may not match on surname, resulting in potential false or missed links. This can lead to lower linkage rates for females compared to males and may affect research outcomes.
+
+## Linkage Algorithm Evaluation
+
+To evaluate the quality of the record linkage, we recommend you do the following:
+
+-   Examine the number of unlinked records, stratified by sociodemographic characteristics (@tbl-linkage_rates). If you are using this data for research, this could reveal potential biases in your study data. For example, a significantly lower linkage rate among females compared to males could introduce selection bias in your research study. If you are using this to evaluate the linkage algorithm, variations in linkage rates may highlight limitations in the algorithm’s effectiveness across diverse population groups.
+
+-   Examine the linkage rates over acquisition dates (@fig-linkage_rate_dist). Changes in linkage rates over time may indicate shifts in data quality, variations in data recording practices, or improvements/changes made to the algorithm.
+
+-   Examine the classification metrics performed on the linkage algorithm (@tbl-performance_measures_tbl). The linkage algorithm involves a tradeoff between match certainty and match sensitivity. Match certainty refers to the proportion of identified matched pairs that are true matches, indicating the accuracy of the matched pairs. Match sensitivity refers to the proportion of true matches correctly identified by the algorithm out of all true matches, indicating the algorithm's ability to detect actual matches. An example of a match certainty metric is positive predictive value (precision), and an example of a match sensitivity metric is sensitivity (recall). Examining the table will inform you of the certainty and sensitivity of the record linkage performed.
+
+-   Examine previous linkages of the data. If you are evaluating the linkage algorithm and have access to previous linkages, compare linkage rates (@tbl-linkage_rates) and the matching and blocking variables (@tbl-algorithm_summary) to assess consistency and any potential improvements.
+
+{{< pagebreak >}}
+
+# Methods
+
+This report was generated using the linkrep package\^(reference package) in R.
+
+We used an iterative, multistage approach to link records from two data sources: `r params$left_dataset_name` and `r params$right_dataset_name`. We sought to link the records from `r params$left_dataset_name` to the records in `r params$left_dataset_name`.
+
+## Pre-Processing
+
+The steps taken to clean and standardize the data rely on its cleanliness and availability of fields.
+
+All punctuation was removed from non-numeric fields, and characters were converted to a common case. To reduce name variation, names with common values were given a standard form: nicknames were converted to full given names (e.g., Bill =\> William); and name variations were converted to standard forms (e.g., Haley, Hailey, Hailee =\> Hailey). \[Similarly, to reduce address variation, abbreviations were expanded to their original forms (e.g., Rd or Rd. =\> Road).\] Fields with multiple attributes, such as name fields containing both primary (i.e., first name) and secondary (i.e., middle name) given names, were split into separate fields. Date fields were divided into day, month, and year fields by analyzing the date format (e.g., DD/MM/YYYY, MM/DD/YYYY, YYYY-MM-DD, etc.) and separating accordingly.
+
+Categorical variables, such as sex/gender or ethnicity, were given a common set of standard values across the two datasets\^(reference datastan?). For example, if gender is categorized as Male = 1, Female = 2, Non-binary = 3, Gender fluid = 4, and Other = 5 in the left dataset, and as Male = M, Female = F, and Other = X in the right dataset, the values would be converted to the common categories. Since the right dataset has only three categories, the left dataset’s values would need to be adjusted to match. Specifically, Male = 1 would be converted to M, Female = 2 would be converted to F, and Non-binary = 3, Gender fluid = 4, and Other = 5 would be converted to X\^(reference datastan?). (where should the reference go?)
+
+### Missing Data Imputation
+
+Haven't figured out how to display missing data imputation yet so unsure if this should be included: Missing data was imputed by inferring sex/gender from primary given name---the first name in the provided name field. In cases where data elements were combined into single fields, such as postal codes being appended to address fields, regular expressions were used to separate the data elements and impute the missing data.
+
+## Linkage Algorithm
+
+Linkage was performed using the reclin2 package (version 0.5.0) in R.[@reclin2pkg] Records were linked through an iterative process using a combination of deterministic---an exact match on the considered fields---and probabilistic steps (@tbl-algorithm_summary). For probabilistic steps, the Fellegi-Sunter model @fellegisunter and its extensions were used to generate match weights for each matching variable in the candidate record pairs.\
+These extensions included:
+
+a)  The Expectation-Maximization algorithm\^(reference? is there a paper on this?) for unsupervised learning of M and U conditional probabilities.
+
+b)  The Jaro-Winkler string distance metric [@jarowinkler]---an approximate string comparator---to match string-based identifiers.
+
+c)  Adjusting identifier weights for observed frequencies (i.e., common vs. rare values). For example, less common names (e.g., Barret) that matched were assigned a higher weight than common names (e.g., John).
+
+d)  Total match weights were normalized to a standard range: \[0,1\].
+
+e)  Blocking strategies were used to reduce the search space of candidate record pairs---leading to reduced computation time and memory requirements.
+
+f)  A single minimum acceptance threshold was used instead of the two-threshold approach originally recommended by Fellegi and Sunter which required a clerical review of candidate record pairs with intermediate probabilistic weights.
+
+Different sets of blocking and matching variables (@tbl-algorithm_summary) were selected for each iteration with the aim of considering every possible record pair. In each iteration, the candidate record pairs were all possible combinations of record pairs that remained after blocking filtered out those that did not meet the blocking criteria.
+
+Initially, a deterministic pass was conducted, followed by multiple probabilistic passes. During each probabilistic pass, match weights were computed for each matching variable across all candidate record pairs, summed, and then normalized to produce the final match weight for each pair. An acceptance threshold was selected by examining the match weights of candidate record pairs, identifying weights that appeared to represent both matches and non-matches, and setting it between these intermediate values. Candidate record pairs were classified as matches if their match weight exceeded the chosen threshold and was the highest among all match weights for that record. If a record was involved in multiple pairs with the same highest match weight exceeding the threshold, the pair with the most recent data was selected and classified as a match.
+
+Match weights for string-matching variables, such as surname, were computed using the Jaro-Winkler string distance metric. A Jaro-Winkler acceptance threshold was chosen to classify whether two strings should be considered the same or different. If the distance metric exceeded the threshold, the pair was assigned a weight of 1 to indicate they were considered the same; otherwise, they were assigned a weight of 0.
+
+The pre-processing step introduced new variables that expanded our ability to make comparisons beyond our initial capability. Non-English language names follow different ordering or formatting conventions compared to English language names. Therefore, when multiple given names were present, separating them enabled us to compare all given names with the primary given name of the current record, enhancing the likelihood of a match. To address data entry errors where month and day fields may have been mistakenly interchanged, separating the date fields enabled us to compare days directly with months.
+
+Following each linkage step, matched record pairs were removed from contention before subsequent iterations were performed.
+
+## Linkage Algorithm Evaluation
+
+To evaluate the quality of the linkage algorithm, we stratified linkage rates by sociodemographic fields (@tbl-linkage_rates), allowing us to examine the algorithm's performance and consistency across different demographic categories. We examined linkage rate trends over time (@fig-linkage_rate_dist) to provide insights into the algorithm’s performance across acquisition dates and to assess how changes in data capture may have affected linkage rates over time.
+
+`r if(!is.null(params$performance_measures_data_path)) "::: {.content-visible}" else "::: {.content-hidden}"`
+
+The evaluation of the probabilistic portion of the linkage algorithm was performed on the entire subset of records that had non-missing values for the gold standard field, `r params$left_dataset_name`, before executing the linkage algorithm. Classification metrics---\[metrics provided by the classification metrics parameter\] (@tbl-performance_measures_tbl)---were derived using `r params$ground_truth` to classify pairs of records as matches or non-matches.
+
+:::
