@@ -3,7 +3,7 @@ editor: source
 ---
 {{< pagebreak >}}
 
-# Background
+# Background {#sec-background}
 
 ## Record Linkage
 
@@ -53,7 +53,7 @@ To evaluate the quality of the record linkage, we recommend you do the following
 
 {{< pagebreak >}}
 
-# Methods
+# Methods {#sec-methods}
 
 This report was generated using the linkrep package\^(reference package) in R.
 
