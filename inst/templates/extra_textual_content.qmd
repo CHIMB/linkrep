@@ -104,6 +104,17 @@ To evaluate the quality of the linkage algorithm, we stratified linkage rates by
 
 `r if(!is.null(performance_measures_table)) "::: {.content-visible}" else "::: {.content-hidden}"`
 
-The evaluation of the probabilistic portion of the linkage algorithm was performed on the entire subset of records that had non-missing values for the gold standard field, `r params$left_dataset_name`, before executing the linkage algorithm. Classification metrics---\[metrics provided by the classification metrics parameter\] (@tbl-performance_measures_tbl)---were derived using `r params$ground_truth` to classify pairs of records as matches or non-matches.
+The evaluation of the probabilistic portion of the linkage algorithm was performed on the entire subset of records that had non-missing values for the gold standard field, `r params$left_dataset_name`, before executing the linkage algorithm. Classification performance was evaluated using the following metrics: 
 
+PPV = $\frac{TP}{TP + FP}$
+
+NPV = $\frac{TN}{TN + FN}$
+
+Sensitivity = $\frac{TP}{TP + FN}$
+
+Specificity = $\frac{TN}{TN + FP}$
+
+F1-Score = $2 \cdot \frac{PPV \cdot Sensitivity}{PPV + Sensitivity}$
+
+where $TP$ = true positive, $TN$ = true negative, $FP$ = false positive, and $FN$ = false negative
 :::
