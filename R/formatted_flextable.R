@@ -89,7 +89,7 @@ formatted_flextable <- function(data,
   table <- set_flextable_labels(data, table)
 
   if(!is.null(footnotes)) {
-    table <- add_footer_lines(table, values = paste(footnotes, collapse = "\n"))
+    table <- add_footer_lines(table, values = footnotes)
   }
 
   # format the numbers in the table

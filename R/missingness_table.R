@@ -75,12 +75,8 @@ missingness_table <- function(data,
   # transform gtsummary table into a flextable to ensure consistency in report output
   table <- as_flex_table(table)
 
-  if (is.null(footnotes)) {
-    footnotes <- "Data are presented as n (%)."
-  } else {
-    footnotes <- paste(footnotes, collapse = "\n")
-    footnotes <- paste0(footnotes, "\n", "Data are presented as n (%).")
-  }
+  # add extra footnote to end of provided footnotes
+  footnotes <- append(footnotes, "Data are presented as n (%).")
 
   table <- format_flextables_from_gtsummary(table,
                                             output_format,

@@ -315,16 +315,8 @@ linkage_rate_table <- function(main_data,
   # transform gtsummary table into a flextable to ensure consistency in report output
   table <- as_flex_table(table)
 
-  if (is.null(footnotes)) {
-    footnotes <- 'Data are presented as n (%), mean \u00B1 SD, or median (Q1, Q3); where SD = standard deviation, Q1 = 25\u1d57\u02b0 percentile and Q3 = 75\u1d57\u02b0 percentile.'
-  } else {
-    footnotes <- paste(footnotes, collapse = "\n")
-    footnotes <- paste0(
-      footnotes,
-      "\n",
-      'Data are presented as n (%), mean \u00B1 SD, or median (Q1, Q3); where SD = standard deviation, Q1 = 25\u1d57\u02b0 percentile and Q3 = 75\u1d57\u02b0 percentile.'
-    )
-  }
+  # add extra footnote to end of provided footnotes
+  footnotes <- append(footnotes, 'Data are presented as n (%), mean \u00B1 SD, or median (Q1, Q3); where SD = standard deviation, Q1 = 25\u1d57\u02b0 percentile and Q3 = 75\u1d57\u02b0 percentile.')
 
   table <- format_flextables_from_gtsummary(table,
                                             output_format,

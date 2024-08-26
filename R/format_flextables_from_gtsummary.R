@@ -29,7 +29,7 @@ format_flextables_from_gtsummary <- function(flextable,
                              font_style = font_style)
 
   if (!is.null(footnotes)){
-    validate_string(footnotes, "footnotes")
+    validate_string_vector(footnotes, "footnotes")
     flextable <- add_footer_lines(flextable, values = footnotes)
   }
 
