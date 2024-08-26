@@ -32,7 +32,8 @@ linkage_quality_report(
   performance_measures_data = NULL,
   performance_measures_tbl_footnotes = NULL,
   ground_truth = NULL,
-  ground_truth_missing_var = NULL,
+  num_pairs_non_missing_ground_truth = NULL,
+  num_record_pairs = NULL,
   definitions = NULL,
   definitions_display_header = TRUE,
   abbreviations = NULL,
@@ -143,11 +144,12 @@ in percentages with values between 0 and 100 when using the default quarto templ
 the performance measures table. Each element in the vector will be displayed on a new line.}
 
 \item{ground_truth}{String indicating the ground truth used to produce the
-performance meassures.}
+performance measures. Must be provided with \code{performance_measures_data}.}
 
-\item{ground_truth_missing_var}{A string of the name of the variable indicating
-the missingness of the ground truth variable. Must be present in either \code{main_data}
-or \code{missing_data_indicators}.}
+\item{num_pairs_non_missing_ground_truth}{The number of record pairs with non-missing
+ground truth.}
+
+\item{num_record_pairs}{The total number of record pairs (cartesian product).}
 
 \item{definitions}{A data frame, a file path to an rds file that
 contains a data frame or a file path to a csv file. Data must contain two columns:

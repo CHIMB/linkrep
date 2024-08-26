@@ -61,10 +61,10 @@
 #' @param performance_measures_tbl_footnotes A character vector of additional footnotes for
 #' the performance measures table. Each element in the vector will be displayed on a new line.
 #' @param ground_truth String indicating the ground truth used to produce the
-#'  performance meassures.
-#' @param ground_truth_missing_var A string of the name of the variable indicating
-#'  the missingness of the ground truth variable. Must be present in either \code{main_data}
-#'  or \code{missing_data_indicators}.
+#'  performance measures. Must be provided with \code{performance_measures_data}.
+#' @param num_pairs_non_missing_ground_truth The number of record pairs with non-missing
+#'  ground truth.
+#' @param num_record_pairs The total number of record pairs (cartesian product).
 #' @param definitions A data frame, a file path to an rds file that
 #'  contains a data frame or a file path to a csv file. Data must contain two columns:
 #'  the list of terms in the first and their definitions in the second.
@@ -199,7 +199,8 @@ linkage_quality_report <- function(main_data,
                                    performance_measures_data = NULL,
                                    performance_measures_tbl_footnotes = NULL,
                                    ground_truth = NULL,
-                                   ground_truth_missing_var = NULL,
+                                   num_pairs_non_missing_ground_truth = NULL,
+                                   num_record_pairs = NULL,
                                    definitions = NULL,
                                    definitions_display_header = TRUE,
                                    abbreviations = NULL,
@@ -306,8 +307,16 @@ linkage_quality_report <- function(main_data,
   if (!is.null(ground_truth)){
     validate_string(ground_truth, "ground_truth")
   }
-  if (!is.null(ground_truth_missing_var)){
-    validate_string(ground_truth_missing_var, "ground_truth_missing_var")
+  if (!is.null(num_pairs_non_missing_ground_truth)){
+    if (is.null(num_record_pairs)){
+      stop("num_pairs_non_missing_ground_truth and num_record_pairs must both be provided")
+    } else {
+      validate_numeric(num_pairs_non_missing_ground_truth, " num_pairs_non_missing_ground_truth")
+      validate_numeric(num_record_pairs, "num_record_pairs")
+      if (num_pairs_non_missing_ground_truth > num_record_pairs){
+        stop("num_pairs_non_missing_ground_truth should not be larger than num_record_pairs")
+      }
+    }
   }
 
   validate_boolean(abbreviations_display_header, "abbreviations_display_header")
@@ -553,21 +562,11 @@ linkage_quality_report <- function(main_data,
   if (is.null(performance_measures_data) & !is.null(performance_measures_tbl_footnotes)){
     warning("Footnotes were provided for the performance measures table with no 'performance_measures_data'. Table will not be created.")
   }
-  ground_truth_missing <- NULL
+  # ground_truth_missing <- NULL
   if (!is.null(performance_measures_data)){
     performance_measures_data <- read_data(performance_measures_data, "performance_measures_data")
-    if (is.null(ground_truth_missing_var)){
-      stop("Must provide ground_truth and ground_truth_missing_var with 'performance_measures_data'")
-    }
-    if (ground_truth_missing_var %in% names(main_data)){
-      ground_truth_missing <- main_data[[ground_truth_missing_var]]
-    } else if (ground_truth_missing_var %in% names(missing_data_indicators)){
-      ground_truth_missing <- missing_data_indicators[[ground_truth_missing_var]]
-    } else {
-      stop("Invalid argument: ground_truth_missing_var. ground_truth_missing_var must be a variable present in 'main_data' or 'missing_data_indicators'")
-    }
-    if (!(sum(ground_truth_missing != 0 & ground_truth_missing != 1) == 0 & sum(is.na(ground_truth_missing)) == 0)){
-      stop("Invalid argument: ground_truth_missing_var. ground_truth_missing_var must be a binary or logical variable")
+    if (is.null(ground_truth)){
+      stop("Must provide ground_truth with 'performance_measures_data'")
     }
   }
 
@@ -655,15 +654,13 @@ linkage_quality_report <- function(main_data,
                                   big.mark = thousands_separator,
                                   decimal.mark = decimal_mark, format = "f")
 
-  num_non_missing_ground_truth <- NULL
   percent_non_missing_ground_truth <- NULL
-  if (!is.null(ground_truth_missing)){
-    num_non_missing_ground_truth <- nrow(main_data) - sum(ground_truth_missing)
-    percent_non_missing_ground_truth <- num_non_missing_ground_truth / nrow(main_data)
+  if (!is.null(num_pairs_non_missing_ground_truth) & !is.null(num_record_pairs)){
+    percent_non_missing_ground_truth <- num_pairs_non_missing_ground_truth / num_record_pairs
 
-    num_non_missing_ground_truth <- formatC(num_non_missing_ground_truth,
-                                            big.mark = thousands_separator,
-                                            format = "f", digits = 0)
+    num_pairs_non_missing_ground_truth <- formatC(num_pairs_non_missing_ground_truth,
+                                                  big.mark = thousands_separator,
+                                                  format = "f", digits = 0)
     percent_non_missing_ground_truth <- formatC(percent_non_missing_ground_truth,
                                                 big.mark = thousands_separator,
                                                 decimal.mark = decimal_mark,
@@ -917,13 +914,16 @@ linkage_quality_report <- function(main_data,
   if (!is.null(performance_measures_data)) {
     perf_meas_tbl <- performance_measures_table(
       data = performance_measures_data,
+      ground_truth = ground_truth,
       output_format = output_format,
       font_size = table_font_size,
       font_style = font_style,
       footnotes = performance_measures_tbl_footnotes,
       thousands_separator = thousands_separator,
       decimal_mark = decimal_mark,
-      num_decimal_places = num_decimal_places
+      num_decimal_places = num_decimal_places,
+      num_record_pairs = num_pairs_non_missing_ground_truth,
+      percent_record_pairs = percent_non_missing_ground_truth
     )
     performance_measures_table_path <- generate_element_paths(perf_meas_tbl)
 
@@ -1000,8 +1000,6 @@ linkage_quality_report <- function(main_data,
   data_time_period = data_time_period,
   num_records_linked = num_records_linked,
   overall_linkage_rate = overall_linkage_rate,
-  num_non_missing_ground_truth = num_non_missing_ground_truth,
-  percent_non_missing_ground_truth = percent_non_missing_ground_truth,
   report_generation_date = report_generation_date,
   display_back_cover_page = display_back_cover_page,
   comprehensive_report = comprehensive_report

@@ -45,8 +45,6 @@ params:
   data_time_period: null
   num_records_linked: null
   overall_linkage_rate: null
-  num_non_missing_ground_truth: null
-  percent_non_missing_ground_truth: null
   report_generation_date: null
   display_back_cover_page: true
   comprehensive_report: true
@@ -402,7 +400,11 @@ if (!is.null(linkage_rates_over_time_plot)){
 
 :::
 
-{{< pagebreak >}}
+`r if (!is.null(algorithm_summary_table) | !is.null(performance_measures_table))"::: {.content-visible}" else "::: {.content-hidden}"` 
+
+{{< pagebreak >}} 
+
+:::
 
 `r if(!is.null(algorithm_summary_table)) "::: {.content-visible}" else "::: {.content-hidden}"`
 
@@ -476,7 +478,7 @@ if (!is.null(performance_measures_table)){
 
 :::
 
-`r if (is.null(algorithm_summary_table) & is.null(performance_measures_table) &!is.null(missingness_table)) "::: {.content-visible}" else "::: {.content-hidden}"` 
+`r if (!is.null(missingness_table)) "::: {.content-visible}" else "::: {.content-hidden}"` 
 
 {{< pagebreak >}} 
 
