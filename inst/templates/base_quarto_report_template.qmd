@@ -200,37 +200,30 @@ requires_landscape_page <- function(table){
 ```
 :::
 
-::: {.content-visible when-format="pdf"}
-```{=tex}
-\section*{Acknowledgements}
-```
-:::
-
 ::: {.content-visible when-format="docx"}
 {{< pagebreak >}}
-
-# Acknowledgements {.unnumbered}
 :::
 
-This report was generated using software developed by Elizabeth Stoughton at the George & Fay Yee Centre for Healthcare Innovation (CHI), in partnership with the Manitoba Centre for Health Policy (MCHP), and the Provincial Information Management and Analytics (PIMA) department at Manitoba Health (MH). Graphics were designed by Karan Singh and Patrick Faucher of CHI Knowledge Translation. Barret Monchka conceptualized and led the design and development of the report-generating software.
+This report was prepared by Elizabeth Stoughton and Barret Monchka at the George & Fay Yee Centre for Healthcare Innovation (CHI), in collaboration with the Manitoba Centre for Health Policy (MCHP) and the Provincial Information Management and Analytics (PIMA) department at Manitoba Health (MH). We gratefully acknowledge the contributions of Randy Walld of MCHP and Craig Kasper of MH for their roles in establishing the analytical and operational processes used to prepare the data for this report, and Karan Singh and Patrick Faucher of CHI Knowledge Translation for producing the graphics. Financial support was provided by CHI under the Canadian Institutes of Health Research (CIHR) Strategy for Patient Oriented Research (SPOR).  
 
-The linkrep R package (<https://github.com/CHIMB/linkrep>), which produced this report, is available for use under an MIT license, provided this acknowledgement remains intact.
+The software used to generate this report was developed by Elizabeth Stoughton and Cole Chuchmach, under the direction of Barret Monchka, and is available as an R package (<https://github.com/CHIMB/linkrep>) under an MIT license.  
 
-© 2024 George & Fay Yee Centre for Healthcare Innovation
+Permission is granted to adapt and reproduce the textual and graphical content of this report, in whole or in part, for non-commercial purposes related to generating data linkage quality reports, provided the original authors are appropriately attributed. If no textual or graphical content is reproduced in dynamically generated reports, then the copyright statement and suggested citation may be revised as necessary. Findings contained in this report may be reproduced provided the source is cited. All reasonable precautions have been taken by CHI to verify the accuracy of the information contained in this report, which is provided without warranty of any kind, either expressed or implied. The reader is responsible for the interpretation of the published material. In no event shall CHI, MCHP, MH, the University of Manitoba, the Government of Manitoba, or any data providers be liable for damages arising from the use of the published material or the report-generating software.  
+
+© `r format(Sys.Date(), "%Y")` George & Fay Yee Centre for Healthcare Innovation
 
 ::: {.content-visible when-format="pdf"}
 ```{=tex}
-\section*{Contact Information}
+\subsubsection*{Suggested Citation}
 ```
 :::
 
 ::: {.content-visible when-format="docx"}
-# Contact Information {.unnumbered}
+### Suggested Citation {.unnumbered .unlisted}
 :::
 
-If you would like to discuss the results of this report and the potential impact of linkage error on your research study, or require guidance on adjusting for linkage error in your data analysis, please request a consultation with CHI by visiting <https://umanitoba.ca/centre-for-healthcare-innovation/> and selecting "Request a free consultation."
+Stoughton, Elizabeth & Monchka, Barret. {*Data Linkage Quality Report: Social Allowances Management Information Network*}. Winnipeg, Manitoba: George & Fay Yee Centre for Healthcare Innovation; `r format(Sys.Date(), "%B %Y")`.
 
-For additional questions regarding this linkage, please e-mail [data.linkage\@umanitoba.ca](data.linkage@umanitoba.ca).
 
 ::: {.content-visible when-format="pdf"}
 {{< pagebreak >}}
@@ -262,8 +255,6 @@ if (!is.null(definitions_data) & !is.null(listed_output_function) & params$outpu
 
 ::: {.content-visible when-format="docx"}
 # Definition of Terms {.unnumbered}
-
-\addcontentsline{toc}{section}{Definition of Terms}
 
 ```{r definitions word output, ft.align="left"}
 if (!is.null(definitions_data) & !is.null(listed_output_function) & params$output_format == "docx"){
@@ -299,8 +290,6 @@ if (!is.null(abbreviations_data) & !is.null(listed_output_function) & params$out
 ::: {.content-visible when-format="docx"}
 # List of Abbreviations {.unnumbered}
 
-\addcontentsline{toc}{section}{List of Abbreviations}
-
 ```{r abbreviations word output, ft.align="left"}
 if (!is.null(abbreviations_data) & !is.null(listed_output_function) & params$output_format == "docx"){
   listed_output_function(
@@ -323,13 +312,13 @@ if (!is.null(abbreviations_data) & !is.null(listed_output_function) & params$out
 
 ::: {.content-visible when-format="docx"}
 # Summary {.unnumbered}
-
-\addcontentsline{toc}{section}{Summary}
 :::
 
-The purpose of this report is to detail the methods used to link the records in `r params$left_dataset_name` (N = `r params$num_records_left_dataset`) to those in `r params$right_dataset_name` `r ifelse(is.null(params$num_records_right_dataset), "", sprintf("(N = %s)", params$num_records_right_dataset))` and to provide guidance on how to evaluate the quality of the linkage process.
+This report details the methods used to link records from `r params$left_dataset_name` (N = `r params$num_records_left_dataset`) to those in `r params$right_dataset_name` `r ifelse(is.null(params$num_records_right_dataset), "", sprintf("(N = %s)", params$num_records_right_dataset))` and offers guidance on evaluating the quality of the linkage process. We used an iterative approach that combines deterministic and probabilistic methods to link `r params$num_records_linked` records, achieveing an overall linkage rate of `r params$overall_linkage_rate`% (see @tbl-linkage_rates).
 
-Records were linked using an iterative, multistage process that uses a combination of deterministic and probabilistic approaches to link the records. We linked `r params$num_records_linked` records, achieving an overall linkage rate of `r params$overall_linkage_rate`% (@tbl-linkage_rates).
+{{< pagebreak >}}
+
+To discuss the findings of this report, the potential impact of linkage errors on a research study, or to request guidance on adjusting for linkage errors in a data analysis, you may schedule a consultation with CHI by visiting <https://umanitoba.ca/centre-for-healthcare-innovation/> and selecting “Request a free consultation.” For additional questions regarding this data linkage, please e-mail [data.linkage@umanitoba.ca](mailto:data.linkage@umanitoba.ca).
 
 {{< pagebreak >}}
 
@@ -342,26 +331,39 @@ Records were linked using an iterative, multistage process that uses a combinati
 
 ::: {.content-visible when-format="docx"}
 # How to Read This Report {.unnumbered}
-
-\addcontentsline{toc}{section}{How to Read This Report}
 :::
 
-Record linkage is an efficient way of generating comprehensive datasets for researchers. Details on the linkage process and its quality are rarely reported in studies using linked data\^(reference multimorbidity study). The lack of reporting is primarily due to researchers’ limited knowledge of record linkage and the potential errors that can lead to biases. To mitigate misleading conclusions in studies using linked data, we have created a report using recommended guidelines on reporting linked data\^(reference papers). A few important guidelines we have included are:
+Integrating information from multiple data sources can generate rich and comprehensive datasets that address complex research questions. However, the uncertainty inherent in linking disparate data sources---particularly when there are no unique personal identifiers in common---may introduce bias, potentially reducing the representativeness of the linked data with respect to the target study population. This potential adverse impact on study validity has led to the development of reporting guidelines for studies using linked data, which have informed the elements included in this data linkage quality report.[@bohensky2011; @gilbert2017; @pratt2020; @elstad2023; @zhao2022]  
 
--   Providing the overall linkage rate
--   A methods section, detailing the steps taken to perform the linkage
--   Information on how to assess the quality of the linkage
+Researchers using this linked data should familiarize themselves with the record linkage methods employed, carefully assess the representativeness of the linked sample, and consider how linkage errors may impact the interpretation of study findings. The detailed information in the [Background](#sec-background) and [Methods](#sec-methods) sections will aid in interpreting the results of the linkage process. When disseminating research based on linked data, we encourage adherence to reporting guidelines to support critical evaluations of findings and promote research excellence.[@bohensky2011; @gilbert2017; @pratt2020]   
 
-The following section (Results) includes tables and plots that summarize the linkage process and its performance. To assess the quality of the linkage, we recommend you do the following:
+The [Results](#sec-results) section includes figures and tables with descriptive statistics that summarize the performance of the linkage algorithm and the quality of the linked data. To asses the suitability of the data for research purposes, consider the following recommendations:  
 
--   Examine the number of unlinked records, stratified by sociodemographic characteristics (Table). If you are using this data for research, this could reveal potential biases in your study data. For example, a significantly lower linkage rate among females compared to males could introduce selection bias in your research study. If you are using this to evaluate the linkage algorithm, variations in linkage rates may highlight limitations in the algorithm’s effectiveness across diverse population groups.
--   Examine the linkage rates over acquisition dates (Figure ). Changes in linkage rates over time may indicate shifts in data quality, variations in data recording practices, or improvements/changes made to the algorithm.
--   Examine the performance measures for the linkage algorithm (Table , Figure). The linkage algorithm involves a trade off between match certainty and match sensitivity. Match certainty refers to the proportion of identified matched pairs that are true matches, indicating the accuracy of the matched pairs. Match sensitivity refers to the proportion of true matches correctly identified by the algorithm out of all true matches, indicating the algorithm's ability to detect actual matches. An example of a match certainty metric is positive predictive value (precision), and an example of a match sensitivity metric is sensitivity (recall). Examining the table will inform you of the certainty and sensitivity of the record linkage performed.
--   Examine previous linkages of the data. If you are evaluating the linkage algorithm and have access to previous linkages, compare linkage rates (Table) and the matching and blocking variables (Table) to assess consistency and any potential improvements.
+`r list_num = 1`
 
-Detailed information on record linkage and the methods used can be found in the Background and Methods section following the Results section.
+`r list_num`. **Examine the representativeness of the linked sample:** Use the column percentages in @tbl-linkage_rates to compare record characteristics with their distribution in the source data. Significant differences in these distributions may affect the generalizability of study findings. 
+`r list_num = list_num + 1` 
 
-If you are going to be publishing a research study with this data, please consider referring to reporting guidelines for studies involving linked data\^(reference papers) to ensure transparency and aid readers in interpreting your results.
+
+`r list_num`. **Assess potential biases in the linkage process:** Utilize the row percentages in @tbl-linkage_rates to examine the proportion of unlinked records, stratified by sociodemographic and other characteristics. For example, a significantly lower linkage rate among females compared to males may indicate issues with the linkage algorithm or data quality that could introduce selection bias into a research study. Algorithmic biases can lead to an unrepresentative sample, as reflected in @tbl-linkage_rates.
+`r list_num = list_num + 1`   
+
+
+`r if(!is.null(linkage_rates_over_time_plot)) "::: {.content-visible}" else "::: {.content-hidden}"`
+`r list_num`. **Explore variations in linkage rates over data acquisition dates:** Refer to @fig-linkage_rate_dist to identify shifts in data quality or variations in data collection practices over time. Differential linkage error with respect to acquisition dates leads to a non-random sample.
+`r if(!is.null(linkage_rates_over_time_plot)) list_num = list_num + 1`  
+:::  
+
+
+`r if(!is.null(performance_measures_table)) "::: {.content-visible}" else "::: {.content-hidden}"`
+`r list_num`. **Evaluate linkage algorithm accuracy:** Review @tbl-performance_measures_tbl and @fig-performance_measures_chart to assess whether the linkage algorithm performed adequately in classifying candidate record pairs as matches or non-matches. Match classification, which involves a tradeoff between match certainty (i.e., precision or PPV) and match sensitivity (i.e., recall), should be assessed in the context of your research objectives.
+`r if(!is.null(performance_measures_table)) list_num = list_num + 1`
+:::   
+
+
+`r if(!is.null(algorithm_summary_table)) "::: {.content-visible}" else "::: {.content-hidden}"`
+`r list_num`. **Critically review the multi-step linkage algorithm employed:** Analyze the parameters used in each step of the algorithm (@tbl-algorithm_summary), including the matching technique (deterministic or probabilistic), acceptance threshold, and variables considered, to evaluate the confidence that linked records belong to the same individual. For example, exact matches on multiple fields generally reduce the chances of linkage error, whereas relying heavily on approximate string matching may increase noise in the linked data. Similarly, higher acceptance thresholds and variables with strong discriminative power (e.g., last name or personal unique identifiers) tend to reduce linkage errors compared to lower classification cut-offs and variables with weaker discriminative ability (e.g., sex/gender or postal code).
+:::
 
 {{< pagebreak >}}
 
@@ -371,13 +373,13 @@ if (requires_landscape_page(linkage_rate_table)){
 }
 ```
 
-# Results
+# Results {#sec-results}
 
 ## Linkage Rate Summary
 
 ```{r linkage rate table, ft.align="left"}
 #| label: tbl-linkage_rates
-#| tbl-cap: !expr paste0("Stratified linkage rates for records in ", params$left_dataset_name, " that linked to the records in ",  params$right_dataset_name, " (N = ", params$num_records_left_dataset, ifelse(params$data_time_period == "", "", ", "), params$data_time_period, ").") 
+#| tbl-cap: !expr paste0("Stratified linkage rates for records in ", params$left_dataset_name, " (N = ", params$num_records_left_dataset, ifelse(params$data_time_period == "", "", ", "), params$data_time_period, ") that linked to ",  params$right_dataset_name, ".") 
 
 linkage_rate_table
 ```
@@ -392,7 +394,7 @@ if (requires_landscape_page(linkage_rate_table)){
 
 ```{r linkage rates over time plot}
 #| label: fig-linkage_rate_dist
-#| fig-cap: !expr paste0("Distribution of linkage rates over acquisition dates for records in ", params$left_dataset_name,".")
+#| fig-cap: !expr paste0("Distribution of linkage rates over data acquisition dates for records in ", params$left_dataset_name,".")
 if (!is.null(linkage_rates_over_time_plot)){
   linkage_rates_over_time_plot
 }
@@ -416,7 +418,7 @@ if (!is.null(algorithm_summary_table)){
 
 ```{r algorithm summary table, ft.align="left"}
 #| label: tbl-algorithm_summary
-#| tbl-cap: !expr paste0("Linkage algorithm summary for the linkage of records in ", params$left_dataset_name, " to those in ", params$right_dataset_name, ". This table provides a detailed overview of each pass in the linkage process.")
+#| tbl-cap: !expr paste0("Summary of the multi-step algorithm to link records in ", params$left_dataset_name, " to those in ", params$right_dataset_name, ".")
 
 if (!is.null(algorithm_summary_table)){
   algorithm_summary_table
@@ -451,7 +453,7 @@ if (!is.null(performance_measures_table)){
 
 ```{r performance measures table, ft.align="left"}
 #| label: tbl-performance_measures_tbl
-#| tbl-cap: !expr paste0("Performance measures for estimating the performance of the probabilistic portion of the linkage algorithm for records in ", params$left_dataset_name, " linked to those in ", params$right_dataset_name, ". These were estimated for the subset of records that had non-missing values for ", params$ground_truth, " (N = ", params$num_non_missing_ground_truth, ", ", params$percent_non_missing_ground_truth, "%).")
+#| tbl-cap: !expr paste0("Classification performance for linking records in ", params$left_dataset_name, " to those in ", params$right_dataset_name, ".")
 
 if (!is.null(performance_measures_table)){
   performance_measures_table
