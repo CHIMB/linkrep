@@ -25,6 +25,9 @@
 #'
 #' @import flextable
 #'
+#' @keywords internal
+#' @noRd
+#'
 formatted_flextable <- function(data,
                                 output_format,
                                 font_size,

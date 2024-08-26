@@ -63,6 +63,9 @@
 #' @importFrom rlang := !!
 #' @importFrom utils write.csv
 #'
+#' @keywords internal
+#' @noRd
+#'
 linkage_rate_table <- function(main_data,
                                output_format,
                                column_var,

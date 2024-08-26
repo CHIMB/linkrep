@@ -5,6 +5,9 @@
 #' @param param The string parameter to check.
 #' @param param_name The name of the parameter to be used in potential error messages.
 #'
+#' @keywords internal
+#' @noRd
+#'
 validate_string <- function(param, param_name){
   if (!is.character(param_name) | length(param_name) != 1){
     stop("Invalid argument: param_name. param_name must be a single string")
@@ -22,6 +25,9 @@ validate_string <- function(param, param_name){
 #' @param param The string vector parameter to check.
 #' @param param_name The name of the parameter to be used in potential error messages.
 #'
+#' @keywords internal
+#' @noRd
+#'
 validate_string_vector <- function(param, param_name){
   if (!is.character(param)) {
     stop(sprintf("Invalid argument: %s. %s must be a character string vector", param_name, param_name))
@@ -35,6 +41,9 @@ validate_string_vector <- function(param, param_name){
 #'
 #' @param param The boolean parameter to check.
 #' @param param_name The name of the parameter to be used in potential error messages.
+#'
+#' @keywords internal
+#' @noRd
 #'
 validate_boolean <- function(param, param_name){
   if(is.null(param) | length(param) != 1){
@@ -53,6 +62,9 @@ validate_boolean <- function(param, param_name){
 #' @param param The numeric parameter to check.
 #' @param param_name The name of the parameter to be used in potential error messages.
 #'
+#' @keywords internal
+#' @noRd
+#'
 validate_numeric <- function(param, param_name){
   validate_string(param_name, "param_name")
   if ((!is.numeric(param) & !is.integer(param)) | length(param) != 1){
@@ -67,6 +79,9 @@ validate_numeric <- function(param, param_name){
 #'
 #' @param param The numeric parameter to check.
 #' @param param_name The name of the parameter to be used in potential error messages.
+#'
+#' @keywords internal
+#' @noRd
 #'
 validate_numeric_vector <- function(param, param_name){
   validate_string(param_name, "param_name")
@@ -85,6 +100,9 @@ validate_numeric_vector <- function(param, param_name){
 #' @param param_name The name of the parameter to be used in potential error messages.
 #'
 #' @importFrom data.table is.data.table data.table
+#'
+#' @keywords internal
+#' @noRd
 #'
 validate_df <- function(param, param_name){
   validate_string(param_name, "param_name")
@@ -106,6 +124,9 @@ validate_df <- function(param, param_name){
 #' @param var_param_name The name of the variable parameter to be used in potential error messages.
 #' @param data_param_name The name of the data parameter to be used in potential error messages.
 #'
+#' @keywords internal
+#' @noRd
+#'
 validate_var_in_data <- function(var, data, var_param_name, data_param_name){
   validate_string(var, "var")
   validate_df(data, "data")
@@ -123,6 +144,9 @@ validate_var_in_data <- function(var, data, var_param_name, data_param_name){
 #'
 #' @param param The data frame parameter to check.
 #' @param param_name The name of the parameter to be used in potential error messages.
+#'
+#' @keywords internal
+#' @noRd
 #'
 validate_df_binary <- function(param, param_name){
   validate_df(param, "param")
@@ -145,6 +169,9 @@ validate_df_binary <- function(param, param_name){
 #'
 #' @param ft The `flextable` to check.
 #' @param param_name The name of the parameter to be used in potential error messages.
+#'
+#' @keywords internal
+#' @noRd
 #'
 validate_flextable <- function(ft, param_name){
   validate_string(param_name, "param_name")
@@ -170,6 +197,9 @@ validate_flextable <- function(ft, param_name){
 #'  \code{system_fonts()$family} in the package \code{\link{system_fonts}}
 #'
 #' @importFrom systemfonts system_fonts
+#'
+#' @keywords internal
+#' @noRd
 #'
 validate_common_parameters <- function(data = NULL,
                                        footnotes = NULL,

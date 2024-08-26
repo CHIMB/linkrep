@@ -6,6 +6,9 @@
 #'
 #' @importFrom fmsb radarchartcirc
 #'
+#' @keywords internal
+#' @noRd
+#'
 performance_measures_plot <- function(data){
 
   PLOT_COLOUR <- "grey65"

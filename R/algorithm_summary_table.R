@@ -22,6 +22,9 @@
 #'
 #' @return A \code{flextable} object.
 #'
+#' @keywords internal
+#' @noRd
+#'
 algorithm_summary_table <- function(data,
                                     output_format,
                                     font_size = 12,

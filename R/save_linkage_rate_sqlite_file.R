@@ -14,6 +14,9 @@
 #' @importFrom RSQLite SQLite
 #' @importFrom DBI dbConnect dbWriteTable dbDisconnect
 #'
+#' @keywords internal
+#' @noRd
+#'
 save_linkage_rate_sqlite_file <- function(output_dir,
                                           report_generation_date,
                                           data_linker,

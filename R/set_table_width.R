@@ -17,6 +17,9 @@
 #'
 #' @import flextable
 #'
+#' @keywords internal
+#' @noRd
+#'
 set_table_width <- function(flextable){
   PORTRAIT_WIDTH <- 6.5
   LANDSCAPE_WIDTH <- 9

@@ -18,6 +18,9 @@
 #'
 #' @importFrom flextable border_remove delete_part
 #'
+#' @keywords internal
+#' @noRd
+#'
 two_column_table <- function(data,
                              output_format,
                              font_size = 12,

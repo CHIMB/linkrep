@@ -18,6 +18,9 @@
 #'
 #' @import flextable
 #'
+#' @keywords internal
+#' @noRd
+#'
 format_flextables_from_gtsummary <- function(flextable,
                                              output_format,
                                              font_size,

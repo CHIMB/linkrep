@@ -27,6 +27,9 @@
 #'
 #' @importFrom gtsummary theme_gtsummary_language tbl_summary as_flex_table modify_header modify_footnote all_categorical everything all_stat_cols
 #'
+#' @keywords internal
+#' @noRd
+#'
 missingness_table <- function(data,
                               output_format,
                               font_size = 12,

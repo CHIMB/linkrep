@@ -27,6 +27,9 @@
 #' @importFrom tidyselect all_of
 #' @importFrom lubridate make_date quarter semester
 #'
+#' @keywords internal
+#' @noRd
+#'
 linkage_rates_over_time_plot <- function(data,
                                          link_indicator_var,
                                          acquisition_year_var,
