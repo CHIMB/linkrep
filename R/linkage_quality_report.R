@@ -51,7 +51,8 @@
 #' @param project_id String indicating the project ID.
 #' @param num_records_right_dataset The number of records in the right dataset of the linkage.
 #' @param acquisition_year_var A string of the name of the numeric variable in
-#'  \code{main_data} that represents the acquisition year.
+#'  \code{main_data} that represents the acquisition year. This must be provided
+#'  for the datasets date range to be output on the title page of a PDF output.
 #' @param acquisition_month_var A string of the name of the numeric variable in
 #'  \code{main_data} that represents the acquisition month.
 #' @param algorithm_summary_data A data frame, a file path to an rds file that
@@ -974,21 +975,19 @@ linkage_quality_report <- function(main_data,
       performance_measures_plot_path <- NULL
     }
 
-    # concatenated_footnotes <- paste0(performance_measures_tbl_footnotes, collapse = " ")
-    # performance_measures_plot_caption <- paste0(
-    #   "Radar chart showing classification performance for linking records in",
-    #   left_dataset_name,
-    #   " to those in ",
-    #   right_dataset_name,
-    #   ". Classification performance was estimated among record pairs with non-missing values for ",
-    #   ground_truth,
-    #   ifelse(!is.null(num_record_pairs) & !is.null(percent_record_pairs),
-    #          paste0(" (N = ", num_record_pairs, ", ", percent_record_pairs, "%)"),
-    #          ""),
-    #   " and reported as percentages (%).",
-    #   concatenated_footnotes)
-
-
+    concatenated_footnotes <- paste0(performance_measures_tbl_footnotes, collapse = " ")
+    performance_measures_plot_caption <- paste0(
+      "Radar chart showing classification performance for linking records in ",
+      left_dataset_name,
+      " to those in ",
+      right_dataset_name,
+      ". Classification performance was estimated among record pairs with non-missing values for ",
+      ground_truth,
+      ifelse(!is.null(num_pairs_non_missing_ground_truth) & !is.null(percent_non_missing_ground_truth),
+             paste0(" (N = ", num_pairs_non_missing_ground_truth, ", ", percent_non_missing_ground_truth, "%)"),
+             ""),
+      " and reported as percentages (%). ",
+      concatenated_footnotes)
   }
 
   # missingness table
@@ -1032,6 +1031,7 @@ linkage_quality_report <- function(main_data,
   algorithm_summary_table_path = algorithm_summary_table_path,
   performance_measures_table_path = performance_measures_table_path,
   performance_measures_plot_path = performance_measures_plot_path,
+  performance_measures_plot_caption = performance_measures_plot_caption,
   missingness_table_path = missingness_table_path,
   report_title = report_title,
   left_dataset_name = left_dataset_name,

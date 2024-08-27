@@ -32,6 +32,7 @@ params:
   algorithm_summary_table_path: null
   performance_measures_table_path: null
   performance_measures_plot_path: null
+  performance_measures_plot_caption: null
   missingness_table_path: null
   report_title: null
   left_dataset_name: null
@@ -213,7 +214,7 @@ Permission is granted to adapt and reproduce the textual and graphical content o
 
 © `r format(Sys.Date(), "%Y")` George & Fay Yee Centre for Healthcare Innovation  
 
-
+\vspace*{3cm}
 **Suggested Citation**
 
 Stoughton, Elizabeth & Monchka, Barret. {*Data Linkage Quality Report: Social Allowances Management Information Network*}. Winnipeg, Manitoba: George & Fay Yee Centre for Healthcare Innovation; `r format(Sys.Date(), "%B %Y")`.
@@ -458,7 +459,7 @@ if (!is.null(performance_measures_table)){
 
 `r if (!is.null(params$performance_measures_plot_path)) "::: {.content-visible}" else "::: {.content-hidden}"`
 
-![Visualization of the performance metrics provided in @tbl-performance_measures_tbl.](`r params$performance_measures_plot_path`){#fig-performance_measures_chart}
+![`r params$performance_measures_plot_caption`](`r params$performance_measures_plot_path`){#fig-performance_measures_chart}
 
 :::
 
