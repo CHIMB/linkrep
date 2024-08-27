@@ -17,6 +17,8 @@
 #'  conventions and how this data is used in the table.
 #' @param display_total_column A logical indicating whether to
 #'  display a total (overall) column in the table. Default is \code{TRUE}.
+#' @param display_unlinked_column A logical indicating whether to
+#'  display the unlinked column in the table. Default is \code{TRUE}.
 #' @param display_mean_not_median_stats A logical indicating whether
 #'  to display the statistics for continuous variables in the table
 #'  as either mean \eqn{\pm} standard deviation or median (Q1, Q3), where Q1 is
@@ -72,6 +74,7 @@ linkage_rate_table <- function(main_data,
                                strata_vars,
                                missing_data_indicators = NULL,
                                display_total_column = TRUE,
+                               display_unlinked_column = TRUE,
                                display_mean_not_median_stats = FALSE,
                                percent_type = "row",
                                font_size = 12,
@@ -110,6 +113,7 @@ linkage_rate_table <- function(main_data,
   }
 
   validate_boolean(display_total_column, "display_total_column")
+  validate_boolean(display_unlinked_column, "display_unlinked_column")
   validate_boolean(display_mean_not_median_stats, "display_mean_not_median_stats")
   validate_string(percent_type, "percent_type")
   if (percent_type != "row" & percent_type != "column"){
@@ -310,7 +314,11 @@ linkage_rate_table <- function(main_data,
   table <- modify_footnote(table, all_stat_cols() ~ NA)
 
   if (output_to_csv){
-    out_file <- paste0(output_dir, "/linkage_rate_table.csv")
+    if (percent_type == "row"){
+      out_file <- paste0(output_dir, "/linkage_rate_table.csv")
+    } else {
+      out_file <- paste0(output_dir, "/linked_data_representativeness_table.csv")
+    }
     df <- as.data.frame(table)
     write.csv(df, out_file)
   }
@@ -319,13 +327,19 @@ linkage_rate_table <- function(main_data,
   table <- as_flex_table(table)
 
   # add extra footnote to end of provided footnotes
-  footnotes <- append(footnotes, 'Data are presented as n (%), mean \u00B1 SD, or median (Q1, Q3); where SD = standard deviation, Q1 = 25\u1d57\u02b0 percentile and Q3 = 75\u1d57\u02b0 percentile.')
+  footnotes <- append(footnotes, paste0("Data are presented as n (",
+                                        percent_type,
+                                        " %), mean \u00B1 SD, or median (Q1, Q3); where SD = standard deviation, Q1 = 25\u1d57\u02b0 percentile and Q3 = 75\u1d57\u02b0 percentile."))
 
   table <- format_flextables_from_gtsummary(table,
                                             output_format,
                                             font_size,
                                             font_style,
                                             footnotes)
+
+  if (!display_unlinked_column){
+    table <- delete_columns(table, 3)
+  }
 
   return(table)
 }
