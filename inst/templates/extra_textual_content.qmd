@@ -3,6 +3,18 @@ editor: source
 ---
 {{< pagebreak >}}
 
+# Data Linkage in Manitoba
+
+The internationally recognized Manitoba Population Research Data Repository is made possible through the integration of data across multiple domains, including health, education, social services, judicial affairs, and immigration.[@katz2019] This extensive collection of routinely-collected data with excellent population coverage of Manitoba residents, enables high-quality interdisciplinary research of topics highly relevant to Canadians, such as the social determinants of health and healthcare delivery patterns.  
+
+Databases contained within the Repository are linked using a method known as “spine linkage.” In this approach, each dataset is linked to a central “spine dataset” (i.e., the Manitoba Health Insurance Registry), rather than performing pairwise linkages separately between all datasets.[@blake2023] After separately linking each Repository database to the Manitoba Health Insurance Registry to attach an encrypted Personal Health Identification Number (PHIN) field to each database, the encrypted PHIN is then used as the common unique identifier by researchers to join the de-identified datasets.[@katz2019] Spine linkage makes large data repositories feasible by significantly reducing the number of linkages required, which in turn reduces the disclosure of personally identifiable information.[@blake2023] However, a key limitation of spine linkage is the exclusion of individuals who are present in some data sources but not in the spine dataset. Consequently, the practice of performing spine linkage with the Manitoba Health Insurance Registry may adversely impact research based solely on non-health data sources. Studies focused on population subgroups without coverage through the Manitoba Health Services Insurance Plan (e.g., federally insured individuals, foreign students, temporary foreign workers with a work permit duration of less than one year) or with delayed coverage (e.g., new residents from other Canadian provinces) should carefully consider these limitations and changes in coverage requirements over time.[@govmb2023movingtomanitoba; @mchp2023term]   
+
+In Manitoba, the responsibility for linking research data is shared among MCHP, Manitoba Health, and CHI. MCHP handles linkage between Repository databases and the Manitoba Health Insurance Registry, except for certain federally regulated data sources, which are managed by Manitoba Health. CHI and Manitoba Health share responsibilities for project-specific linkage services, such as the linking of clinical or survey datasets to the Manitoba Health Insurance Registry, enabling researchers to create enriched datasets by combining primary and routinely collected data. Additionally, CHI provides methodological guidance on data linkage practices and offers consultations to researchers and trainees on adjusting for linkage error in data analyses.  
+
+To minimize the exposure of personal information in accordance with data privacy legislation, including the Personal Health Information Act (PHIA) and the Freedom of Information and Protection of Privacy Act (FIPPA),[@PHIA; @FIPPA] data linkage using identifiable information is performed by a small, trusted group of analysts from CHI, MCHP, and Manitoba Health. Following linkage, data is de-identified—by encrypting PHINs and removing names and addresses—before data is accessible to researchers within the MCHP secure data analytics environment.[@katz2019] Record similarity is commonly assessed using PHIN, given names, surnames, sex/gender, birthdate, and residential or mailing address including postal code. Even when PHIN is present in both data sources being linked, records are never joined solely on PHIN to account for potential data recording errors (e.g., incorrect PHINs being recorded) and to validate the PHINs that were collected.
+
+{{< pagebreak >}}
+
 # Background on Record Linkage {#sec-background}
 
 Record linkage, also known as data linkage and entity resolution, is the task of determining which data records correspond to the same entity (i.e., the same person), and is used to deduplicate data by self-joining records within a single database and to create comprehensive datasets by bringing together person-level information from multiple sources. Record linkage techniques estimate the similarity between all possible pairs of records (i.e., the Cartesian product) by comparing the common fields present in both data sources. The similarity scores are then used to classify candidate record pairs as either matches (i.e., records belonging to the same individual) or non-matches (i.e., records belonging to different individuals). Given the potential for misclassification, the quality of linked data should be carefully assessed before proceeding with research data analysis.  
@@ -51,7 +63,7 @@ Haven't figured out how to display missing data imputation yet so unsure if this
 
 ## Linkage Algorithm
 
-Linkage was performed using the reclin2 package (version 0.5.0) in R.[@reclin2pkg] Records were linked through an iterative process using a combination of deterministic and probabilistic steps`r if (!is.null(algorithm_summary_table)) " (@tbl-algorithm_summary)"`. For probabilistic steps, the Fellegi-Sunter model @fellegisunter with extensions were used to generate match weights for each candidate record pair that met blocking constraints.\
+Linkage was performed using the `r params$linkage_package` package in R (version `r params$linkage_package_version`). Records were linked through an iterative process using a combination of deterministic and probabilistic steps`r if (!is.null(algorithm_summary_table)) " (@tbl-algorithm_summary)"`. For probabilistic steps, the Fellegi-Sunter model @fellegisunter with extensions were used to generate match weights for each candidate record pair that met blocking constraints.\
 These extensions included:
 
 a)  The Expectation-Maximization algorithm for the unsupervised learning of M and U conditional probabilities.[@winkler2000]  
@@ -78,11 +90,12 @@ Following each linkage step, matched record pairs were removed from contention b
 
 ## Linkage Algorithm Evaluation
 
-To evaluate the quality of the linkage algorithm, we stratified linkage rates by sociodemographic fields (@tbl-linkage_rates), allowing us to examine the algorithm's performance and consistency across different demographic categories. We examined linkage rate trends over time (@fig-linkage_rate_dist) to provide insights into the algorithm’s performance across acquisition dates and to assess how changes in data capture may have affected linkage rates over time.
+This data linkage quality report was generated in R using the linkrep package (version `r params$linkrep_package_version`) to facilitate assessments of linked data quality.[@linkrep] Linkage rates were stratified by sociodemographic characteristics (@tbl-linkage_rates) to enable an examination of the algorithm’s  consistency across demographic groups and identify potential selection bias.`r if(!is.null(linkage_rates_over_time_plot)) " To assess how changes in data capture may have affected linkage rates over time, a histogram is provided showing linkage rate trends over time (@fig-linkage_rate_dist)."`  
 
-`r if(!is.null(performance_measures_table)) "::: {.content-visible}" else "::: {.content-hidden}"`
+`r if(!is.null(params$ground_truth)) "::: {.content-visible}" else "::: {.content-hidden}"`
+Links predicted by the probabilistic linkage algorithm were evaluated against `r params$ground_truth` as the ground truth`r if(!is.null(performance_measures_table)) " (@tbl-performance_measures_tbl)"`. Classification accuracy was estimated using the subset of records from `r params$left_dataset_name` that had non-missing values for the gold standard field, `r params$ground_truth`, before executing the linkage algorithm.   
 
-The evaluation of the probabilistic portion of the linkage algorithm was performed on the entire subset of records that had non-missing values for the gold standard field, `r params$left_dataset_name`, before executing the linkage algorithm. Classification performance was evaluated using the following metrics: 
+Classification performance was evaluated using the following metrics:   
 
 PPV = $\frac{TP}{TP + FP}$
 

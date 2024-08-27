@@ -11,6 +11,9 @@ linkage_quality_report(
   right_dataset_name,
   output_dir,
   data_linker,
+  linkage_package,
+  linkage_package_version,
+  linkrep_package_version,
   linkage_rate_tbl_column_var,
   linkage_rate_tbl_strata_vars,
   linkage_rate_tbl_footnotes = NULL,
@@ -74,6 +77,14 @@ in the left dataset of the linkage.}
 \item{output_dir}{A path to a directory. All output files will be save here.}
 
 \item{data_linker}{String indicating who performed the linkage.}
+
+\item{linkage_package}{String indicating the R package used to link the data.}
+
+\item{linkage_package_version}{String indicating the version of the \code{linkage_package}
+used to link the data. You can obtain the package version via \code{packageVersion("package_name")}.}
+
+\item{linkrep_package_version}{String indicating the version of \code{linkrep} used to
+generate the report. You can obtain the package version via \code{packageVersion("linkrep")}.}
 
 \item{linkage_rate_tbl_column_var}{A string of the name of a logical or binary
 variable present in \code{main_data} that indicates whether a record linked or not.

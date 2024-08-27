@@ -48,6 +48,9 @@ params:
   report_generation_date: null
   display_back_cover_page: true
   comprehensive_report: true
+  linkage_package: null
+  linkage_package_version: null
+  linkrep_package_version: null
 
 header-includes:
 - \renewcommand{\thesection}{\arabic{section}.}
@@ -208,17 +211,10 @@ The software used to generate this report was developed by Elizabeth Stoughton a
 
 Permission is granted to adapt and reproduce the textual and graphical content of this report, in whole or in part, for non-commercial purposes related to generating data linkage quality reports, provided the original authors are appropriately attributed. If no textual or graphical content is reproduced in dynamically generated reports, then the copyright statement and suggested citation may be revised as necessary. Findings contained in this report may be reproduced provided the source is cited. All reasonable precautions have been taken by CHI to verify the accuracy of the information contained in this report, which is provided without warranty of any kind, either expressed or implied. The reader is responsible for the interpretation of the published material. In no event shall CHI, MCHP, MH, the University of Manitoba, the Government of Manitoba, or any data providers be liable for damages arising from the use of the published material or the report-generating software.  
 
-© `r format(Sys.Date(), "%Y")` George & Fay Yee Centre for Healthcare Innovation
+© `r format(Sys.Date(), "%Y")` George & Fay Yee Centre for Healthcare Innovation  
 
-::: {.content-visible when-format="pdf"}
-```{=tex}
-\subsubsection*{Suggested Citation}
-```
-:::
 
-::: {.content-visible when-format="docx"}
-### Suggested Citation {.unnumbered .unlisted}
-:::
+**Suggested Citation**
 
 Stoughton, Elizabeth & Monchka, Barret. {*Data Linkage Quality Report: Social Allowances Management Information Network*}. Winnipeg, Manitoba: George & Fay Yee Centre for Healthcare Innovation; `r format(Sys.Date(), "%B %Y")`.
 
@@ -312,9 +308,7 @@ if (!is.null(abbreviations_data) & !is.null(listed_output_function) & params$out
 # Summary {.unnumbered}
 :::
 
-This report details the methods used to link records from `r params$left_dataset_name` (N = `r params$num_records_left_dataset`) to those in `r params$right_dataset_name` `r ifelse(is.null(params$num_records_right_dataset), "", sprintf("(N = %s)", params$num_records_right_dataset))` and offers guidance on evaluating the quality of the linkage process. We used an iterative approach that combines deterministic and probabilistic methods to link `r params$num_records_linked` records, achieving an overall linkage rate of `r params$overall_linkage_rate`% (see @tbl-linkage_rates).
-
-{{< pagebreak >}}
+This report details the methods used to link records from `r params$left_dataset_name` (N = `r params$num_records_left_dataset`) to those in `r params$right_dataset_name` `r ifelse(is.null(params$num_records_right_dataset), "", sprintf("(N = %s)", params$num_records_right_dataset))` and offers guidance on evaluating the quality of the linkage process. We used an iterative approach that combines deterministic and probabilistic methods to link `r params$num_records_linked` records, achieving an overall linkage rate of `r params$overall_linkage_rate`% (see @tbl-linkage_rates).  
 
 To discuss the findings of this report, the potential impact of linkage errors on a research study, or to request guidance on adjusting for linkage errors in a data analysis, you may schedule a consultation with CHI by visiting <https://umanitoba.ca/centre-for-healthcare-innovation/> and selecting “Request a free consultation.” For additional questions regarding this data linkage, please e-mail [data.linkage@umanitoba.ca](mailto:data.linkage@umanitoba.ca).
 

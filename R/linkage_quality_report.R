@@ -12,6 +12,11 @@
 #' @param right_dataset_name String indicating the name of the right dataset.
 #' @param output_dir A path to a directory. All output files will be save here.
 #' @param data_linker String indicating who performed the linkage.
+#' @param linkage_package String indicating the R package used to link the data.
+#' @param linkage_package_version String indicating the version of the \code{linkage_package}
+#'  used to link the data. You can obtain the package version via \code{packageVersion("package_name")}.
+#' @param linkrep_package_version String indicating the version of \code{linkrep} used to
+#'  generate the report. You can obtain the package version via \code{packageVersion("linkrep")}.
 #' @param linkage_rate_tbl_column_var A string of the name of a logical or binary
 #'  variable present in \code{main_data} that indicates whether a record linked or not.
 #'  Its values will be the columns in the linkage rate table.
@@ -178,11 +183,14 @@ linkage_quality_report <- function(main_data,
                                    right_dataset_name,
                                    output_dir,
                                    data_linker,
+                                   linkage_package, # newwwwwwwwww
+                                   linkage_package_version, # newwwwwww
+                                   linkrep_package_version, # newww
                                    linkage_rate_tbl_column_var,
                                    linkage_rate_tbl_strata_vars,
                                    linkage_rate_tbl_footnotes = NULL,
-                                   linkage_rate_tbl_display_total_column = TRUE,
-                                   linkage_rate_tbl_display_mean_not_median_stats = FALSE,
+                                   linkage_rate_tbl_display_total_column = TRUE, # remove!
+                                   linkage_rate_tbl_display_mean_not_median_stats = FALSE, # change: _continuous_stat = "mean" or "median", footnote should be specified based on this input
                                    linkage_rate_tbl_percent_type = "row",
                                    linkage_rate_tbl_output_to_csv = FALSE,
                                    missing_data_indicators = NULL,
@@ -227,6 +235,23 @@ linkage_quality_report <- function(main_data,
                                    citation_style = NULL
 ){
 
+  # linkage_rate_tbl_column_var,
+  # linkage_rate_tbl_strata_vars,
+  # linkage_rate_tbl_footnotes = NULL,
+  # linkage_rate_tbl_display_total_column = TRUE,
+  # linkage_rate_tbl_display_mean_not_median_stats = FALSE,
+  # linkage_rate_tbl_percent_type = "row",
+  # linkage_rate_tbl_output_to_csv = FALSE,
+
+# linked_data_representativeness_tbl_strata_vars
+# linked_data_representativeness_tbl_footnotes
+# linkage_rate_tbl_strata_vars
+# linkage_rate_tbl_footnotes
+# stratified_linkage_tbls_column_var
+# stratified_linkage_tbls_continuous_stat
+# stratified_linkage_tbls_output_to_csv
+
+
 
   # perform parameter input checks
 
@@ -251,6 +276,9 @@ linkage_quality_report <- function(main_data,
   }
 
   validate_string(data_linker, "data_linker")
+  validate_string(linkage_package, "linkage_package")
+  validate_string(linkage_package_version, "linkage_package_version")
+  validate_string(linkrep_package_version, "linkrep_package_version")
 
   validate_string(linkage_rate_tbl_column_var, "linkage_rate_tbl_column_var")
   validate_string_vector(linkage_rate_tbl_strata_vars, "linkage_rate_tbl_strata_vars")
@@ -911,6 +939,7 @@ linkage_quality_report <- function(main_data,
   # performance measures table
   performance_measures_table_path <- NULL
   performance_measures_plot_path <- NULL
+  performance_measures_plot_caption <- NULL
   if (!is.null(performance_measures_data)) {
     perf_meas_tbl <- performance_measures_table(
       data = performance_measures_data,
@@ -944,6 +973,22 @@ linkage_quality_report <- function(main_data,
       unlink(performance_measures_plot_path)
       performance_measures_plot_path <- NULL
     }
+
+    # concatenated_footnotes <- paste0(performance_measures_tbl_footnotes, collapse = " ")
+    # performance_measures_plot_caption <- paste0(
+    #   "Radar chart showing classification performance for linking records in",
+    #   left_dataset_name,
+    #   " to those in ",
+    #   right_dataset_name,
+    #   ". Classification performance was estimated among record pairs with non-missing values for ",
+    #   ground_truth,
+    #   ifelse(!is.null(num_record_pairs) & !is.null(percent_record_pairs),
+    #          paste0(" (N = ", num_record_pairs, ", ", percent_record_pairs, "%)"),
+    #          ""),
+    #   " and reported as percentages (%).",
+    #   concatenated_footnotes)
+
+
   }
 
   # missingness table
@@ -1002,7 +1047,10 @@ linkage_quality_report <- function(main_data,
   overall_linkage_rate = overall_linkage_rate,
   report_generation_date = report_generation_date,
   display_back_cover_page = display_back_cover_page,
-  comprehensive_report = comprehensive_report
+  comprehensive_report = comprehensive_report,
+  linkage_package = linkage_package,
+  linkage_package_version = linkage_package_version,
+  linkrep_package_version = linkrep_package_version
   ))
 
   # Format final output:
