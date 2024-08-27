@@ -1,6 +1,6 @@
 Package: linkrep
 Type: Package
-Title: Record Linkage Quality Reports
+Title: Data Linkage Quality Reports
 Version: 0.1.0
 Authors@R: c(
             person(given="Elizabeth", family="Stoughton", email="stoughte@myumanitoba.ca", role="aut"),
@@ -35,3 +35,4 @@ Imports:
 Suggests: 
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
+URL: https://github.com/CHIMB/linkrep
