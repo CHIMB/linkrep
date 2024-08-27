@@ -187,7 +187,7 @@ requires_landscape_page <- function(table){
         \vfill
         \large
         \textbf{`r ifelse(is.null(params$project_id), "", sprintf("PHRPC \\#: %s", as.character(params$project_id)))`}\\
-        Report Generation Date: `r params$report_generation_date`
+        Prepared on `r params$report_generation_date`
 
     \end{flushright}
 \end{titlepage}
@@ -312,7 +312,7 @@ if (!is.null(abbreviations_data) & !is.null(listed_output_function) & params$out
 # Summary {.unnumbered}
 :::
 
-This report details the methods used to link records from `r params$left_dataset_name` (N = `r params$num_records_left_dataset`) to those in `r params$right_dataset_name` `r ifelse(is.null(params$num_records_right_dataset), "", sprintf("(N = %s)", params$num_records_right_dataset))` and offers guidance on evaluating the quality of the linkage process. We used an iterative approach that combines deterministic and probabilistic methods to link `r params$num_records_linked` records, achieveing an overall linkage rate of `r params$overall_linkage_rate`% (see @tbl-linkage_rates).
+This report details the methods used to link records from `r params$left_dataset_name` (N = `r params$num_records_left_dataset`) to those in `r params$right_dataset_name` `r ifelse(is.null(params$num_records_right_dataset), "", sprintf("(N = %s)", params$num_records_right_dataset))` and offers guidance on evaluating the quality of the linkage process. We used an iterative approach that combines deterministic and probabilistic methods to link `r params$num_records_linked` records, achieving an overall linkage rate of `r params$overall_linkage_rate`% (see @tbl-linkage_rates).
 
 {{< pagebreak >}}
 
@@ -335,7 +335,7 @@ Integrating information from multiple data sources can generate rich and compreh
 
 Researchers using this linked data should familiarize themselves with the record linkage methods employed, carefully assess the representativeness of the linked sample, and consider how linkage errors may impact the interpretation of study findings. The detailed information in the [Background](#sec-background) and [Methods](#sec-methods) sections will aid in interpreting the results of the linkage process. When disseminating research based on linked data, we encourage adherence to reporting guidelines to support critical evaluations of findings and promote research excellence.[@bohensky2011; @gilbert2017; @pratt2020]   
 
-The [Results](#sec-results) section includes figures and tables with descriptive statistics that summarize the performance of the linkage algorithm and the quality of the linked data. To asses the suitability of the data for research purposes, consider the following recommendations:  
+The [Results](#sec-results) section includes figures and tables with descriptive statistics that summarize the performance of the linkage algorithm and the quality of the linked data. To assess the suitability of the data for research purposes, consider the following recommendations:  
 
 `r list_num = 1`
 
@@ -348,19 +348,19 @@ The [Results](#sec-results) section includes figures and tables with descriptive
 
 
 `r if(!is.null(linkage_rates_over_time_plot)) "::: {.content-visible}" else "::: {.content-hidden}"`
-`r list_num`. **Explore variations in linkage rates over data acquisition dates:** Refer to @fig-linkage_rate_dist to identify shifts in data quality or variations in data collection practices over time. Differential linkage error with respect to acquisition dates leads to a non-random sample.
+`r list_num`. **Explore variations in linkage rates over data acquisition dates:** Refer to `r if(!is.null(linkage_rates_over_time_plot)) "@fig-linkage_rate_dist"` to identify shifts in data quality or variations in data collection practices over time. Differential linkage error with respect to acquisition dates leads to a non-random sample.
 `r if(!is.null(linkage_rates_over_time_plot)) list_num = list_num + 1`  
 :::  
 
 
 `r if(!is.null(performance_measures_table)) "::: {.content-visible}" else "::: {.content-hidden}"`
-`r list_num`. **Evaluate linkage algorithm accuracy:** Review @tbl-performance_measures_tbl and @fig-performance_measures_chart to assess whether the linkage algorithm performed adequately in classifying candidate record pairs as matches or non-matches. Match classification, which involves a tradeoff between match certainty (i.e., precision or PPV) and match sensitivity (i.e., recall), should be assessed in the context of your research objectives.
+`r list_num`. **Evaluate linkage algorithm accuracy:** Review `r if(!is.null(performance_measures_table)) "@tbl-performance_measures_tbl"` and `r if(!is.null(performance_measures_table)) "@fig-performance_measures_chart "` to assess whether the linkage algorithm performed adequately in classifying candidate record pairs as matches or non-matches. Match classification, which involves a tradeoff between match certainty (i.e., precision or PPV) and match sensitivity (i.e., recall), should be assessed in the context of your research objectives.
 `r if(!is.null(performance_measures_table)) list_num = list_num + 1`
 :::   
 
 
 `r if(!is.null(algorithm_summary_table)) "::: {.content-visible}" else "::: {.content-hidden}"`
-`r list_num`. **Critically review the multi-step linkage algorithm employed:** Analyze the parameters used in each step of the algorithm (@tbl-algorithm_summary), including the matching technique (deterministic or probabilistic), acceptance threshold, and variables considered, to evaluate the confidence that linked records belong to the same individual. For example, exact matches on multiple fields generally reduce the chances of linkage error, whereas relying heavily on approximate string matching may increase noise in the linked data. Similarly, higher acceptance thresholds and variables with strong discriminative power (e.g., last name or personal unique identifiers) tend to reduce linkage errors compared to lower classification cut-offs and variables with weaker discriminative ability (e.g., sex/gender or postal code).
+`r list_num`. **Critically review the multi-step linkage algorithm employed:** Analyze the parameters used in each step of the algorithm `r if(!is.null(algorithm_summary_table)) "(@tbl-algorithm_summary)"`, including the matching technique (deterministic or probabilistic), acceptance threshold, and variables considered, to evaluate the confidence that linked records belong to the same individual. For example, exact matches on multiple fields generally reduce the chances of linkage error, whereas relying heavily on approximate string matching may increase noise in the linked data. Similarly, higher acceptance thresholds and variables with strong discriminative power (e.g., last name or personal unique identifiers) tend to reduce linkage errors compared to lower classification cut-offs and variables with weaker discriminative ability (e.g., sex/gender or postal code).
 :::
 
 {{< pagebreak >}}
@@ -498,7 +498,7 @@ if (!is.null(missingness_table)){
 
 ```{r missingness table, ft.align="left"}
 #| label: tbl-missing_counts
-#| tbl-cap: !expr paste0("Missing value counts for records in ", params$left_dataset_name, ".")
+#| tbl-cap: !expr paste0("Missingness of select variables within ", params$left_dataset_name, ".")
 
 if(!is.null(missingness_table)){
   missingness_table
