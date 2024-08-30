@@ -19,11 +19,11 @@
 #'  display a total (overall) column in the table. Default is \code{TRUE}.
 #' @param display_unlinked_column A logical indicating whether to
 #'  display the unlinked column in the table. Default is \code{TRUE}.
-#' @param display_mean_not_median_stats A logical indicating whether
-#'  to display the statistics for continuous variables in the table
-#'  as either mean \eqn{\pm} standard deviation or median (Q1, Q3), where Q1 is
-#'  the 25\eqn{^{th}} percentile, and Q3 is the 75\eqn{^{th}} percentile. Default
-#'  is \code{FALSE}.
+#' @param continuous_stat A string indicating which statistic to use on continuous
+#'  variables. Allowed values are "\code{mean}" or "\code{median}" (default). If
+#'  "\code{mean}", mean \eqn{\pm} standard deviation will be output otherwise,
+#'  median (Q1, Q3), where Q1 is the 25\eqn{^{th}} percentile, and Q3 is the
+#'  75\eqn{^{th}} percentile, will be output.
 #' @param percent_type String specifying the desired percent type. Allowed values
 #'  are "\code{row}" or "\code{column}".
 #' @param font_size A number specifying the font size for the table text.
@@ -75,7 +75,7 @@ linkage_rate_table <- function(main_data,
                                missing_data_indicators = NULL,
                                display_total_column = TRUE,
                                display_unlinked_column = TRUE,
-                               display_mean_not_median_stats = FALSE,
+                               continuous_stat = "median",
                                percent_type = "row",
                                font_size = 12,
                                font_style = "Times New Roman",
@@ -114,7 +114,10 @@ linkage_rate_table <- function(main_data,
 
   validate_boolean(display_total_column, "display_total_column")
   validate_boolean(display_unlinked_column, "display_unlinked_column")
-  validate_boolean(display_mean_not_median_stats, "display_mean_not_median_stats")
+  validate_string(continuous_stat, "continuous_stat")
+  if (continuous_stat != "median" & continuous_stat != "mean"){
+    stop("Invalid argument: continuous_stat. Options: 'median' or 'mean'")
+  }
   validate_string(percent_type, "percent_type")
   if (percent_type != "row" & percent_type != "column"){
     stop("Invalid argument: percent_type. Options: 'row' or 'column'")
@@ -177,61 +180,64 @@ linkage_rate_table <- function(main_data,
   #   variable name, by "Missing "
   # - All variables provided in missing_data_indicators will be output in the table
   #----
-  if (!is.null(missing_data_indicators)){
-    # Match the columns in the two datasets and label the matched missing indicators "Missing"
-    i <- 1
-    while(i <= ncol(data_subset) & ncol(missing_data_indicators) > 0){
-      # missing indicators labels
-      missing_labels <- label(missing_data_indicators)
+  # only output missing values for the linkage rate table (display_unlinked_column = TRUE), not the linkage data representativeness table
+  if (display_unlinked_column){
+    if (!is.null(missing_data_indicators)){
+      # Match the columns in the two datasets and label the matched missing indicators "Missing"
+      i <- 1
+      while(i <= ncol(data_subset) & ncol(missing_data_indicators) > 0){
+        # missing indicators labels
+        missing_labels <- label(missing_data_indicators)
 
-      data_subset_col_name <- names(data_subset)[i]
-      # naming standard for missing field indicators
-      missing_col_name <- paste0(data_subset_col_name, "_missing")
+        data_subset_col_name <- names(data_subset)[i]
+        # naming standard for missing field indicators
+        missing_col_name <- paste0(data_subset_col_name, "_missing")
 
-      # two options:
-      # 1. The name of the variable in main_data_missing matches the name of the variable in main_data suffixed by '_missing'
-      # 2. The label of the variable in main_data_missing matches the label of the variable in main_data
-      if (missing_col_name %in% names(missing_data_indicators)) {
-        data_subset <- mutate(data_subset, !!missing_col_name := missing_data_indicators[[missing_col_name]])
-        # need variable to be right after the 'main_data' variable to be able to make it a sublevel of it in the table
-        data_subset <- relocate(data_subset, !!missing_col_name, .after = !!data_subset_col_name)
-        Hmisc::label(data_subset[[missing_col_name]]) <- "Missing"
-        missing_data_indicators[[missing_col_name]] <- NULL
-        i <- i + 2
-      } else {
-        col_label <- label(data_subset[[i]])
-        if ((col_label != "") & (col_label %in% missing_labels)) {
-          missing_index <- which(missing_labels == col_label)
-          missing_col_name <- names(missing_labels)[missing_index]
-          data_subset <- mutate(data_subset, !!missing_col_name := missing_data_indicators[[missing_index]])
+        # two options:
+        # 1. The name of the variable in main_data_missing matches the name of the variable in main_data suffixed by '_missing'
+        # 2. The label of the variable in main_data_missing matches the label of the variable in main_data
+        if (missing_col_name %in% names(missing_data_indicators)) {
+          data_subset <- mutate(data_subset, !!missing_col_name := missing_data_indicators[[missing_col_name]])
           # need variable to be right after the 'main_data' variable to be able to make it a sublevel of it in the table
           data_subset <- relocate(data_subset, !!missing_col_name, .after = !!data_subset_col_name)
           Hmisc::label(data_subset[[missing_col_name]]) <- "Missing"
           missing_data_indicators[[missing_col_name]] <- NULL
+          i <- i + 2
+        } else {
+          col_label <- label(data_subset[[i]])
+          if ((col_label != "") & (col_label %in% missing_labels)) {
+            missing_index <- which(missing_labels == col_label)
+            missing_col_name <- names(missing_labels)[missing_index]
+            data_subset <- mutate(data_subset, !!missing_col_name := missing_data_indicators[[missing_index]])
+            # need variable to be right after the 'main_data' variable to be able to make it a sublevel of it in the table
+            data_subset <- relocate(data_subset, !!missing_col_name, .after = !!data_subset_col_name)
+            Hmisc::label(data_subset[[missing_col_name]]) <- "Missing"
+            missing_data_indicators[[missing_col_name]] <- NULL
+            i <- i + 1
+          }
           i <- i + 1
         }
-        i <- i + 1
       }
-    }
 
-    # label remaining missing indicators with "Missing " in front of the label or variable name so it stands on its own in the table
-    if (ncol(missing_data_indicators) > 0) {
-      for (i in seq_along(missing_data_indicators)){
-        col_label <- label(missing_data_indicators[,i])
-        if (col_label == ""){
-          Hmisc::label(missing_data_indicators[,i]) <- paste("Missing", names(missing_data_indicators)[i])
-        } else {
-          Hmisc::label(missing_data_indicators[,i]) <- paste("Missing", col_label)
+      # label remaining missing indicators with "Missing " in front of the label or variable name so it stands on its own in the table
+      if (ncol(missing_data_indicators) > 0) {
+        for (i in seq_along(missing_data_indicators)){
+          col_label <- label(missing_data_indicators[,i])
+          if (col_label == ""){
+            Hmisc::label(missing_data_indicators[,i]) <- paste("Missing", names(missing_data_indicators)[i])
+          } else {
+            Hmisc::label(missing_data_indicators[,i]) <- paste("Missing", col_label)
+          }
         }
       }
-    }
 
-    # combine the two datasets
-    data_subset <- cbind(data_subset, missing_data_indicators)
+      # combine the two datasets
+      data_subset <- cbind(data_subset, missing_data_indicators)
+    }
   }
 
   categorical_stat <- ifelse(display_percent_symbol, "{n} ({p}%)", "{n} ({p})")
-  continuous_stat <- ifelse(display_mean_not_median_stats,
+  continuous_stat <- ifelse(continuous_stat == "mean",
                             "{mean} \u00B1 {sd}",
                             "{median} ({p25}, {p75})")
 
@@ -264,11 +270,15 @@ linkage_rate_table <- function(main_data,
     missing = "no"
   )
 
+  column_headers <- ifelse(display_unlinked_column,
+                           sprintf("**{level}**\n(N = {style_number(n)}, {style_percent(p, digits = %d)}%%)",
+                                   num_decimal_places),
+                           "**{level}**\n(N = {style_number(n)})")
+
   table <- modify_header(
     table,
     label = "",
-    all_stat_cols() ~ sprintf("**{level}**\n(N = {style_number(n)}, {style_percent(p, digits = %d)}%%)",
-                              num_decimal_places)
+    all_stat_cols() ~ column_headers
   )
 
   # display percent if percent type is "column"
@@ -326,20 +336,28 @@ linkage_rate_table <- function(main_data,
   # transform gtsummary table into a flextable to ensure consistency in report output
   table <- as_flex_table(table)
 
-  # add extra footnote to end of provided footnotes
-  footnotes <- append(footnotes, paste0("Data are presented as n (",
-                                        percent_type,
-                                        " %), mean \u00B1 SD, or median (Q1, Q3); where SD = standard deviation, Q1 = 25\u1d57\u02b0 percentile and Q3 = 75\u1d57\u02b0 percentile."))
+  if (!display_unlinked_column){
+    table <- delete_columns(table, 3)
+  }
 
+  # add extra footnote to end of provided footnotes
+  if ("continuous" %in% table$table_body$var_type){
+   default_footnote <- paste0("Data are presented as n (",
+                             percent_type,
+                             " %) or ",
+                             ifelse(continuous_stat == "mean", "mean \u00B1 SD", "median (Q1, Q3)"),
+                             "; where ",
+                             ifelse(continuous_stat == "mean", "SD = standard deviation.", "Q1 = 25\u1d57\u02b0 percentile and Q3 = 75\u1d57\u02b0 percentile."))
+  } else {
+    default_footnote <- paste0("Data are presented as n (", percent_type," %)")
+  }
+  footnotes <- append(footnotes, default_footnote)
   table <- format_flextables_from_gtsummary(table,
                                             output_format,
                                             font_size,
                                             font_style,
                                             footnotes)
 
-  if (!display_unlinked_column){
-    table <- delete_columns(table, 3)
-  }
 
   return(table)
 }
