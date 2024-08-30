@@ -7,23 +7,27 @@
 linkage_quality_report(
   main_data,
   report_title,
+  report_subtitle,
   left_dataset_name,
   right_dataset_name,
   output_dir,
   data_linker,
   linkage_package,
-  linkage_package_version,
-  linkrep_package_version,
-  linkage_rate_tbl_column_var,
+  stratified_linkage_tbls_column_var,
+  linked_data_representativeness_tbl_strata_vars,
   linkage_rate_tbl_strata_vars,
+  linked_data_representativeness_tbl_footnotes = NULL,
   linkage_rate_tbl_footnotes = NULL,
-  linkage_rate_tbl_display_total_column = TRUE,
-  linkage_rate_tbl_display_mean_not_median_stats = FALSE,
-  linkage_rate_tbl_percent_type = "row",
-  linkage_rate_tbl_output_to_csv = FALSE,
+  stratified_linkage_tbls_continuous_stat = "median",
+  stratified_linkage_tbls_output_to_csv = FALSE,
+  display_missingness_table = FALSE,
   missing_data_indicators = NULL,
   missingness_tbl_footnotes = NULL,
   output_format = "pdf",
+  linkage_package_version = NULL,
+  linkrep_package_version = NULL,
+  R_version = NULL,
+  datastan_package_version = NULL,
   comprehensive_report = TRUE,
   save_linkage_rate = TRUE,
   project_id = NULL,
@@ -68,7 +72,11 @@ linkage_quality_report(
 frame or a file path to a csv file. This data contains variables present
 in the left dataset of the linkage.}
 
-\item{report_title}{String indicating the title of the report.}
+\item{report_title}{String indicating the title of the report. If
+\code{output_format = "docx"}, the title will only be used in the suggested citation.}
+
+\item{report_subtitle}{String indicating the subtitle of the report. If
+\code{output_format = "docx"}, the subtitle will only be used in the suggested citation.}
 
 \item{left_dataset_name}{String indicating the name of the left dataset.}
 
@@ -80,35 +88,36 @@ in the left dataset of the linkage.}
 
 \item{linkage_package}{String indicating the R package used to link the data.}
 
-\item{linkage_package_version}{String indicating the version of the \code{linkage_package}
-used to link the data. You can obtain the package version via \code{packageVersion("package_name")}.}
-
-\item{linkrep_package_version}{String indicating the version of \code{linkrep} used to
-generate the report. You can obtain the package version via \code{packageVersion("linkrep")}.}
-
-\item{linkage_rate_tbl_column_var}{A string of the name of a logical or binary
+\item{stratified_linkage_tbls_column_var}{A string of the name of a logical or binary
 variable present in \code{main_data} that indicates whether a record linked or not.
-Its values will be the columns in the linkage rate table.}
+Its values will be the columns in the linkage rate table and the linkaed data
+representativeness table.}
+
+\item{linked_data_representativeness_tbl_strata_vars}{A character vector of the
+names of the variables present in \code{main_data} to stratify the linked data
+representativeness table by.}
 
 \item{linkage_rate_tbl_strata_vars}{A character vector of the names of the
 variables present in \code{main_data} to stratify the linkage rate table by.}
 
+\item{linked_data_representativeness_tbl_footnotes}{A character vector of additional
+footnotes for the linked data representativeness table. Each element in the
+vector will be displayed on a new line.}
+
 \item{linkage_rate_tbl_footnotes}{A character vector of additional footnotes for
 the linkage rate table. Each element in the vector will be displayed on a new line.}
 
-\item{linkage_rate_tbl_display_total_column}{A logical indicating whether to
-display a total (overall) column in the table. Default is \code{TRUE}.}
+\item{stratified_linkage_tbls_continuous_stat}{A string indicating which statistic
+to use on continuous variables in the linkage rate table. Allowed values are
+"\code{mean}" or "\code{median}" (default). If "\code{mean}", mean \eqn{\pm}
+standard deviation will be output otherwise, median (Q1, Q3), where Q1 is the
+25\eqn{^{th}} percentile, and Q3 is the 75\eqn{^{th}} percentile, will be output.}
 
-\item{linkage_rate_tbl_display_mean_not_median_stats}{A logical indicating whether
-to display the statistics for continuous variables in the linkage rate table
-as either mean \eqn{\pm} standard deviation or median (Q1, Q3), where Q1 is
-the 25\eqn{^{th}} percentile, and Q3 is the 75\eqn{^{th}} percentile. Default is \code{FALSE}.}
+\item{stratified_linkage_tbls_output_to_csv}{A logical indicating whether to
+save the linkage rate table in a csv file. Default is \code{FALSE}.}
 
-\item{linkage_rate_tbl_percent_type}{String specifying the desired percent type
-in the linkage rate table. Allowed values are "\code{row}" or "\code{column}".}
-
-\item{linkage_rate_tbl_output_to_csv}{A logical indicating whether to save the
-linkage rate table in a csv file. Default is \code{FALSE}.}
+\item{display_missingness_table}{A logical indicating whether to display the
+missingness table in the report.}
 
 \item{missing_data_indicators}{A data frame, a file path to an rds file that
 contains a data frame or a file path to a csv file. All variables in the data
@@ -122,6 +131,18 @@ the missingness table. Each element in the vector will be displayed on a new lin
 \item{output_format}{String specifying the desired output format. Allowed values
 are "\code{pdf}" or "\code{docx}".}
 
+\item{linkage_package_version}{String indicating the version of the \code{linkage_package}
+used to link the data. You can obtain the package version via \code{packageVersion("package_name")}.}
+
+\item{linkrep_package_version}{String indicating the version of \code{linkrep} used to
+generate the report. You can obtain the package version via \code{packageVersion("linkrep")}.}
+
+\item{R_version}{String indicating the version of R used to generate the report.
+You can obtain the version of R via \code{R.version.string}.}
+
+\item{datastan_package_version}{String indicating the version of \code{datastan} used to
+preprocess the data. You can obtain the package version via \code{packageVersion("datastan")}.}
+
 \item{comprehensive_report}{A logical indicating whether to output a comprehensive
 report. A comprehensive report includes the Background and Methods sections.}
 
@@ -134,7 +155,8 @@ saved in the file.}
 \item{num_records_right_dataset}{The number of records in the right dataset of the linkage.}
 
 \item{acquisition_year_var}{A string of the name of the numeric variable in
-\code{main_data} that represents the acquisition year.}
+\code{main_data} that represents the acquisition year. This must be provided
+for the datasets date range to be output on the title page of a PDF output.}
 
 \item{acquisition_month_var}{A string of the name of the numeric variable in
 \code{main_data} that represents the acquisition month.}
@@ -165,6 +187,9 @@ ground truth.}
 \item{definitions}{A data frame, a file path to an rds file that
 contains a data frame or a file path to a csv file. Data must contain two columns:
 the list of terms in the first and their definitions in the second.}
+
+\item{definitions_display_header}{A logical indicating whether to display the
+column headers in the definitions table. Only applied when \code{output_format = "docx"}.}
 
 \item{abbreviations}{A data frame, a file path to an rds file that
 contains a data frame or a file path to a csv file. Data must contain two columns:

@@ -7,33 +7,38 @@
 #' @param main_data A data frame, a file path to an rds file that contains a data
 #'  frame or a file path to a csv file. This data contains variables present
 #'  in the left dataset of the linkage.
-#' @param report_title String indicating the title of the report.
+#' @param report_title String indicating the title of the report. If
+#'  \code{output_format = "docx"}, the title will only be used in the suggested citation.
+#' @param report_subtitle String indicating the subtitle of the report. If
+#'  \code{output_format = "docx"}, the subtitle will only be used in the suggested citation.
 #' @param left_dataset_name String indicating the name of the left dataset.
 #' @param right_dataset_name String indicating the name of the right dataset.
 #' @param output_dir A path to a directory. All output files will be save here.
 #' @param data_linker String indicating who performed the linkage.
 #' @param linkage_package String indicating the R package used to link the data.
-#' @param linkage_package_version String indicating the version of the \code{linkage_package}
-#'  used to link the data. You can obtain the package version via \code{packageVersion("package_name")}.
-#' @param linkrep_package_version String indicating the version of \code{linkrep} used to
-#'  generate the report. You can obtain the package version via \code{packageVersion("linkrep")}.
-#' @param linkage_rate_tbl_column_var A string of the name of a logical or binary
+#' @param stratified_linkage_tbls_column_var A string of the name of a logical or binary
 #'  variable present in \code{main_data} that indicates whether a record linked or not.
-#'  Its values will be the columns in the linkage rate table.
+#'  Its values will be the columns in the linkage rate table and the linkaed data
+#'  representativeness table.
+#' @param linked_data_representativeness_tbl_strata_vars A character vector of the
+#'  names of the variables present in \code{main_data} to stratify the linked data
+#'  representativeness table by.
 #' @param linkage_rate_tbl_strata_vars A character vector of the names of the
 #'  variables present in \code{main_data} to stratify the linkage rate table by.
+#' @param linked_data_representativeness_tbl_footnotes A character vector of additional
+#'  footnotes for the linked data representativeness table. Each element in the
+#'  vector will be displayed on a new line.
 #' @param linkage_rate_tbl_footnotes A character vector of additional footnotes for
-#' the linkage rate table. Each element in the vector will be displayed on a new line.
-#' @param linkage_rate_tbl_display_total_column A logical indicating whether to
-#'  display a total (overall) column in the table. Default is \code{TRUE}.
-#' @param linkage_rate_tbl_display_mean_not_median_stats A logical indicating whether
-#'  to display the statistics for continuous variables in the linkage rate table
-#'  as either mean \eqn{\pm} standard deviation or median (Q1, Q3), where Q1 is
-#'  the 25\eqn{^{th}} percentile, and Q3 is the 75\eqn{^{th}} percentile. Default is \code{FALSE}.
-#' @param linkage_rate_tbl_percent_type String specifying the desired percent type
-#'  in the linkage rate table. Allowed values are "\code{row}" or "\code{column}".
-#' @param linkage_rate_tbl_output_to_csv A logical indicating whether to save the
-#'  linkage rate table in a csv file. Default is \code{FALSE}.
+#'  the linkage rate table. Each element in the vector will be displayed on a new line.
+#' @param stratified_linkage_tbls_continuous_stat A string indicating which statistic
+#'  to use on continuous variables in the linkage rate table. Allowed values are
+#'  "\code{mean}" or "\code{median}" (default). If "\code{mean}", mean \eqn{\pm}
+#'  standard deviation will be output otherwise, median (Q1, Q3), where Q1 is the
+#'  25\eqn{^{th}} percentile, and Q3 is the 75\eqn{^{th}} percentile, will be output.
+#' @param stratified_linkage_tbls_output_to_csv A logical indicating whether to
+#'  save the linkage rate table in a csv file. Default is \code{FALSE}.
+#' @param display_missingness_table A logical indicating whether to display the
+#'  missingness table in the report.
 #' @param missing_data_indicators A data frame, a file path to an rds file that
 #'  contains a data frame or a file path to a csv file. All variables in the data
 #'  must be logical or binary, with \code{1} or \code{TRUE} representing a missing record
@@ -43,6 +48,14 @@
 #' the missingness table. Each element in the vector will be displayed on a new line.
 #' @param output_format String specifying the desired output format. Allowed values
 #'  are "\code{pdf}" or "\code{docx}".
+#' @param linkage_package_version String indicating the version of the \code{linkage_package}
+#'  used to link the data. You can obtain the package version via \code{packageVersion("package_name")}.
+#' @param linkrep_package_version String indicating the version of \code{linkrep} used to
+#'  generate the report. You can obtain the package version via \code{packageVersion("linkrep")}.
+#' @param R_version String indicating the version of R used to generate the report.
+#'  You can obtain the version of R via \code{R.version.string}.
+#' @param datastan_package_version String indicating the version of \code{datastan} used to
+#'  preprocess the data. You can obtain the package version via \code{packageVersion("datastan")}.
 #' @param comprehensive_report A logical indicating whether to output a comprehensive
 #'  report. A comprehensive report includes the Background and Methods sections.
 #' @param save_linkage_rate A logical indicating whether to save information on
@@ -74,6 +87,8 @@
 #' @param definitions A data frame, a file path to an rds file that
 #'  contains a data frame or a file path to a csv file. Data must contain two columns:
 #'  the list of terms in the first and their definitions in the second.
+#' @param definitions_display_header A logical indicating whether to display the
+#'  column headers in the definitions table. Only applied when \code{output_format = "docx"}.
 #' @param abbreviations A data frame, a file path to an rds file that
 #'  contains a data frame or a file path to a csv file. Data must contain two columns:
 #'  the list of abbreviations in the first and their meaning in the second.
@@ -180,23 +195,27 @@
 #'
 linkage_quality_report <- function(main_data,
                                    report_title,
+                                   report_subtitle,
                                    left_dataset_name,
                                    right_dataset_name,
                                    output_dir,
                                    data_linker,
-                                   linkage_package, # newwwwwwwwww
-                                   linkage_package_version, # newwwwwww
-                                   linkrep_package_version, # newww
-                                   linkage_rate_tbl_column_var,
+                                   linkage_package,
+                                   stratified_linkage_tbls_column_var,
+                                   linked_data_representativeness_tbl_strata_vars,
                                    linkage_rate_tbl_strata_vars,
+                                   linked_data_representativeness_tbl_footnotes = NULL,
                                    linkage_rate_tbl_footnotes = NULL,
-                                   linkage_rate_tbl_display_total_column = TRUE, # remove!
-                                   linkage_rate_tbl_display_mean_not_median_stats = FALSE, # change: _continuous_stat = "mean" or "median", footnote should be specified based on this input
-                                   linkage_rate_tbl_percent_type = "row",
-                                   linkage_rate_tbl_output_to_csv = FALSE,
+                                   stratified_linkage_tbls_continuous_stat = "median",
+                                   stratified_linkage_tbls_output_to_csv = FALSE,
+                                   display_missingness_table = FALSE,
                                    missing_data_indicators = NULL,
                                    missingness_tbl_footnotes = NULL,
                                    output_format = "pdf",
+                                   linkage_package_version = NULL,
+                                   linkrep_package_version = NULL,
+                                   R_version = NULL,
+                                   datastan_package_version = NULL,
                                    comprehensive_report = TRUE,
                                    save_linkage_rate = TRUE,
                                    project_id = NULL,
@@ -236,24 +255,6 @@ linkage_quality_report <- function(main_data,
                                    citation_style = NULL
 ){
 
-  # linkage_rate_tbl_column_var,
-  # linkage_rate_tbl_strata_vars,
-  # linkage_rate_tbl_footnotes = NULL,
-  # linkage_rate_tbl_display_total_column = TRUE,
-  # linkage_rate_tbl_display_mean_not_median_stats = FALSE,
-  # linkage_rate_tbl_percent_type = "row",
-  # linkage_rate_tbl_output_to_csv = FALSE,
-
-# linked_data_representativeness_tbl_strata_vars
-# linked_data_representativeness_tbl_footnotes
-# linkage_rate_tbl_strata_vars
-# linkage_rate_tbl_footnotes
-# stratified_linkage_tbls_column_var
-# stratified_linkage_tbls_continuous_stat
-# stratified_linkage_tbls_output_to_csv
-
-
-
   # perform parameter input checks
 
   if (!is.null(temp_data_output_dir)){
@@ -268,6 +269,7 @@ linkage_quality_report <- function(main_data,
   temp_data_output_dir <- gsub("\\\\", "/", temp_data_output_dir)
 
   validate_string(report_title, "report_title")
+  validate_string(report_subtitle, "report_subtitle")
   validate_string(left_dataset_name, "left_dataset_name")
   validate_string(right_dataset_name, "right_dataset_name")
 
@@ -278,24 +280,41 @@ linkage_quality_report <- function(main_data,
 
   validate_string(data_linker, "data_linker")
   validate_string(linkage_package, "linkage_package")
-  validate_string(linkage_package_version, "linkage_package_version")
-  validate_string(linkrep_package_version, "linkrep_package_version")
 
-  validate_string(linkage_rate_tbl_column_var, "linkage_rate_tbl_column_var")
+  validate_string(stratified_linkage_tbls_column_var, "stratified_linkage_tbls_column_var")
+  validate_string_vector(linked_data_representativeness_tbl_strata_vars, "linked_data_representativeness_tbl_strata_vars")
+  if (!is.null(linked_data_representativeness_tbl_footnotes)){
+    validate_string_vector(linked_data_representativeness_tbl_footnotes, "linked_data_representativeness_tbl_footnotes")
+  }
   validate_string_vector(linkage_rate_tbl_strata_vars, "linkage_rate_tbl_strata_vars")
   if (!is.null(linkage_rate_tbl_footnotes)){
     validate_string_vector(linkage_rate_tbl_footnotes, "linkage_rate_tbl_footnotes")
   }
-  validate_boolean(linkage_rate_tbl_display_total_column, "linkage_rate_tbl_display_total_column")
-  validate_boolean(linkage_rate_tbl_display_mean_not_median_stats, "linkage_rate_tbl_display_mean_not_median_stats")
-  validate_string(linkage_rate_tbl_percent_type, "linkage_rate_tbl_percent_type")
-  if (linkage_rate_tbl_percent_type != "row" & linkage_rate_tbl_percent_type != "column"){
-    stop("Invalid argument: linkage_rate_tbl_percent_type. Options: 'row' or 'column'")
+  validate_string(stratified_linkage_tbls_continuous_stat, "stratified_linkage_tbls_continuous_stat")
+  if (stratified_linkage_tbls_continuous_stat != "median" & stratified_linkage_tbls_continuous_stat != "mean"){
+    stop("Invalid argument: stratified_linkage_tbls_continuous_stat. Options: 'median' or 'mean'")
   }
-  validate_boolean(linkage_rate_tbl_output_to_csv, "linkage_rate_tbl_output_to_csv")
+  validate_boolean(stratified_linkage_tbls_output_to_csv, "stratified_linkage_tbls_output_to_csv")
 
+  validate_boolean(display_missingness_table, "display_missingness_table")
+  if (is.null(missing_data_indicators) & display_missingness_table){
+    stop("display_missingness_table cannot be TRUE when no data is passed in for missing_data_indicators. Either pass data to the missing_data_indicators parameter or set display_missingness_table to FALSE")
+  }
   if (!is.null(missingness_tbl_footnotes)){
     validate_string_vector(missingness_tbl_footnotes, "missingness_tbl_footnotes")
+  }
+
+  if (!is.null(linkage_package_version)){
+    validate_string(linkage_package_version, "linkage_package_version")
+  }
+  if (!is.null(linkrep_package_version)){
+    validate_string(linkrep_package_version, "linkrep_package_version")
+  }
+  if (!is.null(R_version)){
+    validate_string(R_version, "R_version")
+  }
+  if (!is.null(datastan_package_version)){
+    validate_string(datastan_package_version, "datastan_package_version")
   }
 
   validate_boolean(save_linkage_rate, "save_linkage_rate")
@@ -517,12 +536,22 @@ linkage_quality_report <- function(main_data,
 
   main_data <- read_data(main_data, "main_data")
 
-  validate_var_in_data(linkage_rate_tbl_column_var, main_data,
-                       "linkage_rate_tbl_column_var", "main_data")
-  if (sum(is.na(main_data[[linkage_rate_tbl_column_var]])) > 0 |
-      sum(main_data[[linkage_rate_tbl_column_var]] != 0 &
-          main_data[[linkage_rate_tbl_column_var]] != 1) > 0){
-    stop("Invalid argument: linkage_rate_tbl_column_var must be a binary or logical variable in 'main_data'")
+  validate_var_in_data(stratified_linkage_tbls_column_var, main_data,
+                       "stratified_linkage_tbls_column_var", "main_data")
+  if (sum(is.na(main_data[[stratified_linkage_tbls_column_var]])) > 0 |
+      sum(main_data[[stratified_linkage_tbls_column_var]] != 0 &
+          main_data[[stratified_linkage_tbls_column_var]] != 1) > 0){
+    stop("Invalid argument: stratified_linkage_tbls_column_var must be a binary or logical variable in 'main_data'")
+  }
+
+  invalid_strata_vars <- base::setdiff(linked_data_representativeness_tbl_strata_vars, names(main_data))
+  if (length(invalid_strata_vars) > 0) {
+    stop("Invalid argument: linked_data_representativeness_tbl_strata_vars. Not all variables provided are present in 'main_data'")
+  }
+  if (length(linked_data_representativeness_tbl_strata_vars) == 1){
+    if (linked_data_representativeness_tbl_strata_vars == stratified_linkage_tbls_column_var){
+      stop("stratified_linkage_tbls_column_var and linked_data_representativeness_tbl_strata_vars cannot be the same")
+    }
   }
 
   invalid_strata_vars <- base::setdiff(linkage_rate_tbl_strata_vars, names(main_data))
@@ -530,8 +559,8 @@ linkage_quality_report <- function(main_data,
     stop("Invalid argument: linkage_rate_tbl_strata_vars. Not all variables provided are present in 'main_data'")
   }
   if (length(linkage_rate_tbl_strata_vars) == 1 & is.null(missing_data_indicators)){
-    if (linkage_rate_tbl_strata_vars == linkage_rate_tbl_column_var){
-      stop("linkage_rate_tbl_column_var and linkage_rate_tbl_strata_vars cannot be the same")
+    if (linkage_rate_tbl_strata_vars == stratified_linkage_tbls_column_var){
+      stop("stratified_linkage_tbls_column_var and linkage_rate_tbl_strata_vars cannot be the same")
     }
   }
 
@@ -673,12 +702,12 @@ linkage_quality_report <- function(main_data,
                                          format = "f", digits = 0)
   }
 
-  num_records_linked <- sum(main_data[[linkage_rate_tbl_column_var]] == 1)
+  num_records_linked <- sum(main_data[[stratified_linkage_tbls_column_var]] == 1)
   num_records_linked <- formatC(num_records_linked,
                                 big.mark = thousands_separator,
                                 format = "f", digits = 0)
 
-  overall_linkage_rate <- sum(main_data[[linkage_rate_tbl_column_var]] == 1)/nrow(main_data) * 100
+  overall_linkage_rate <- sum(main_data[[stratified_linkage_tbls_column_var]] == 1)/nrow(main_data) * 100
   overall_linkage_rate <- formatC(overall_linkage_rate, digits = num_decimal_places,
                                   big.mark = thousands_separator,
                                   decimal.mark = decimal_mark, format = "f")
@@ -842,7 +871,7 @@ linkage_quality_report <- function(main_data,
       }
       cat("\\begin{description}")
       for (i in 1:nrow(data)){
-        cat("\\item[", data[[1]][i], "]")
+        cat("\\item[", data[[1]][i], ":]")
         cat(data[[2]][i])
       }
       cat("\\end{description}")
@@ -859,7 +888,7 @@ linkage_quality_report <- function(main_data,
   if (!is.null(definitions)){
     if (output_format == "docx"){
       definitions_table <- two_column_table(
-        data = abbreviations_data,
+        data = definitions_data,
         output_format = output_format,
         font_size = table_font_size,
         font_style = font_style,
@@ -886,16 +915,38 @@ linkage_quality_report <- function(main_data,
     }
   }
 
+  linked_data_repr_tbl <- linkage_rate_table(
+    main_data = main_data,
+    output_format = output_format,
+    column_var = stratified_linkage_tbls_column_var,
+    strata_vars = linked_data_representativeness_tbl_strata_vars,
+    display_total_column = TRUE,
+    display_unlinked_column = FALSE,
+    continuous_stat = stratified_linkage_tbls_continuous_stat,
+    percent_type = "column",
+    font_size = table_font_size,
+    font_style = font_style,
+    footnotes = linked_data_representativeness_tbl_footnotes,
+    thousands_separator = thousands_separator,
+    decimal_mark = decimal_mark,
+    num_decimal_places = num_decimal_places,
+    display_percent_symbol = display_percent_symbol,
+    output_to_csv = stratified_linkage_tbls_output_to_csv,
+    output_dir = output_dir
+  )
+  linked_data_repr_tbl_path <- generate_element_paths(linked_data_repr_tbl)
+
   # linkage rate table
   linkage_rate_tbl <- linkage_rate_table(
     main_data = main_data,
     output_format = output_format,
-    column_var = linkage_rate_tbl_column_var,
+    column_var = stratified_linkage_tbls_column_var,
     strata_vars = linkage_rate_tbl_strata_vars,
     missing_data_indicators = missing_data_indicators,
-    display_total_column = linkage_rate_tbl_display_total_column,
-    display_mean_not_median_stats = linkage_rate_tbl_display_mean_not_median_stats,
-    percent_type = linkage_rate_tbl_percent_type,
+    display_total_column = FALSE,
+    display_unlinked_column = TRUE,
+    continuous_stat = stratified_linkage_tbls_continuous_stat,
+    percent_type = "row",
     font_size = table_font_size,
     font_style = font_style,
     footnotes = linkage_rate_tbl_footnotes,
@@ -903,7 +954,7 @@ linkage_quality_report <- function(main_data,
     decimal_mark = decimal_mark,
     num_decimal_places = num_decimal_places,
     display_percent_symbol = display_percent_symbol,
-    output_to_csv = linkage_rate_tbl_output_to_csv,
+    output_to_csv = stratified_linkage_tbls_output_to_csv,
     output_dir = output_dir
   )
   linkage_rate_table_path <- generate_element_paths(linkage_rate_tbl)
@@ -913,7 +964,7 @@ linkage_quality_report <- function(main_data,
   if(!is.null(acquisition_year) & !is.null(acquisition_month)){
     linkage_rates_plot <- linkage_rates_over_time_plot(
       data = main_data,
-      link_indicator_var =  linkage_rate_tbl_column_var,
+      link_indicator_var = stratified_linkage_tbls_column_var,
       acquisition_year_var = acquisition_year_var,
       acquisition_month_var = acquisition_month_var)
     if (!is.null(linkage_rates_plot)){
@@ -992,7 +1043,7 @@ linkage_quality_report <- function(main_data,
 
   # missingness table
   missingness_table_path <- NULL
-  if (!is.null(missing_data_indicators)){
+  if (display_missingness_table){
     missingness_tbl <- missingness_table(
       data = missing_data_indicators,
       output_format = output_format,
@@ -1026,6 +1077,7 @@ linkage_quality_report <- function(main_data,
   definitions_data_path = definitions_data_path,
   abbreviations_data_path = abbreviations_data_path,
   listed_elements_generator_function_path = listed_elements_generator_function_path,
+  linked_data_repr_table_path = linked_data_repr_tbl_path,
   linkage_rate_table_path = linkage_rate_table_path,
   linkage_rates_plot_path = linkage_rates_plot_path,
   algorithm_summary_table_path = algorithm_summary_table_path,
@@ -1034,6 +1086,7 @@ linkage_quality_report <- function(main_data,
   performance_measures_plot_caption = performance_measures_plot_caption,
   missingness_table_path = missingness_table_path,
   report_title = report_title,
+  report_subtitle = report_subtitle,
   left_dataset_name = left_dataset_name,
   right_dataset_name = right_dataset_name,
   data_linker = data_linker,
@@ -1050,7 +1103,9 @@ linkage_quality_report <- function(main_data,
   comprehensive_report = comprehensive_report,
   linkage_package = linkage_package,
   linkage_package_version = linkage_package_version,
-  linkrep_package_version = linkrep_package_version
+  linkrep_package_version = linkrep_package_version,
+  R_version = R_version,
+  datastan_package_version = datastan_package_version
   ))
 
   # Format final output:
