@@ -180,7 +180,7 @@ requires_landscape_page <- function(table){
 }
 ```
 
-\newgeometry{top = 1in, bottom = 0.8in, left = 0.5in, right = 0.5in}
+\newgeometry{top = 1in, bottom = 1in, left = 0.5in, right = 0.5in}
 
 ::: {.content-visible when-format="pdf"}
 ```{=tex}
@@ -193,10 +193,12 @@ requires_landscape_page <- function(table){
     \LARGE
     `r params$report_subtitle`\\
     `r if(!is.null(params$data_time_period)) params$data_time_period`\\
+  \end{flushleft}
+  \begin{flushright}
     \large
     \textbf{`r if(!is.null(params$project_id)) sprintf("PHRPC \\#: %s", as.character(params$project_id))`}\\
     Prepared on `r params$report_generation_date`
-  \end{flushleft}
+  \end{flushright}
 \end{titlepage}
 ```
 \newgeometry{top = 1in, bottom = 1in, left = 1in, right = 1in}
