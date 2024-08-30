@@ -19,6 +19,8 @@
 #'  display a total (overall) column in the table. Default is \code{TRUE}.
 #' @param display_unlinked_column A logical indicating whether to
 #'  display the unlinked column in the table. Default is \code{TRUE}.
+#' @param display_missing_vars A logical indicating whether to display the missing
+#'  data indicators in the linked data representativeness table. Default is \code{FALSE}.
 #' @param continuous_stat A string indicating which statistic to use on continuous
 #'  variables. Allowed values are "\code{mean}" or "\code{median}" (default). If
 #'  "\code{mean}", mean \eqn{\pm} standard deviation will be output otherwise,
@@ -75,6 +77,7 @@ linkage_rate_table <- function(main_data,
                                missing_data_indicators = NULL,
                                display_total_column = TRUE,
                                display_unlinked_column = TRUE,
+                               display_missing_vars = FALSE,
                                continuous_stat = "median",
                                percent_type = "row",
                                font_size = 12,
@@ -180,8 +183,10 @@ linkage_rate_table <- function(main_data,
   #   variable name, by "Missing "
   # - All variables provided in missing_data_indicators will be output in the table
   #----
-  # only output missing values for the linkage rate table (display_unlinked_column = TRUE), not the linkage data representativeness table
-  if (display_unlinked_column){
+  if (percent_type == "row"){
+    display_missing_vars = TRUE
+  }
+  if (display_missing_vars){
     if (!is.null(missing_data_indicators)){
       # Match the columns in the two datasets and label the matched missing indicators "Missing"
       i <- 1
@@ -333,6 +338,9 @@ linkage_rate_table <- function(main_data,
     write.csv(df, out_file)
   }
 
+  continuous_var_present <- ifelse("continuous" %in% table$table_body$var_type,
+                            TRUE, FALSE)
+
   # transform gtsummary table into a flextable to ensure consistency in report output
   table <- as_flex_table(table)
 
@@ -341,7 +349,7 @@ linkage_rate_table <- function(main_data,
   }
 
   # add extra footnote to end of provided footnotes
-  if ("continuous" %in% table$table_body$var_type){
+  if (continuous_var_present){
    default_footnote <- paste0("Data are presented as n (",
                              percent_type,
                              " %) or ",
