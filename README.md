@@ -32,7 +32,8 @@ needs:
 interpret the tables and figures to assess for potential biases
 
 **Linkage Rate Summary**: Includes the linkage rate table which
-stratifies linkage rates by sociodemographic factors
+stratifies linkage rates by sociodemographic factors and other
+characteristics
 
 **Linkage Algorithm Summary**: If provided, includes tables and figures
 describing the linkage algorithm and its quality
