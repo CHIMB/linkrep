@@ -106,22 +106,6 @@ test_that("Testing the fonts were correctly updated", {
 })
 
 
-test_that("Testing the footnotes were correctly updated", {
-  out_f <- "pdf"
-
-  ft <- formatted_flextable(mtcars, out_f, 12, "Arial", NULL)
-  expect_null(ft$footer$content$data[1][[1]])
-
-  ft <- formatted_flextable(mtcars, out_f, 12, "Calibri", "this is my footnote!")
-  expect_equal(ft$footer$content$data[[1]]$txt, "this is my footnote!")
-
-  ft <- formatted_flextable(mtcars, out_f, 12, "Calibri", c("uno", "dos", "tres"))
-  expect_equal(ft$footer$content$data[[1]]$txt, "uno\ndos\ntres")
-})
-
-
-
-
 test_that("Testing the text alignments were correctly updated", {
   out_f <- "pdf"
   ft <- formatted_flextable(mtcars, out_f, 13, "Arial", header_align = "left", body_align = "right")

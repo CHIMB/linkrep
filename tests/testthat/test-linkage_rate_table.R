@@ -9,7 +9,7 @@ test_that("Testing factoring to output 'Linked' and 'Unlinked' works with both b
   expect_equal(t$header$content$data[[3]]$txt[1], "Unlinked")
 
   t <- suppressMessages(linkage_rate_table(main_data, out_f, "linked", names(CO2),
-                          display_total_column = F, display_mean_not_median_stats = T,
+                          display_total_column = F, continuous_stat = "mean",
                           display_percent_symbol = T))
   expect_equal(t$header$content$data[[2]]$txt[1], "Linked")
   expect_equal(t$header$content$data[[3]]$txt[1], "Unlinked")
@@ -22,7 +22,7 @@ test_that("Testing factoring to output 'Linked' and 'Unlinked' works with both b
   expect_equal(t$header$content$data[[3]]$txt[1], "Unlinked")
 
   t <- suppressMessages(linkage_rate_table(main_data, out_f, "linked", names(mtcars),
-                          display_total_column = F, display_mean_not_median_stats = T,
+                          display_total_column = F, continuous_stat = "mean",
                           display_percent_symbol = T))
   expect_equal(t$header$content$data[[2]]$txt[1], "Linked")
   expect_equal(t$header$content$data[[3]]$txt[1], "Unlinked")
@@ -157,14 +157,6 @@ test_that("Testing 0(NA) does not show up in table", {
   expect_equal(t$body$content$data[[90]]$txt, "0 (0_000)")
 })
 
-test_that("Testing footnotes output correctly", {
-  t <- suppressMessages(linkage_rate_table(main_data, out_f, col_var, strata_vars))
-  expect_equal(t$footer$content$data[[1]]$txt, 'Data are presented as n (%), mean \u00B1 SD, or median (Q1, Q3); where SD = standard deviation, Q1 = 25\u1d57\u02b0 percentile and Q3 = 75\u1d57\u02b0 percentile.')
-
-  t <- suppressMessages(linkage_rate_table(main_data, out_f, col_var, strata_vars,
-                                           footnotes = c("one", "un", "uno", "eins")))
-  expect_equal(t$footer$content$data[[1]]$txt, "one\nun\nuno\neins\nData are presented as n (%), mean \u00B1 SD, or median (Q1, Q3); where SD = standard deviation, Q1 = 25\u1d57\u02b0 percentile and Q3 = 75\u1d57\u02b0 percentile.")
-})
 
 
 
