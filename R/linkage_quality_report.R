@@ -28,6 +28,9 @@
 #' @param linked_data_representativeness_tbl_footnotes A character vector of additional
 #'  footnotes for the linked data representativeness table. Each element in the
 #'  vector will be displayed on a new line.
+#' @param linked_data_repr_tbl_display_missing_indicators A logical
+#'  indicating whether to display the missing data indicators in the linked data
+#'  representativeness table. Default is \code{FALSE}.
 #' @param linkage_rate_tbl_footnotes A character vector of additional footnotes for
 #'  the linkage rate table. Each element in the vector will be displayed on a new line.
 #' @param stratified_linkage_tbls_continuous_stat A string indicating which statistic
@@ -205,6 +208,7 @@ linkage_quality_report <- function(main_data,
                                    linked_data_representativeness_tbl_strata_vars,
                                    linkage_rate_tbl_strata_vars,
                                    linked_data_representativeness_tbl_footnotes = NULL,
+                                   linked_data_repr_tbl_display_missing_indicators = FALSE,
                                    linkage_rate_tbl_footnotes = NULL,
                                    stratified_linkage_tbls_continuous_stat = "median",
                                    stratified_linkage_tbls_output_to_csv = FALSE,
@@ -286,6 +290,7 @@ linkage_quality_report <- function(main_data,
   if (!is.null(linked_data_representativeness_tbl_footnotes)){
     validate_string_vector(linked_data_representativeness_tbl_footnotes, "linked_data_representativeness_tbl_footnotes")
   }
+  validate_boolean(linked_data_repr_tbl_display_missing_indicators, "linked_data_repr_tbl_display_missing_indicators")
   validate_string_vector(linkage_rate_tbl_strata_vars, "linkage_rate_tbl_strata_vars")
   if (!is.null(linkage_rate_tbl_footnotes)){
     validate_string_vector(linkage_rate_tbl_footnotes, "linkage_rate_tbl_footnotes")
@@ -920,8 +925,10 @@ linkage_quality_report <- function(main_data,
     output_format = output_format,
     column_var = stratified_linkage_tbls_column_var,
     strata_vars = linked_data_representativeness_tbl_strata_vars,
+    missing_data_indicators = missing_data_indicators,
     display_total_column = TRUE,
     display_unlinked_column = FALSE,
+    display_missing_vars = linked_data_repr_tbl_display_missing_indicators,
     continuous_stat = stratified_linkage_tbls_continuous_stat,
     percent_type = "column",
     font_size = table_font_size,
@@ -1112,7 +1119,7 @@ linkage_quality_report <- function(main_data,
 
   # change file name and location
   # file automatically saves in calling location therefore need to manually move it to output_dir
-  file_name <- paste0("Record Linkage Quality Report.", output_format)
+  file_name <- paste0("Data Linkage Quality Report.", output_format)
   src <- gsub("qmd", output_format, updated_quarto_report)
   result <- file.rename(src, paste0(output_dir, "/", file_name))
   message(paste0("Ignore above, output created: ", file_name))
