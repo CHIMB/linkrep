@@ -17,6 +17,7 @@ linkage_quality_report(
   linked_data_representativeness_tbl_strata_vars,
   linkage_rate_tbl_strata_vars,
   linked_data_representativeness_tbl_footnotes = NULL,
+  linked_data_repr_tbl_display_missing_indicators = FALSE,
   linkage_rate_tbl_footnotes = NULL,
   stratified_linkage_tbls_continuous_stat = "median",
   stratified_linkage_tbls_output_to_csv = FALSE,
@@ -103,6 +104,10 @@ variables present in \code{main_data} to stratify the linkage rate table by.}
 \item{linked_data_representativeness_tbl_footnotes}{A character vector of additional
 footnotes for the linked data representativeness table. Each element in the
 vector will be displayed on a new line.}
+
+\item{linked_data_repr_tbl_display_missing_indicators}{A logical
+indicating whether to display the missing data indicators in the linked data
+representativeness table. Default is \code{FALSE}.}
 
 \item{linkage_rate_tbl_footnotes}{A character vector of additional footnotes for
 the linkage rate table. Each element in the vector will be displayed on a new line.}
