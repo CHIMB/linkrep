@@ -46,13 +46,17 @@ techniques used
 
 ## Example Report
 
-insert report generation, including the sample data
+\[insert report generation, including the sample data\]
 
 ## Installation
 
 ``` r
 # install.packages("pak")
 pak::pak("CHIMB/linkrep")
+
+# You may need to install tinytex:
+# install.packages("tinytex")
+# tinytex::install_tinytex()
 ```
 
 ### Local Installation
@@ -65,6 +69,10 @@ then run the following code to complete installation:
 # Select the unmodified package you downloaded from GitHub:
 pkg_path <- file.choose()
 devtools::install_local(pkg_path)
+
+# You may need to install tinytex:
+# install.packages("tinytex")
+# tinytex::install_tinytex()
 ```
 
 ## Additional Information
