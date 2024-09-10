@@ -41,7 +41,7 @@ params:
   right_dataset_name: null
   data_linker: null
   output_format: null
-  project_id: nul
+  project_id: null
   num_records_left_dataset: null
   num_records_right_dataset: null
   ground_truth: null
@@ -191,14 +191,17 @@ requires_landscape_page <- function(table){
   \thispagestyle{nopagenumbers}
   \vspace*{\fill}
     \Huge
-    \textbf{`r params$report_title`}\\
+    \textbf{`r params$report_title`}  
+    
     \LARGE
-    `r params$report_subtitle`\\
+    `r params$report_subtitle`  
+    
     `r if(!is.null(params$data_time_period)) params$data_time_period`
   \end{flushleft}
   \begin{flushright}
     \large
-    `r if(!is.null(params$project_id)) sprintf("PHRPC \\#: %s", as.character(params$project_id))`\\
+    `r if(!is.null(params$project_id)) sprintf("PHRPC \\#: %s", as.character(params$project_id))`  
+    
     Prepared on `r params$report_generation_date`
   \end{flushright}
 \end{titlepage}
