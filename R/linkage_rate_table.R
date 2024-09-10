@@ -19,8 +19,6 @@
 #'  display a total (overall) column in the table. Default is \code{TRUE}.
 #' @param display_unlinked_column A logical indicating whether to
 #'  display the unlinked column in the table. Default is \code{TRUE}.
-#' @param display_missing_vars A logical indicating whether to display the missing
-#'  data indicators in the linked data representativeness table. Default is \code{FALSE}.
 #' @param continuous_stat A string indicating which statistic to use on continuous
 #'  variables. Allowed values are "\code{mean}" or "\code{median}" (default). If
 #'  "\code{mean}", mean \eqn{\pm} standard deviation will be output otherwise,
@@ -61,7 +59,7 @@
 #' @return A \code{flextable} that was originally a \code{gtsummary}.
 #'
 #' @importFrom gtsummary theme_gtsummary_language tbl_summary as_flex_table modify_header modify_footnote add_overall bold_labels style_number all_categorical all_continuous all_stat_cols
-#' @importFrom dplyr select mutate relocate
+#' @importFrom dplyr select mutate relocate across where
 #' @importFrom tidyselect all_of
 #' @importFrom Hmisc label
 #' @importFrom rlang := !!
@@ -77,7 +75,6 @@ linkage_rate_table <- function(main_data,
                                missing_data_indicators = NULL,
                                display_total_column = TRUE,
                                display_unlinked_column = TRUE,
-                               display_missing_vars = FALSE,
                                continuous_stat = "median",
                                percent_type = "row",
                                font_size = 12,
@@ -158,86 +155,64 @@ linkage_rate_table <- function(main_data,
 
   # data_subset will contain the necessary variables to generate the table
   data_subset <- select(main_data, all_of(strata_vars), all_of(column_var))
+  # save labels to restore them after certain calculations remove them
+  labels <- label(data_subset)
 
-  #----
-  # We decided to have two separate data frames passed to the linkage rate table
-  # to make it easier to identify missing variables to be used in the missingness
-  # table. If one data frame were passed to the main function then we would need
-  # to ensure all missing values were indicated with NA and then perform computations
-  # in the missignness table function to extract the missing values and make a whole
-  # new data frame to generate that table. We felt by using this strategy, we eliminate
-  # the need for making a new data frame and leave it up to the user to ensure
-  # they provide a missingness data frame if they want missing values output.
-  #
-  # Logic for below:
-  # 1) Loop through main_data, each time trying to identify if there is a corresponding
-  # variable in missing_data_indicators
-  # - a corresponding variable is either one with the same variable name suffixed by "_missing"
-  #   or the same label as the variable in main_data
-  # 2) If a corresponding variable is found, place the variable from missing_data_indicators
-  # next to the one in main_data (this is needed for later on). Remove the
-  # missing_data_indicators variable from missing_data_indicators. Label that variable "Missing".
-  # 3) Once the loop is finished:
-  # - If there are remaining variables in missing_data_indicators, append them to the
-  #   end of main_data and prefix either their label, or if they don't have one their
-  #   variable name, by "Missing "
-  # - All variables provided in missing_data_indicators will be output in the table
-  #----
-  if (percent_type == "row"){
-    display_missing_vars = TRUE
-  }
-  if (display_missing_vars){
-    if (!is.null(missing_data_indicators)){
-      # Match the columns in the two datasets and label the matched missing indicators "Missing"
-      i <- 1
-      while(i <= ncol(data_subset) & ncol(missing_data_indicators) > 0){
-        # missing indicators labels
-        missing_labels <- label(missing_data_indicators)
+  # In all categorical variables, turn NA values into "Missing" so they are viewed
+  # as a level in the table output and incorporated into the column percent calculations.
+  data_subset <- mutate(data_subset, across(where(~ !is.numeric(.) & !is.integer(.)), ~ ifelse(is.na(.), "Missing",  if (is.factor(.)) as.character(.) else .)))
 
-        data_subset_col_name <- names(data_subset)[i]
-        # naming standard for missing field indicators
-        missing_col_name <- paste0(data_subset_col_name, "_missing")
+  # Add the missing value indicators to data_subset
+  if (!is.null(missing_data_indicators)){
+    # Match the columns in the two datasets and label the matched missing indicators "Missing"
+    i <- 1
+    while(i <= ncol(data_subset) & ncol(missing_data_indicators) > 0){
+      # missing indicators labels
+      missing_labels <- label(missing_data_indicators)
 
-        # two options:
-        # 1. The name of the variable in main_data_missing matches the name of the variable in main_data suffixed by '_missing'
-        # 2. The label of the variable in main_data_missing matches the label of the variable in main_data
-        if (missing_col_name %in% names(missing_data_indicators)) {
-          data_subset <- mutate(data_subset, !!missing_col_name := missing_data_indicators[[missing_col_name]])
-          # need variable to be right after the 'main_data' variable to be able to make it a sublevel of it in the table
-          data_subset <- relocate(data_subset, !!missing_col_name, .after = !!data_subset_col_name)
-          Hmisc::label(data_subset[[missing_col_name]]) <- "Missing"
+      data_subset_col_name <- names(data_subset)[i]
+      # naming standard for missing field indicators
+      missing_col_name <- paste0(data_subset_col_name, "_missing")
+
+      # 1. The name of the variable in main_data_missing matches the name of the variable in main_data suffixed by '_missing'
+      # 2. The label of the variable in main_data_missing matches the label of the variable in main_data
+      if (missing_col_name %in% names(missing_data_indicators)) {
+        missing_data_indicators[[missing_col_name]] <- NULL
+      } else {
+        col_label <- labels[[i]]
+        if ((col_label != "") & (col_label %in% missing_labels)) {
+          missing_index <- which(missing_labels == col_label)
+          missing_col_name <- names(missing_labels)[missing_index]
           missing_data_indicators[[missing_col_name]] <- NULL
-          i <- i + 2
-        } else {
-          col_label <- label(data_subset[[i]])
-          if ((col_label != "") & (col_label %in% missing_labels)) {
-            missing_index <- which(missing_labels == col_label)
-            missing_col_name <- names(missing_labels)[missing_index]
-            data_subset <- mutate(data_subset, !!missing_col_name := missing_data_indicators[[missing_index]])
-            # need variable to be right after the 'main_data' variable to be able to make it a sublevel of it in the table
-            data_subset <- relocate(data_subset, !!missing_col_name, .after = !!data_subset_col_name)
-            Hmisc::label(data_subset[[missing_col_name]]) <- "Missing"
-            missing_data_indicators[[missing_col_name]] <- NULL
-            i <- i + 1
-          }
-          i <- i + 1
         }
       }
-
-      # label remaining missing indicators with "Missing " in front of the label or variable name so it stands on its own in the table
-      if (ncol(missing_data_indicators) > 0) {
-        for (i in seq_along(missing_data_indicators)){
-          col_label <- label(missing_data_indicators[,i])
-          if (col_label == ""){
-            Hmisc::label(missing_data_indicators[,i]) <- paste("Missing", names(missing_data_indicators)[i])
-          } else {
-            Hmisc::label(missing_data_indicators[,i]) <- paste("Missing", col_label)
-          }
-        }
+      if ("Missing" %in% unique(data_subset[[i]])) {
+        # Get the unique levels excluding "Missing", and sort them alphabetically
+        other_levels <- sort(setdiff(unique(data_subset[[i]]), "Missing"))
+        # Reorder the column's levels so that "Missing" comes last
+        data_subset[[i]] <- factor(data_subset[[i]], levels = c(other_levels, "Missing"))
       }
+      # restore label
+      if (labels[[i]] != ""){
+        Hmisc::label(data_subset[[i]]) <- labels[[i]]
+      }
+      i <- i + 1
+    }
 
-      # combine the two datasets
-      data_subset <- cbind(data_subset, missing_data_indicators)
+    # combine the two datasets
+    data_subset <- cbind(data_subset, missing_data_indicators)
+  } else {
+    for (i in names(data_subset)) {
+      if ("Missing" %in% unique(data_subset[[i]])) {
+        # Get the unique levels excluding "Missing", and sort them alphabetically
+        other_levels <- sort(setdiff(unique(data_subset[[i]]), "Missing"))
+        # Reorder the column's levels so that "Missing" comes last
+        data_subset[[i]] <- factor(data_subset[[i]], levels = c(other_levels, "Missing"))
+      }
+      # restore label
+      if (labels[[i]] != ""){
+        Hmisc::label(data_subset[[i]]) <- labels[[i]]
+      }
     }
   }
 
@@ -272,7 +247,8 @@ linkage_rate_table <- function(main_data,
       all_continuous() ~ num_decimal_places
     ),
     percent = percent_type,
-    missing = "no"
+    missing = "ifany",
+    missing_text = "Missing"
   )
 
   column_headers <- ifelse(display_unlinked_column,
@@ -297,21 +273,9 @@ linkage_rate_table <- function(main_data,
     )
   }
 
-  #----
-  # Above we moved the missing_data_indicator variables associated with a main_data
-  # variable right next to its corresponding variable in main_data. This was so
-  # we could easily locate the "Missing" variable and make it a 'level' of its
-  # main variable. This way, "Missing" will show up as a subgroup of that variable
-  # in the table and won't be bold alongside the main variables.
-  # If the 'gtsummary' package gets updated and the structure of the table changes, the
-  # following lines of code will most likely need to be modified.
-  #----
-
-  # make the missing values associated with another variable a sub level of that variable
-  table$table_body$row_type <- ifelse(table$table_body$var_label == "Missing", "level", table$table_body$row_type)
-
   # tab over the sublevels for pdf output, as it doesn't tab them over automatically
-  table$table_body$label <- ifelse(output_format == "pdf" & table$table_body$row_type == "level",
+  table$table_body$label <- ifelse(output_format == "pdf" &
+                                     (table$table_body$row_type == "level" | table$table_body$row_type == "missing"),
                                    paste0("\t", table$table_body$label),
                                    table$table_body$label)
 
