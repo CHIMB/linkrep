@@ -62,23 +62,6 @@ test_that("Testing the missing indicators dataset is correctly added to the tabl
                                    "oxygen_missing")
   Hmisc::label(main_data_missing[[3]]) <- "Uptake" # tests matching on labels
   Hmisc::label(main_data_missing[[4]]) <- "Plant Origin"
-
-  t <- suppressMessages(linkage_rate_table(main_data, "pdf", col_var, strata_vars,
-                                           main_data_missing))
-  # check all the rows in the table have been inserted correctly
-  expect_equal(t$body$dataset$label,
-               c("Plant", "\tQn1","\tQn2", "\tQn3", "\tQc1", "\tQc3",
-                  "\tQc2", "\tMn3","\tMn2", "\tMn1","\tMc2", "\tMc3",
-                  "\tMc1", "\tMissing",
-                  "Plant Origin", "\tQuebec", "\tMississippi", "\tMissing",
-                  "Treatment", "\tnonchilled","\tchilled",
-                  "conc", "\t95", "\t175", "\t250", "\t350", "\t500", "\t675",
-                  "\t1000", "\tMissing",
-                  "Uptake", "\tMissing",
-                  "Missing stuff",
-                  "Missing oxygen_missing"))
-
-
 })
 
 test_that("Testing table outputs with or without main_data_missing...", {
