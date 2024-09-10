@@ -2,7 +2,7 @@
 % Please edit documentation in R/linkage_quality_report.R
 \name{linkage_quality_report}
 \alias{linkage_quality_report}
-\title{Generate a Record Linkage Quality Report}
+\title{Generate a Data Linkage Quality Report}
 \usage{
 linkage_quality_report(
   main_data,
@@ -17,8 +17,8 @@ linkage_quality_report(
   linked_data_representativeness_tbl_strata_vars,
   linkage_rate_tbl_strata_vars,
   linked_data_representativeness_tbl_footnotes = NULL,
-  linked_data_repr_tbl_display_missing_indicators = FALSE,
   linkage_rate_tbl_footnotes = NULL,
+  linkage_rate_tbl_display_total_col = FALSE,
   stratified_linkage_tbls_continuous_stat = "median",
   stratified_linkage_tbls_output_to_csv = FALSE,
   display_missingness_table = FALSE,
@@ -105,12 +105,11 @@ variables present in \code{main_data} to stratify the linkage rate table by.}
 footnotes for the linked data representativeness table. Each element in the
 vector will be displayed on a new line.}
 
-\item{linked_data_repr_tbl_display_missing_indicators}{A logical
-indicating whether to display the missing data indicators in the linked data
-representativeness table. Default is \code{FALSE}.}
-
 \item{linkage_rate_tbl_footnotes}{A character vector of additional footnotes for
 the linkage rate table. Each element in the vector will be displayed on a new line.}
+
+\item{linkage_rate_tbl_display_total_col}{A logical indicating whether to display
+a third column in the linkage rate table displaying the overall totals for each value.}
 
 \item{stratified_linkage_tbls_continuous_stat}{A string indicating which statistic
 to use on continuous variables in the linkage rate table. Allowed values are
@@ -284,8 +283,8 @@ Saves either a word or pdf record linkage quality report to the \code{output_dir
 }
 \description{
 The \code{linkage_quality_report} function takes in data from a linkage and
-outputs a record linkage quality report. The report contains information on
-record linkage and provides plots and tables to describe the data.
+outputs a data linkage quality report. The report contains information on
+data linkage and provides figures and tables to describe the data.
 }
 \details{
 All tables display the variable labels in their headings before reverting to
@@ -293,9 +292,9 @@ All tables display the variable labels in their headings before reverting to
  function use \code{\link[Hmisc]{label}}.
 
 Information on \code{missing_data_indicators}:\cr
-Used in the linkage rate table and the missingness table. All variables present
+Used in the linkage rate table, linked data representativeness table and the missingness table. All variables present
  in the data will be displayed in both tables.\cr
-Linkage rate table:\cr
+Linkage rate and linked data representativeness table:\cr
  Variables associated with those in \code{main_data} must either have the same
  variable name suffixed by "\code{_missing}" or have the same label for it to be
  displayed in the linkage rate table as a value of that variable. In this case,
