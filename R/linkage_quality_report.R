@@ -1,8 +1,8 @@
-#' Generate a Record Linkage Quality Report
+#' Generate a Data Linkage Quality Report
 #'
 #' The \code{linkage_quality_report} function takes in data from a linkage and
-#' outputs a record linkage quality report. The report contains information on
-#' record linkage and provides plots and tables to describe the data.
+#' outputs a data linkage quality report. The report contains information on
+#' data linkage and provides figures and tables to describe the data.
 #'
 #' @param main_data A data frame, a file path to an rds file that contains a data
 #'  frame or a file path to a csv file. This data contains variables present
@@ -28,11 +28,10 @@
 #' @param linked_data_representativeness_tbl_footnotes A character vector of additional
 #'  footnotes for the linked data representativeness table. Each element in the
 #'  vector will be displayed on a new line.
-#' @param linked_data_repr_tbl_display_missing_indicators A logical
-#'  indicating whether to display the missing data indicators in the linked data
-#'  representativeness table. Default is \code{FALSE}.
 #' @param linkage_rate_tbl_footnotes A character vector of additional footnotes for
 #'  the linkage rate table. Each element in the vector will be displayed on a new line.
+#' @param linkage_rate_tbl_display_total_col A logical indicating whether to display
+#'  a third column in the linkage rate table displaying the overall totals for each value.
 #' @param stratified_linkage_tbls_continuous_stat A string indicating which statistic
 #'  to use on continuous variables in the linkage rate table. Allowed values are
 #'  "\code{mean}" or "\code{median}" (default). If "\code{mean}", mean \eqn{\pm}
@@ -154,9 +153,9 @@
 #'  function use \code{\link[Hmisc]{label}}.
 #'
 #' Information on \code{missing_data_indicators}:\cr
-#' Used in the linkage rate table and the missingness table. All variables present
+#' Used in the linkage rate table, linked data representativeness table and the missingness table. All variables present
 #'  in the data will be displayed in both tables.\cr
-#' Linkage rate table:\cr
+#' Linkage rate and linked data representativeness table:\cr
 #'  Variables associated with those in \code{main_data} must either have the same
 #'  variable name suffixed by "\code{_missing}" or have the same label for it to be
 #'  displayed in the linkage rate table as a value of that variable. In this case,
@@ -208,8 +207,8 @@ linkage_quality_report <- function(main_data,
                                    linked_data_representativeness_tbl_strata_vars,
                                    linkage_rate_tbl_strata_vars,
                                    linked_data_representativeness_tbl_footnotes = NULL,
-                                   linked_data_repr_tbl_display_missing_indicators = FALSE,
                                    linkage_rate_tbl_footnotes = NULL,
+                                   linkage_rate_tbl_display_total_col = FALSE,
                                    stratified_linkage_tbls_continuous_stat = "median",
                                    stratified_linkage_tbls_output_to_csv = FALSE,
                                    display_missingness_table = FALSE,
@@ -290,11 +289,11 @@ linkage_quality_report <- function(main_data,
   if (!is.null(linked_data_representativeness_tbl_footnotes)){
     validate_string_vector(linked_data_representativeness_tbl_footnotes, "linked_data_representativeness_tbl_footnotes")
   }
-  validate_boolean(linked_data_repr_tbl_display_missing_indicators, "linked_data_repr_tbl_display_missing_indicators")
   validate_string_vector(linkage_rate_tbl_strata_vars, "linkage_rate_tbl_strata_vars")
   if (!is.null(linkage_rate_tbl_footnotes)){
     validate_string_vector(linkage_rate_tbl_footnotes, "linkage_rate_tbl_footnotes")
   }
+  validate_boolean(linkage_rate_tbl_display_total_col, "linkage_rate_tbl_display_total_col")
   validate_string(stratified_linkage_tbls_continuous_stat, "stratified_linkage_tbls_continuous_stat")
   if (stratified_linkage_tbls_continuous_stat != "median" & stratified_linkage_tbls_continuous_stat != "mean"){
     stop("Invalid argument: stratified_linkage_tbls_continuous_stat. Options: 'median' or 'mean'")
@@ -928,7 +927,6 @@ linkage_quality_report <- function(main_data,
     missing_data_indicators = missing_data_indicators,
     display_total_column = TRUE,
     display_unlinked_column = FALSE,
-    display_missing_vars = linked_data_repr_tbl_display_missing_indicators,
     continuous_stat = stratified_linkage_tbls_continuous_stat,
     percent_type = "column",
     font_size = table_font_size,
@@ -950,7 +948,7 @@ linkage_quality_report <- function(main_data,
     column_var = stratified_linkage_tbls_column_var,
     strata_vars = linkage_rate_tbl_strata_vars,
     missing_data_indicators = missing_data_indicators,
-    display_total_column = FALSE,
+    display_total_column = linkage_rate_tbl_display_total_col,
     display_unlinked_column = TRUE,
     continuous_stat = stratified_linkage_tbls_continuous_stat,
     percent_type = "row",
