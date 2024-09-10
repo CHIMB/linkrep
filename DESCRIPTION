@@ -8,10 +8,10 @@ Authors@R: c(
             person(given="George & Fay Yee Centre for Healthcare Innovation", email="data.linkage@umanitoba.ca", role="cre")
           )
 Description: Provides a function to generate highly customizable linkage quality reports. 
-These reports include tables and figures generated from the provided data, offering a 
-thorough overview of the data linkage process and the methods applied. Additionally, 
-they provide guidance on interpreting the linkage results, helping to identify 
-potential biases within the linked dataset. 
+    These reports include tables and figures generated from the provided data, offering a 
+    thorough overview of the data linkage process and the methods applied. Additionally, 
+    they provide guidance on interpreting the linkage results, helping to identify 
+    potential biases within the linked dataset. 
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
