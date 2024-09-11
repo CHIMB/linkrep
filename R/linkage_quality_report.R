@@ -13,7 +13,7 @@
 #'  \code{output_format = "docx"}, the subtitle will only be used in the suggested citation.
 #' @param left_dataset_name String indicating the name of the left dataset.
 #' @param right_dataset_name String indicating the name of the right dataset.
-#' @param output_dir A path to a directory. All output files will be save here.
+#' @param output_dir A path to a directory. All output files will be saved here.
 #' @param data_linker String indicating who performed the linkage.
 #' @param linkage_package String indicating the R package used to link the data.
 #' @param stratified_linkage_tbls_column_var A string of the name of a logical or binary
@@ -143,7 +143,7 @@
 #'  how the background images are placed onto a PDF report. Default is
 #'  \url{https://github.com/CHIMB/linkrep/blob/main/inst/templates/set_background_images.tex}.
 #' @param citation_style A file path to a csl file containing the citation style.
-#'  To find different styles visit \url{https://github.com/citation-style-language/styles/blob/master/american-medical-association.csl}
+#'  To find different styles visit \url{https://github.com/citation-style-language/styles/blob/master/american-medical-association.csl}.
 #'  If the location of the citation must change in the text you must modify its
 #'  location in the quarto report template.
 #'
@@ -175,7 +175,7 @@
 #'  - The report generation year\cr
 #'  - The name of the data linker (provided by \code{data_linker})\cr
 #'  - The name of the left dataset (provided by \code{left_dataset_name})\cr
-#'  - The name fo the right dataset (provided by \code{right_dataset_name})\cr
+#'  - The name of the right dataset (provided by \code{right_dataset_name})\cr
 #'  - The overall linkage rate\cr
 #'  - The acquisition dates of the left dataset\cr
 #'  - The project ID\cr
