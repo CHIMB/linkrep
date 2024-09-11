@@ -199,6 +199,18 @@ linkage_rate_table <- function(main_data,
       i <- i + 1
     }
 
+    # label remaining missing indicators with "Missing " in front of the label or variable name so it stands on its own in the table
+    if (ncol(missing_data_indicators) > 0) {
+      for (i in seq_along(missing_data_indicators)){
+        col_label <- label(missing_data_indicators[,i])
+        if (col_label == ""){
+          Hmisc::label(missing_data_indicators[,i]) <- paste("Missing", names(missing_data_indicators)[i])
+        } else {
+          Hmisc::label(missing_data_indicators[,i]) <- paste("Missing", col_label)
+        }
+      }
+    }
+
     # combine the two datasets
     data_subset <- cbind(data_subset, missing_data_indicators)
   } else {
