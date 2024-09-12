@@ -77,7 +77,9 @@ devtools::install_local(pkg_path)
 
 ## Additional Information
 
-\[link documentation\]
+For detailed instructions on formatting data for the report and
+customizing features, refer to the [User
+Documentation](https://github.com/CHIMB/linkrep/blob/main/inst/docs/User_Documentation.pdf)
 
 ## Authors
 
