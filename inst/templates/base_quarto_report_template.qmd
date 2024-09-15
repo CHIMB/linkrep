@@ -182,13 +182,11 @@ requires_landscape_page <- function(table){
 
 \newgeometry{top = 1in, bottom = 1in, left = 0.5in, right = 0.5in}
 
-\setlength{\parskip}{0.5em}
-
 ::: {.content-visible when-format="pdf"}
 ```{=tex}
 \begin{titlepage}
-  \begin{flushleft}
   \thispagestyle{nopagenumbers}
+  \setlength{\parskip}{0.2em}
   \vspace*{\fill}
     \Huge
     \textbf{`r params$report_title`}  
@@ -196,14 +194,9 @@ requires_landscape_page <- function(table){
     \LARGE
     `r params$report_subtitle`  
     
-    `r if(!is.null(params$data_time_period)) params$data_time_period`
-  \end{flushleft}
-  \begin{flushright}
-    \large
-    `r if(!is.null(params$project_id)) sprintf("PHRPC \\#: %s", as.character(params$project_id))`  
+    `r if(!is.null(params$data_time_period)) params$data_time_period` \hfill \large `r if(!is.null(params$project_id)) sprintf("PHRPC \\#: %s", as.character(params$project_id))`  
     
-    Prepared on `r params$report_generation_date`
-  \end{flushright}
+    \hfill Prepared on `r params$report_generation_date`
 \end{titlepage}
 ```
 \newgeometry{top = 1in, bottom = 1in, left = 1in, right = 1in}
