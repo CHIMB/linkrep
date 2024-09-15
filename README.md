@@ -44,10 +44,6 @@ limitations
 **Methods**: Details the linkage process, including pre-processing and
 techniques used
 
-## Example Report
-
-\[insert report generation, including the sample data\]
-
 ## Installation
 
 ``` r

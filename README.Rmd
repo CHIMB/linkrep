@@ -40,10 +40,6 @@ Reports generated with `linkrep` can be customized to fit your specific needs:
 
 **Methods**: Details the linkage process, including pre-processing and techniques used
 
-## Example Report
-
-[insert report generation, including the sample data]
-
 ## Installation
 
 ```{r, eval=FALSE}
