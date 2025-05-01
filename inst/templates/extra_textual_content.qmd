@@ -51,7 +51,7 @@ Merging records from different sources may lead to two types of errors: 1) incor
 
 ## Software
 
-All data analytics were performed using R`r if(!is.null(params$R_version)) paste0(" (version ", params$R_version, ")")`. Data preprocessing was conducted with the datastan package`r if(!is.null(params$datastan_package_version)) paste0(" (version ", params$datastan_package_version, ")")`, `r params$linkage_package``r if(!is.null(params$linkage_package_version)) paste0(" (version ", params$linkage_package_version, ")")` was used for record linkage, and the data linkage quality report was generated with linkrep`r if(!is.null(params$linkrep_package_version)) paste0(" (version ", params$linkrep_package_version, ")")`.[@linkrep; @datastanpkg] 
+All data analytics were performed using R`r if(!is.null(params$R_version)) paste0(" (version ", params$R_version, ")")`. Data preprocessing was conducted with the datastan package`r if(!is.null(params$datastan_package_version)) paste0(" (version ", params$datastan_package_version, ")")`, `r params$linkage_package``r if(!is.null(params$linkage_package_version)) paste0(" (version ", params$linkage_package_version, ")")` was used for record linkage, and the data linkage quality report was generated with linkrep`r if(!is.null(params$linkrep_package_version)) paste0(" (version ", params$linkrep_package_version, ")")`.[@linkrep; @datastanpkg; @autolink] 
 
 ## Data Pre-processing
 
@@ -70,7 +70,7 @@ Missing sex/gender values were inferred from the primary given name (the first s
 
 ## Linkage Algorithm
 
-Records were linked through an iterative process consisting of both deterministic and probabilistic steps`r if(!is.null(algorithm_summary_table)) " (@tbl-algorithm_summary)"`. To improve the linkage rate, particularly for records with data entry errors in the fields used in previous passes, we varied the blocking and matching variables across iterations of the multi-step algorithm. Following each linkage step, matched record pairs were excluded from further consideration in subsequent iterations.  
+Records were linked through an iterative process consisting of both deterministic and probabilistic steps`r if(!is.null(algorithm_summary_table)) " (**@tbl-algorithm_summary**)"`. To improve the linkage rate, particularly for records with data entry errors in the fields used in previous passes, we varied the blocking and matching variables across iterations of the multi-step algorithm. Following each linkage step, matched record pairs were excluded from further consideration in subsequent iterations.  
 
 Initially, multiple deterministic linkage steps were conducted where agreement on matching variables was weighted equally. Linkage rates for deterministic passes were reported separately to allow data users to assess the reliability of matches. Specifically, record pairs that matched exactly on fields with high discriminative power are more likely to belong to the same individual, providing greater confidence in the linkage results.  
 
@@ -81,10 +81,10 @@ Within each probabilistic pass, partial match weights were computed for each pai
 
 ## Linkage Algorithm Evaluation
 
-Linkage rates were stratified by sociodemographic characteristics (@tbl-linkage_rates) to enable an examination of the algorithm’s  consistency across demographic groups and identify potential selection bias.`r if(!is.null(linkage_rates_over_time_plot)) " To assess how changes in data capture may have affected linkage rates over time, a histogram is provided showing linkage rate trends over time (@fig-linkage_rate_dist)."`  
+Linkage rates were stratified by sociodemographic characteristics (**@tbl-linkage_rates**) to enable an examination of the algorithm’s  consistency across demographic groups and identify potential selection bias.`r if(!is.null(linkage_rates_over_time_plot)) " To assess how changes in data capture may have affected linkage rates over time, a histogram is provided showing linkage rate trends over time (@fig-linkage_rate_dist)."`  
 
 `r if(!is.null(params$ground_truth)) "::: {.content-visible}" else "::: {.content-hidden}"`
-Links predicted by the probabilistic linkage algorithm were evaluated against `r params$ground_truth` as the ground truth`r if(!is.null(performance_measures_table)) " (@tbl-performance_measures_tbl)"`. Classification accuracy was estimated using the subset of records from `r params$left_dataset_name` that had non-missing values for the gold standard field, `r params$ground_truth`, before executing the linkage algorithm.   
+Links predicted by the probabilistic linkage algorithm were evaluated against `r params$ground_truth` as the ground truth`r if(!is.null(performance_measures_table)) " (**@tbl-performance_measures_tbl**)"`. Classification accuracy was estimated using the subset of records from `r params$left_dataset_name` that had non-missing values for the gold standard field, `r params$ground_truth`, before executing the linkage algorithm.   
 
 Classification performance was evaluated using the following metrics:   
 

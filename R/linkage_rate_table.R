@@ -45,6 +45,8 @@
 #' file. Default is \code{FALSE}.
 #' @param output_dir A path to a directory. The csv file containing the
 #'  table will be saved here if `output_to_csv = TRUE`.
+#' @param threshold A small count threshold that may be supplied by the user if they wish small counts below this threshold
+#'  to be suppressed in the output of the linkage quality report.
 #'
 #' @details
 #' Details on \code{missing_data_indicators}:\cr
@@ -85,7 +87,8 @@ linkage_rate_table <- function(main_data,
                                num_decimal_places = 1,
                                display_percent_symbol = FALSE,
                                output_to_csv = FALSE,
-                               output_dir = NULL
+                               output_dir = NULL,
+                               threshold = NULL
 )
 
 {
@@ -246,22 +249,140 @@ linkage_rate_table <- function(main_data,
                                       labels = c("Linked", "Unlinked"))
 
 
-  # generate linkage rate table
-  table <- tbl_summary(
-    data_subset,
-    by = all_of(column_var),
-    statistic = list(
-      all_categorical() ~ categorical_stat,
-      all_continuous() ~ continuous_stat
-    ),
-    digits = list(
-      all_categorical() ~ c(0, num_decimal_places),
-      all_continuous() ~ num_decimal_places
-    ),
-    percent = percent_type,
-    missing = "ifany",
-    missing_text = "Missing"
-  )
+  # If the threshold is not NULL, then we can do these extra steps to remove any small counts
+  removed_cols <- c()
+  if(!is.null(threshold)){
+    # Generate the linkage table using just integer values
+    table <- tbl_summary(
+      data_subset,
+      by = all_of(column_var),
+      statistic = list(
+        all_categorical() ~ "{n}",
+        all_continuous() ~ "{mean}"
+      )
+    )
+
+    #print(table$table_body, n = 100)
+    table_body <- table$table_body
+
+    # Get the column names and labels
+    col_names  <- colnames(main_data)
+    col_labels <- label(main_data)
+
+    # Variables and labels to remove
+    variables_to_remove <- c()
+    labels_to_remove <- c()
+
+    # Modify specific rows to show "0 (0.0)" if no missing values
+    for (i in 1:nrow(table_body)) {
+      # Get the column and label for this iteration
+      col_name  <- table_body$variable[i]
+      col_label <- table_body$var_label[i]
+      var_type  <- table_body$var_type[i]
+
+      # If the variable type is continous, then skip it
+      if(var_type != "continuous"){
+        # Get the stat 1 and stat 2
+        stat_1 <- table_body$stat_1[i]
+        stat_2 <- table_body$stat_2[i]
+
+        # Convert to numbers
+        stat_1 <- suppressWarnings(as.numeric(gsub(",", "", stat_1)))
+        stat_2 <- suppressWarnings(as.numeric(gsub(",", "", stat_2)))
+
+        # Little function for checking if a number is whole or not
+        is.wholenumber <- function(x, tol = .Machine$double.eps^0.5)  abs(x - round(x)) < tol
+
+        # First, make sure the first and second value aren't NA, otherwise ignore the row
+        if(!is.na(stat_1) && !is.na(stat_2)){
+          # Secondly, make sure that the first and second value are integers
+          if(is.wholenumber(stat_1) == TRUE && is.wholenumber(stat_2 == TRUE)){
+            # Lastly, check if the value are within the thresholds
+            if((stat_1 > 0 && stat_1 <= threshold) || (stat_2 > 0 && stat_2 <= threshold)){
+              # Track the variable/label to remove
+              variables_to_remove <- append(variables_to_remove, col_name)
+              labels_to_remove <- append(labels_to_remove, col_label)
+
+              # Keep unique names only
+              variables_to_remove <- unique(variables_to_remove)
+              labels_to_remove <- unique(labels_to_remove)
+            }
+          }
+        }
+      }
+    }
+
+    # Filter out rows where the variable or label is in the remove lists
+    table$table_body <- table_body %>%
+      filter(
+        !(variable %in% variables_to_remove | var_label %in% labels_to_remove)
+      )
+
+    # Print the filtered table to verify
+    #print(table$table_body, n = 100)
+
+    # Track the removed columns
+    removed_cols <- labels_to_remove
+
+    # Filter data_subset before creating tbl_summary()
+    if(length(variables_to_remove) > 0){
+      data_subset_filtered <- data_subset %>%
+        select(-all_of(variables_to_remove))
+
+      # Otherwise, if a threshold was not provided, generate the linkage table normally
+      table <- tbl_summary(
+        data_subset_filtered,
+        by = all_of(column_var),
+        statistic = list(
+          all_categorical() ~ categorical_stat,
+          all_continuous() ~ continuous_stat
+        ),
+        digits = list(
+          all_categorical() ~ c(0, num_decimal_places),
+          all_continuous() ~ num_decimal_places
+        ),
+        percent = percent_type,
+        missing = "ifany",
+        missing_text = "Missing"
+      )
+    }
+    else{
+      # Otherwise, if a threshold was not provided, generate the linkage table normally
+      table <- tbl_summary(
+        data_subset,
+        by = all_of(column_var),
+        statistic = list(
+          all_categorical() ~ categorical_stat,
+          all_continuous() ~ continuous_stat
+        ),
+        digits = list(
+          all_categorical() ~ c(0, num_decimal_places),
+          all_continuous() ~ num_decimal_places
+        ),
+        percent = percent_type,
+        missing = "ifany",
+        missing_text = "Missing"
+      )
+    }
+  }
+  else{
+    # Otherwise, if a threshold was not provided, generate the linkage table normally
+    table <- tbl_summary(
+      data_subset,
+      by = all_of(column_var),
+      statistic = list(
+        all_categorical() ~ categorical_stat,
+        all_continuous() ~ continuous_stat
+      ),
+      digits = list(
+        all_categorical() ~ c(0, num_decimal_places),
+        all_continuous() ~ num_decimal_places
+      ),
+      percent = percent_type,
+      missing = "ifany",
+      missing_text = "Missing"
+    )
+  }
 
   column_headers <- ifelse(display_unlinked_column,
                            sprintf("**{level}**\n(N = {style_number(n)}, {style_percent(p, digits = %d)}%%)",
@@ -280,7 +401,7 @@ linkage_rate_table <- function(main_data,
     table <- add_overall(
       table,
       last = TRUE,
-      col_label = "**Total**\n(N = {style_number(n)})",
+      col_label = "**Source**\n(N = {style_number(n)})",
       statistic = list(all_categorical() ~ total_col_stat),
     )
   }
@@ -336,6 +457,13 @@ linkage_rate_table <- function(main_data,
     default_footnote <- paste0("Data are presented as n (", percent_type," %)")
   }
   footnotes <- append(footnotes, default_footnote)
+
+  # If we used a threshold, make a note of the columns that were removed
+  if(length(removed_cols) > 0){
+    removed_footnote <- paste0("The following variable(s) were excluded to suppress frequencies less than ", threshold, ": ", paste0(removed_cols, collapse = ", "))
+    footnotes <- append(footnotes, removed_footnote)
+  }
+
   table <- format_flextables_from_gtsummary(table,
                                             output_format,
                                             font_size,

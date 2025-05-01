@@ -65,6 +65,38 @@ missingness_table <- function(data,
     missing = "no"
   )
 
+  # Get the column names and labels
+  col_names  <- colnames(data)
+  col_labels <- label(data)
+
+  # Modify specific rows to show "0 (0.0)" if no missing values
+  for (i in 1:length(col_names)) {
+    # Get the column and label for this iteration
+    col_name  <- col_names[i]
+    col_label <- col_labels[i]
+
+    # Check if all values are 0 or NA
+    if (all(data[[col_name]] == 0 | is.na(data[[col_name]]) | data[[col_name]] == F)) {
+      # Update `stat_0` for rows where `label` matches either `col_name` or `col_label`
+      table$table_body <- table$table_body %>%
+        dplyr::mutate(
+          stat_0 = ifelse(label == col_name | label == col_label, "0 (0.0)", stat_0)
+        )
+    }
+    # Check if all values are 1
+    else if (all(data[[col_name]] == 1 | data[[col_name]] == T)) {
+      # Update `stat_0` for rows where `label` matches either `col_name` or `col_label`
+      table$table_body <- table$table_body %>%
+        dplyr::mutate(
+          stat_0 = ifelse(label == col_name | label == col_label, paste0(nrow(data), " (100.0)"), stat_0)
+        )
+    }
+  }
+
+  # Filter out "level" rows, keeping only "label" rows for simplicity
+  table$table_body <- table$table_body %>%
+    dplyr::filter(row_type == "label")
+
   table <- modify_header(
     table,
     label = "**Variable**",

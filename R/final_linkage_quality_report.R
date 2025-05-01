@@ -1,6 +1,6 @@
 #' Generate a Data Linkage Quality Report
 #'
-#' The \code{linkage_quality_report} function takes in data from a linkage and
+#' The \code{final_linkage_quality_report} function takes in data from a linkage and
 #' outputs a data linkage quality report. The report contains information on
 #' data linkage and provides figures and tables to describe the data.
 #'
@@ -148,6 +148,10 @@
 #'  location in the quarto report template.
 #' @param threshold A small count threshold that may be supplied by the user if they wish small counts below this threshold
 #'  to be suppressed in the output of the linkage quality report.
+#' @param threshold_plots A vector of png files that will appear in the report which are plots of different thresholds
+#'  obtained during data linkage.
+#' @param report_file_name An optional file name which will be assigned to the output report, if no name is supplied, the report title
+#'  is used.
 #'
 #' @details
 #' All tables display the variable labels in their headings before reverting to
@@ -197,7 +201,7 @@
 #' @importFrom quarto quarto_render
 #' @importFrom grDevices dev.off png pdf
 #'
-linkage_quality_report <- function(main_data,
+final_linkage_quality_report <- function(main_data,
                                    report_title,
                                    report_subtitle,
                                    left_dataset_name,
@@ -229,6 +233,10 @@ linkage_quality_report <- function(main_data,
                                    acquisition_month_var = NULL,
                                    algorithm_summary_data = NULL,
                                    algorithm_summary_tbl_footnotes = NULL,
+                                   considered_algorithm_summary_data = NULL,
+                                   considered_algorithm_summary_tbl_footnotes = NULL,
+                                   considered_algorithm_summary_table_names = NULL,
+                                   considered_performance_measures_data = NULL,
                                    performance_measures_data = NULL,
                                    performance_measures_tbl_footnotes = NULL,
                                    ground_truth = NULL,
@@ -258,10 +266,41 @@ linkage_quality_report <- function(main_data,
                                    word_template = NULL,
                                    set_background_images_template = NULL,
                                    citation_style = NULL,
-                                   threshold = NULL
+                                   threshold = NULL,
+                                   threshold_plots = NULL,
+                                   threshold_plot_captions = NULL,
+                                   report_file_name = NULL
 ){
 
+  #-- ERROR HANDLING --#
+  #----
   # perform parameter input checks
+  if(!is.null(threshold_plots)){
+    if(!is.character(threshold_plots)){
+      stop(
+        "Invalid argument: Threshold plots must be a vector of file paths."
+      )
+    }
+    if(!is.null(threshold_plot_captions)){
+      if(!is.character(threshold_plot_captions)){
+        stop(
+          "Invalid argument: Threshold plot captions must be a vector of strings"
+        )
+      }
+
+      if(!(length(threshold_plots) == length(threshold_plot_captions))){
+        stop(
+          "Invalid argument: Numbers of threshold plots and captions must match."
+        )
+      }
+    }
+    else{
+      stop(
+        "Invalid argument: Threshold plot captions must be included with plots."
+      )
+    }
+  }
+
   if(!is.null(threshold) && suppressWarnings(is.na(as.integer(threshold)) == 1)){
     stop(
       "Invalid argument: threshold must be an integer value"
@@ -371,6 +410,9 @@ linkage_quality_report <- function(main_data,
 
   if (!is.null(ground_truth)){
     validate_string(ground_truth, "ground_truth")
+
+    # Capitalize all instances of PHIN
+    ground_truth <- gsub("\\bphin\\b", "PHIN", ground_truth, ignore.case = T)
   }
   if (!is.null(num_pairs_non_missing_ground_truth)){
     if (is.null(num_record_pairs)){
@@ -397,6 +439,7 @@ linkage_quality_report <- function(main_data,
                       font_size = text_font_size)
 
   validate_common_parameters(font_size = table_font_size)
+  #----
 
   #----
   # check_page_files
@@ -476,6 +519,7 @@ linkage_quality_report <- function(main_data,
     acknowledgements_page <- system.file("background_images", "acknowledgements_page.pdf", package = "linkrep")
     check_page_files(acknowledgements_page, "acknowledgements_page")
   }
+  #----
 
   #----
   # check_template_files
@@ -486,6 +530,7 @@ linkage_quality_report <- function(main_data,
   # @param param The name of the parameter being checked
   #
   # @return Either an error message or the file path
+  #----
   #----
   check_template_files <- function(file, extension, default_name, param){
     if (is.null(file)){
@@ -504,12 +549,13 @@ linkage_quality_report <- function(main_data,
     return(file)
   }
 
-  quarto_report_template <- check_template_files(quarto_report_template, "qmd", "base_quarto_report_template.qmd", "quarto_report_template")
+  quarto_report_template <- check_template_files(quarto_report_template, "qmd", "final_quarto_report_template.qmd", "quarto_report_template")
   extra_textual_content_quarto_template <- check_template_files(extra_textual_content_quarto_template, "qmd", "extra_textual_content.qmd", "extra_textual_content_quarto_template")
   references <- check_template_files(references, "bib", "references.bib", "references")
   word_template <- check_template_files(word_template, "docx", "word_template.docx", "word_template")
   set_background_images_template <- check_template_files(set_background_images_template, "tex", "set_background_images.tex", "set_background_images_template")
   citation_style <- check_template_files(citation_style, "csl", "american-medical-association.csl", "citation_style")
+  #----
 
 
   # read in data and perform checks
@@ -632,7 +678,17 @@ linkage_quality_report <- function(main_data,
   }
   if (!is.null(algorithm_summary_data)){
     algorithm_summary_data <- read_data(algorithm_summary_data, "algorithm_summary_data")
+  }
+
+  if(!is.null(considered_algorithm_summary_data)){
+    for(i in 1:length(considered_algorithm_summary_data)){
+      considered_algorithm_summary_data[[i]] <- read_data(considered_algorithm_summary_data[[i]], "considered_algorithm_summary_data")
     }
+  }
+
+  if(!is.null(considered_performance_measures_data)){
+    considered_performance_measures_data <- read_data(considered_performance_measures_data, "considered_performance_measures_data")
+  }
 
   if (is.null(performance_measures_data) & !is.null(performance_measures_tbl_footnotes)){
     warning("Footnotes were provided for the performance measures table with no 'performance_measures_data'. Table will not be created.")
@@ -745,6 +801,7 @@ linkage_quality_report <- function(main_data,
 
   report_generation_date <- Sys.Date()
   report_generation_date <- format(report_generation_date, "%b. %d, %Y")
+  #----
 
   #----
   # substitute values into placeholders
@@ -756,7 +813,6 @@ linkage_quality_report <- function(main_data,
   # file paths into their corresponding placeholders. Then we write the updated
   # lines into a new file for use in the quarto report.
   #----
-
   # background is only affected in pdf output
   new_set_background_images_template <- NULL
   if (output_format == "pdf"){
@@ -801,8 +857,9 @@ linkage_quality_report <- function(main_data,
     writeLines(set_bg_images_lines, new_set_background_images_template)
     rm(set_bg_images_lines)
   }
+  #----
 
-  # ----
+  #----
   # substitute values into placeholders
   #
   # All options in the YAML header cannot have parameters passed to them (ex. mainfont)
@@ -811,7 +868,7 @@ linkage_quality_report <- function(main_data,
   # references file we first read the lines of the quarto document, then gsub the
   # values into their corresponding placeholders and finally, write the new lines
   # back to a new file that's then used in quarto_render()
-  # ----
+  #----
   quarto_report <- readLines(quarto_report_template)
   text_font_size <- paste0(text_font_size, "pt")
 
@@ -837,6 +894,7 @@ linkage_quality_report <- function(main_data,
   updated_quarto_report <- tempfile(tmpdir = temp_data_output_dir, fileext = ".qmd")
   writeLines(quarto_report, updated_quarto_report)
   rm(quarto_report)
+  #----
 
 
   # generate report elements
@@ -992,7 +1050,7 @@ linkage_quality_report <- function(main_data,
     }
   }
 
-  # algorithm summary
+  # Algorithm summary
   algorithm_summary_table_path <- NULL
   if (!is.null(algorithm_summary_data)) {
     alg_summ_tbl <- algorithm_summary_table(
@@ -1007,6 +1065,222 @@ linkage_quality_report <- function(main_data,
     )
     algorithm_summary_table_path <- generate_element_paths(alg_summ_tbl)
   }
+
+  # Considered algorithm summary
+  considered_algorithm_summary_table_path_list <- list()
+  if (!is.null(considered_algorithm_summary_data)) {
+    # Replace each algorithm summary with the flextable
+    for(i in 1:length(considered_algorithm_summary_data)){
+      # Get the algorithm summary
+      algorithm_summary_data <- considered_algorithm_summary_data[[i]]
+
+      # Get the footnotes
+      algorithm_summary_footnotes <- considered_algorithm_summary_tbl_footnotes[[i]]
+
+      # Create the table and place it back into the list
+      alg_summ_tbl <- algorithm_summary_table(
+        data = algorithm_summary_data,
+        output_format = output_format,
+        font_size = table_font_size,
+        font_style = font_style,
+        footnotes = algorithm_summary_footnotes,
+        thousands_separator = thousands_separator,
+        decimal_mark = decimal_mark,
+        num_decimal_places = num_decimal_places
+      )
+
+      # Generate the summary path and add it to a list
+      considered_algorithm_summary_table_path_list[[i]] <- generate_element_paths(alg_summ_tbl)
+    }
+  }
+
+  # Considered performance measures
+  considered_performance_measures_table_path <- NULL
+  considered_performance_measures_plot_path <- NULL
+  considered_performance_measures_plot_caption <- NULL
+  if(!is.null(considered_performance_measures_data)){
+    perf_meas_tbl <- performance_measures_table(
+      data = considered_performance_measures_data,
+      ground_truth = ground_truth,
+      output_format = output_format,
+      font_size = table_font_size,
+      font_style = font_style,
+      footnotes = performance_measures_tbl_footnotes,
+      thousands_separator = thousands_separator,
+      decimal_mark = decimal_mark,
+      num_decimal_places = num_decimal_places,
+      num_record_pairs = num_pairs_non_missing_ground_truth,
+      percent_record_pairs = percent_non_missing_ground_truth
+    )
+    considered_performance_measures_table_path <- generate_element_paths(perf_meas_tbl)
+
+    # performance measures plot
+    considered_performance_measures_plot_path <- tempfile(tmpdir = temp_data_output_dir,
+                                               fileext = ifelse(output_format == "pdf", ".pdf", ".png"))
+    if (output_format == "pdf"){
+      pdf(considered_performance_measures_plot_path, width = 9, height = 9)
+
+      #V2
+      # Set up the number of rows
+      num_rows <- ceiling(nrow(considered_performance_measures_data) / 3)
+
+      # Set up the number of parameters
+      if(nrow(considered_performance_measures_data) == 1){
+        num_cols <- 1
+      }
+      else if (nrow(considered_performance_measures_data) %% 3 == 0){
+        num_cols <- 3
+      }
+      else if (nrow(considered_performance_measures_data) %% 2 == 0){
+        num_cols <- 2
+      }
+      else{
+        num_cols <- 3
+      }
+
+      op <- par(mar = c(1, 0, 1, 0), oma = c(1, 1, 1, 1))  # Adjust 'oma' to create outer margins for the entire plot
+      par(mfrow = c(num_rows+1, num_cols))
+
+      # Plot each radarchart
+      for (i in 1:nrow(considered_performance_measures_data)) {
+        # Make the radarchart for each row of performance measures
+        perf_meas_plot <- performance_measures_plot_v2(as.data.frame(considered_performance_measures_data[i, ]), i)
+      }
+
+      # Now switch to the entire figure for drawing the border
+      par(fig = c(0, 1, 0, 1), new = TRUE)  # This resets the plotting area to the whole grid
+
+      # Define colors for the legend
+      PLOT_COLOURS <- c("red", "orange", "yellow", "green", "lightblue", "blue", "violet", "pink", "grey80", "grey70", "grey60", "grey50")
+
+      # Add the legend in the bottom left of the entire grid
+      MyOrder = suppressWarnings(matrix(1:nrow(considered_performance_measures_data), nrow = num_rows, ncol = num_cols, byrow = T))
+
+      # Flatten the matrix to a vector
+      MyOrder_flat <- as.vector(MyOrder)
+
+      # Get unique algorithm numbers
+      unique_order <- unique(MyOrder_flat)
+
+      # Get corresponding unique algorithm names
+      unique_algorithms <- considered_performance_measures_data$algorithm_name[unique_order]
+
+      # Define corresponding unique colors
+      unique_colors <- PLOT_COLOURS[unique_order]
+
+      # If there is only 1 unique album, leave out the legend
+      if(length(unique_algorithms) > 1){
+        # Add the legend with unique entries
+        legend(x = "bottom", legend = unique_algorithms,
+               bty = "o",  # Adds a box around the legend
+               text.col = "black", box.col = "black",  # Border color
+               cex = 1.5,  # Adjust text size for the legend
+               pt.cex = 2.5,  # Size of the points (if applicable)
+               xpd = TRUE, ncol = num_cols, fill = unique_colors)
+      }
+
+      # Reset graphical parameters
+      par(op)
+
+      # Turn off the plotting device (if necessary)
+      dev.off()
+
+    }
+    else {
+      png(considered_performance_measures_plot_path, units = "in", width = 9, height = 9,
+          res = 350)
+
+      # Set up the number of rows
+      num_rows <- ceiling(nrow(considered_performance_measures_data) / 3)
+
+      # Set up the number of parameters
+      if(nrow(considered_performance_measures_data) == 1){
+        num_cols <- 1
+      }
+      else if (nrow(considered_performance_measures_data) %% 3 == 0){
+        num_cols <- 3
+      }
+      else if (nrow(considered_performance_measures_data) %% 2 == 0){
+        num_cols <- 2
+      }
+      else{
+        num_cols <- 3
+      }
+
+      op <- par(mar = c(1, 0, 1, 0), oma = c(1, 1, 1, 1))  # Adjust 'oma' to create outer margins for the entire plot
+      par(mfrow = c(num_rows+1, num_cols))
+
+      # Plot each radarchart
+      for (i in 1:nrow(considered_performance_measures_data)) {
+        # Make the radarchart for each row of performance measures
+        perf_meas_plot <- performance_measures_plot_v2(as.data.frame(considered_performance_measures_data[i, ]), i)
+      }
+
+      # Now switch to the entire figure for drawing the border
+      par(fig = c(0, 1, 0, 1), new = TRUE)  # This resets the plotting area to the whole grid
+
+      # Define colors for the legend
+      PLOT_COLOURS <- c("red", "orange", "yellow", "green", "lightblue", "blue", "violet", "pink", "grey80", "grey70", "grey60", "grey50")
+
+      # Add the legend in the bottom left of the entire grid
+      MyOrder = suppressWarnings(matrix(1:nrow(considered_performance_measures_data), nrow = num_rows, ncol = num_cols, byrow = T))
+
+      # Flatten the matrix to a vector
+      MyOrder_flat <- as.vector(MyOrder)
+
+      # Get unique algorithm numbers
+      unique_order <- unique(MyOrder_flat)
+
+      # Get corresponding unique algorithm names
+      unique_algorithms <- considered_performance_measures_data$algorithm_name[unique_order]
+
+      # Define corresponding unique colors
+      unique_colors <- PLOT_COLOURS[unique_order]
+
+      # If there is only 1 unique album, leave out the legend
+      if(length(unique_algorithms) > 1){
+        # Add the legend with unique entries
+        legend(x = "bottom", legend = unique_algorithms,
+               bty = "o",  # Adds a box around the legend
+               text.col = "black", box.col = "black",  # Border color
+               cex = 1.5,  # Adjust text size for the legend
+               pt.cex = 2.5,  # Size of the points (if applicable)
+               xpd = TRUE, ncol = num_cols, fill = unique_colors)
+      }
+
+      # Reset graphical parameters
+      par(op)
+
+      # Turn off the plotting device (if necessary)
+      dev.off()
+    }
+
+    if (length(perf_meas_plot) > 0){
+      unlink(considered_performance_measures_plot_path)
+      considered_performance_measures_plot_path <- NULL
+    }
+
+    # Change caption pluarlization based on number of rows
+    base_cap <- "Radar chart showing classification performance for linking records in "
+    if(nrow(considered_performance_measures_data) > 1){
+      base_cap <- "Radar charts showing classification performance for linking records in "
+    }
+
+    concatenated_footnotes <- paste0(performance_measures_tbl_footnotes, collapse = " ")
+    considered_performance_measures_plot_caption <- paste0(
+      base_cap,
+      left_dataset_name,
+      " to those in ",
+      right_dataset_name,
+      ". Classification performance was estimated among record pairs with non-missing values for ",
+      ground_truth,
+      ifelse(!is.null(num_pairs_non_missing_ground_truth) & !is.null(percent_non_missing_ground_truth),
+             paste0(" (N = ", num_pairs_non_missing_ground_truth, ", ", percent_non_missing_ground_truth, "%)"),
+             ""),
+      " and reported as percentages (%). ",
+      concatenated_footnotes)
+  }
+
 
   # performance measures table
   performance_measures_table_path <- NULL
@@ -1032,13 +1306,138 @@ linkage_quality_report <- function(main_data,
     performance_measures_plot_path <- tempfile(tmpdir = temp_data_output_dir,
                                                fileext = ifelse(output_format == "pdf", ".pdf", ".png"))
     if (output_format == "pdf"){
-      pdf(performance_measures_plot_path, width = 5, height = 5)
-      perf_meas_plot <- performance_measures_plot(performance_measures_data)
+      pdf(performance_measures_plot_path, width = 9, height = 9)
+      #V2
+      # Set up the number of rows
+      num_rows <- ceiling(nrow(performance_measures_data) / 3)
+
+      # Set up the number of parameters
+      if(nrow(performance_measures_data) == 1){
+        num_cols <- 1
+      }
+      else if (nrow(performance_measures_data) %% 3 == 0){
+        num_cols <- 3
+      }
+      else if (nrow(performance_measures_data) %% 2 == 0){
+        num_cols <- 2
+      }
+      else{
+        num_cols <- 3
+      }
+
+      op <- par(mar = c(1, 0, 1, 0), oma = c(1, 1, 1, 1))  # Adjust 'oma' to create outer margins for the entire plot
+      par(mfrow = c(num_rows+1, num_cols))
+
+      # Plot each radarchart
+      for (i in 1:nrow(performance_measures_data)) {
+        # Make the radarchart for each row of performance measures
+        perf_meas_plot <- performance_measures_plot_v2(as.data.frame(performance_measures_data[i, ]), i)
+      }
+
+      # Now switch to the entire figure for drawing the border
+      par(fig = c(0, 1, 0, 1), new = TRUE)  # This resets the plotting area to the whole grid
+
+      # Define colors for the legend
+      PLOT_COLOURS <- c("red", "orange", "yellow", "green", "lightblue", "blue", "violet", "pink", "grey80", "grey70", "grey60", "grey50")
+
+      # Add the legend in the bottom left of the entire grid
+      MyOrder = suppressWarnings(matrix(1:nrow(performance_measures_data), nrow = num_rows, ncol = num_cols, byrow = T))
+
+      # Flatten the matrix to a vector
+      MyOrder_flat <- as.vector(MyOrder)
+
+      # Get unique algorithm numbers
+      unique_order <- unique(MyOrder_flat)
+
+      # Get corresponding unique algorithm names
+      unique_algorithms <- performance_measures_data$algorithm_name[unique_order]
+
+      # Define corresponding unique colors
+      unique_colors <- PLOT_COLOURS[unique_order]
+
+      # If there is only 1 unique album, leave out the legend
+      if(length(unique_algorithms) > 1){
+        # Add the legend with unique entries
+        legend(x = "bottom", legend = unique_algorithms,
+               bty = "o",  # Adds a box around the legend
+               text.col = "black", box.col = "black",  # Border color
+               cex = 1.5,  # Adjust text size for the legend
+               pt.cex = 2.5,  # Size of the points (if applicable)
+               xpd = TRUE, ncol = num_cols, fill = unique_colors)
+      }
+
+      # Reset graphical parameters
+      par(op)
+
+      # Turn off the plotting device (if necessary)
       dev.off()
+
     } else {
-      png(performance_measures_plot_path, units = "in", width = 5, height = 5,
+      png(performance_measures_plot_path, units = "in", width = 9, height = 9,
           res = 350)
-      perf_meas_plot <- performance_measures_plot(performance_measures_data)
+
+      # Set up the number of rows
+      num_rows <- ceiling(nrow(performance_measures_data) / 3)
+
+      # Set up the number of parameters
+      if(nrow(performance_measures_data) == 1){
+        num_cols <- 1
+      }
+      else if (nrow(performance_measures_data) %% 3 == 0){
+        num_cols <- 3
+      }
+      else if (nrow(performance_measures_data) %% 2 == 0){
+        num_cols <- 2
+      }
+      else{
+        num_cols <- 3
+      }
+
+      op <- par(mar = c(1, 0, 1, 0), oma = c(1, 1, 1, 1))  # Adjust 'oma' to create outer margins for the entire plot
+      par(mfrow = c(num_rows+1, num_cols))
+
+      # Plot each radarchart
+      for (i in 1:nrow(performance_measures_data)) {
+        # Make the radarchart for each row of performance measures
+        perf_meas_plot <- performance_measures_plot_v2(as.data.frame(performance_measures_data[i, ]), i)
+      }
+
+      # Now switch to the entire figure for drawing the border
+      par(fig = c(0, 1, 0, 1), new = TRUE)  # This resets the plotting area to the whole grid
+
+      # Define colors for the legend
+      PLOT_COLOURS <- c("red", "orange", "yellow", "green", "lightblue", "blue", "violet", "pink", "grey80", "grey70", "grey60", "grey50")
+
+      # Add the legend in the bottom left of the entire grid
+      MyOrder = suppressWarnings(matrix(1:nrow(performance_measures_data), nrow = num_rows, ncol = num_cols, byrow = T))
+
+      # Flatten the matrix to a vector
+      MyOrder_flat <- as.vector(MyOrder)
+
+      # Get unique algorithm numbers
+      unique_order <- unique(MyOrder_flat)
+
+      # Get corresponding unique algorithm names
+      unique_algorithms <- performance_measures_data$algorithm_name[unique_order]
+
+      # Define corresponding unique colors
+      unique_colors <- PLOT_COLOURS[unique_order]
+
+      # If there is only 1 unique album, leave out the legend
+      if(length(unique_algorithms) > 1){
+        # Add the legend with unique entries
+        legend(x = "bottom", legend = unique_algorithms,
+               bty = "o",  # Adds a box around the legend
+               text.col = "black", box.col = "black",  # Border color
+               cex = 1.5,  # Adjust text size for the legend
+               pt.cex = 2.5,  # Size of the points (if applicable)
+               xpd = TRUE, ncol = num_cols, fill = unique_colors)
+      }
+
+      # Reset graphical parameters
+      par(op)
+
+      # Turn off the plotting device (if necessary)
       dev.off()
     }
     if (length(perf_meas_plot) > 0){
@@ -1046,9 +1445,15 @@ linkage_quality_report <- function(main_data,
       performance_measures_plot_path <- NULL
     }
 
+    # Change caption pluarlization based on number of rows
+    base_cap <- "Radar chart showing classification performance for linking records in "
+    if(nrow(performance_measures_data) > 1){
+      base_cap <- "Radar charts showing classification performance for linking records in "
+    }
+
     concatenated_footnotes <- paste0(performance_measures_tbl_footnotes, collapse = " ")
     performance_measures_plot_caption <- paste0(
-      "Radar chart showing classification performance for linking records in ",
+      base_cap,
       left_dataset_name,
       " to those in ",
       right_dataset_name,
@@ -1091,48 +1496,78 @@ linkage_quality_report <- function(main_data,
   }
 
   quarto_render(
-  input = updated_quarto_report,
-  output_format = output_format,
-  execute_params = list(
-  definitions_data_path = definitions_data_path,
-  abbreviations_data_path = abbreviations_data_path,
-  listed_elements_generator_function_path = listed_elements_generator_function_path,
-  linked_data_repr_table_path = linked_data_repr_tbl_path,
-  linkage_rate_table_path = linkage_rate_table_path,
-  linkage_rates_plot_path = linkage_rates_plot_path,
-  algorithm_summary_table_path = algorithm_summary_table_path,
-  performance_measures_table_path = performance_measures_table_path,
-  performance_measures_plot_path = performance_measures_plot_path,
-  performance_measures_plot_caption = performance_measures_plot_caption,
-  missingness_table_path = missingness_table_path,
-  report_title = report_title,
-  report_subtitle = report_subtitle,
-  left_dataset_name = left_dataset_name,
-  right_dataset_name = right_dataset_name,
-  data_linker = data_linker,
-  output_format = output_format,
-  project_id = project_id,
-  num_records_left_dataset = num_records_left_dataset,
-  num_records_right_dataset = num_records_right_dataset,
-  ground_truth = ground_truth,
-  data_time_period = data_time_period,
-  num_records_linked = num_records_linked,
-  overall_linkage_rate = overall_linkage_rate,
-  report_generation_date = report_generation_date,
-  display_back_cover_page = display_back_cover_page,
-  comprehensive_report = comprehensive_report,
-  linkage_package = linkage_package,
-  linkage_package_version = linkage_package_version,
-  linkrep_package_version = linkrep_package_version,
-  R_version = R_version,
-  datastan_package_version = datastan_package_version
+    input = updated_quarto_report,
+    output_format = output_format,
+    execute_params = list(
+    definitions_data_path = definitions_data_path,
+    abbreviations_data_path = abbreviations_data_path,
+    listed_elements_generator_function_path = listed_elements_generator_function_path,
+    linked_data_repr_table_path = linked_data_repr_tbl_path,
+    linkage_rate_table_path = linkage_rate_table_path,
+    linkage_rates_plot_path = linkage_rates_plot_path,
+    algorithm_summary_table_path = algorithm_summary_table_path,
+    considered_algorithm_summary_table_path = considered_algorithm_summary_table_path_list,
+    considered_algorithm_summary_table_names = considered_algorithm_summary_table_names,
+    considered_performance_measures_table_path = considered_performance_measures_table_path,
+    considered_performance_measures_plot_path = considered_performance_measures_plot_path,
+    considered_performance_measures_plot_caption = considered_performance_measures_plot_caption,
+    performance_measures_table_path = performance_measures_table_path,
+    performance_measures_plot_path = performance_measures_plot_path,
+    performance_measures_plot_caption = performance_measures_plot_caption,
+    missingness_table_path = missingness_table_path,
+    report_title = report_title,
+    report_subtitle = report_subtitle,
+    left_dataset_name = left_dataset_name,
+    right_dataset_name = right_dataset_name,
+    data_linker = data_linker,
+    output_format = output_format,
+    project_id = project_id,
+    num_records_left_dataset = num_records_left_dataset,
+    num_records_right_dataset = num_records_right_dataset,
+    ground_truth = ground_truth,
+    data_time_period = data_time_period,
+    num_records_linked = num_records_linked,
+    overall_linkage_rate = overall_linkage_rate,
+    report_generation_date = report_generation_date,
+    display_back_cover_page = display_back_cover_page,
+    comprehensive_report = comprehensive_report,
+    linkage_package = linkage_package,
+    linkage_package_version = linkage_package_version,
+    linkrep_package_version = linkrep_package_version,
+    R_version = R_version,
+    datastan_package_version = datastan_package_version,
+    threshold_plots = threshold_plots,
+    threshold_plot_captions = threshold_plot_captions
   ))
 
   # Format final output:
 
   # change file name and location
   # file automatically saves in calling location therefore need to manually move it to output_dir
-  file_name <- paste0("Data Linkage Quality Report.", output_format)
+  # Define base file name
+  if(!is.null(report_file_name)){
+    base_filename <- paste0(report_file_name, ' - Final Report')
+  }
+  else{
+    base_filename <- paste0(report_title, ' - Final Report')
+  }
+
+  # Start with the base file name
+  full_filename <- file.path(output_dir, paste0(base_filename, ".", output_format))
+  counter <- 1
+
+  # While the file exists, append a number and keep checking
+  while (file.exists(full_filename)){
+    full_filename <- file.path(output_dir, paste0(base_filename, " (", counter, ").", output_format))
+    counter <- counter + 1
+  }
+
+  if(counter > 1){
+    file_name <- paste0(base_filename, " (", counter-1, ").", output_format)
+  }
+  else{
+    file_name <- paste0(base_filename, ".", output_format)
+  }
   src <- gsub("qmd", output_format, updated_quarto_report)
   result <- file.rename(src, paste0(output_dir, "/", file_name))
   message(paste0("Ignore above, output created: ", file_name))

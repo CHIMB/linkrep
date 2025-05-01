@@ -31,6 +31,7 @@ params:
   linkage_rate_table_path: null
   linkage_rates_plot_path: null
   algorithm_summary_table_path: null
+  algorithm_summary_table_names: null
   performance_measures_table_path: null
   performance_measures_plot_path: null
   performance_measures_plot_caption: null
@@ -56,6 +57,8 @@ params:
   linkrep_package_version: null
   R_version: null
   datastan_package_version: null
+  threshold_plots: null
+  threshold_plot_captions: null
 
 header-includes:
 - \renewcommand{\thesection}{\arabic{section}.}
@@ -116,11 +119,20 @@ linkage_rate_table <- read_data(params$linkage_rate_table_path, "linkage_rate_ta
 
 linkage_rates_over_time_plot <- read_data(params$linkage_rates_plot_path, "linkage_rates_plot_path")
 
-algorithm_summary_table <- read_data(params$algorithm_summary_table_path, "algorithm_summary_tabl_path")
+algorithm_summary_table <- list()
+for(i in 1:length(params$algorithm_summary_table_path)){
+  algorithm_summary_table[[i]] <- read_data(params$algorithm_summary_table_path[[i]], "algorithm_summary_tabl_path")
+}
+
+algorithm_summary_table_names <- params$algorithm_summary_table_names
 
 performance_measures_table <- read_data(params$performance_measures_table_path, "performance_measures_table_path")
 
 missingness_table <- read_data(params$missingness_table_path, "missingness_table_path")
+
+threshold_plots <- params$threshold_plots
+
+threshold_plot_captions <- params$threshold_plot_captions
 
 if (!is.null(params$performance_measures_plot_path)){
   if (!file.exists(params$performance_measures_plot_path)){
@@ -136,6 +148,10 @@ if (!is.null(params$performance_measures_plot_path)){
     }
   }
 }
+```
+
+```{r, message = NA}
+#message(params$algorithm_summary_table_path)
 ```
 
 ```{r set_page_width function}
@@ -222,9 +238,10 @@ Permission is granted to adapt and reproduce the textual and graphical content o
 © `r format(Sys.Date(), "%Y")` George & Fay Yee Centre for Healthcare Innovation  
 
 \vspace*{1cm}
-**Suggested Citation**
+**Suggested Citation:**
+\vspace*{-0.25cm}
 
-Stoughton, Elizabeth & Monchka, Barret. *`r params$report_title`: `r params$report_subtitle`*. Winnipeg, Manitoba: George & Fay Yee Centre for Healthcare Innovation; `r format(Sys.Date(), "%B %Y")`.
+Stoughton, Elizabeth & Chuchmach, Cole & Monchka, Barret. *`r params$report_title`: `r params$report_subtitle`*. Winnipeg, Manitoba: George & Fay Yee Centre for Healthcare Innovation; `r format(Sys.Date(), "%B %Y")`.
 
 
 ::: {.content-visible when-format="pdf"}
@@ -321,7 +338,7 @@ if (!is.null(abbreviations_data) & !is.null(listed_output_function) & params$out
 # Summary {.unnumbered}
 :::
 
-This report details the methods used to link records from `r params$left_dataset_name` (N = `r params$num_records_left_dataset`) to those in `r params$right_dataset_name` `r ifelse(is.null(params$num_records_right_dataset), "", sprintf("(N = %s)", params$num_records_right_dataset))` and offers guidance on evaluating the quality of the linkage process. We used an iterative approach that combines deterministic and probabilistic methods to link `r params$num_records_linked` records, achieving an overall linkage rate of `r params$overall_linkage_rate`% (see @tbl-linkage_rates).  
+This report details the methods used to link records from `r params$left_dataset_name` (N = `r params$num_records_left_dataset`) to those in `r params$right_dataset_name` `r ifelse(is.null(params$num_records_right_dataset), "", sprintf("(N = %s)", params$num_records_right_dataset))` and offers guidance on evaluating the quality of the linkage process. We used an iterative approach that combines deterministic and probabilistic methods to link `r params$num_records_linked` records, achieving an overall linkage rate of `r params$overall_linkage_rate`% (see **@tbl-linkage_rates**).  
 
 To discuss the findings of this report, the potential impact of linkage errors on a research study, or to request guidance on adjusting for linkage errors in a data analysis, you may schedule a consultation with CHI by visiting <https://umanitoba.ca/centre-for-healthcare-innovation/> and selecting “Request a free consultation.” For additional questions regarding this data linkage, please e-mail [data.linkage@umanitoba.ca](mailto:data.linkage@umanitoba.ca).
 
@@ -340,18 +357,18 @@ To discuss the findings of this report, the potential impact of linkage errors o
 
 Integrating information from multiple data sources can generate rich and comprehensive datasets that address complex research questions. However, the uncertainty inherent in linking disparate data sources---particularly when there are no unique personal identifiers in common---may introduce bias, potentially reducing the representativeness of the linked data with respect to the target study population. This potential adverse impact on study validity has led to the development of reporting guidelines for studies using linked data, which have informed the elements included in this data linkage quality report.[@bohensky2011; @gilbert2017; @pratt2020; @elstad2023; @zhao2022]  
 
-Researchers using this linked data should familiarize themselves with the record linkage methods employed, carefully assess the representativeness of the linked sample, and consider how linkage errors may impact the interpretation of study findings. `r if (params$comprehensive_report) "The detailed information in the [Background](#sec-background) and [Methods](#sec-methods) sections will aid in interpreting the results of the linkage process" else "The detailed information in the Background and Methods sections [available online](https://github.com/CHIMB/linkrep/blob/main/inst/docs/Extra_Textual_Content.pdf) will aid in interpreting the results of the linkage process"`. When disseminating research based on linked data, we encourage adherence to reporting guidelines to support critical evaluations of findings and promote research excellence.[@bohensky2011; @gilbert2017; @pratt2020]   
+Researchers using this linked data should familiarize themselves with the record linkage methods employed, carefully assess the representativeness of the linked sample, and consider how linkage errors may impact the interpretation of study findings. `r if (params$comprehensive_report) "The detailed information in the [**Background**](#sec-background) and [**Methods**](#sec-methods) sections will aid in interpreting the results of the linkage process" else "The detailed information in the Background and Methods sections [available online](https://github.com/CHIMB/linkrep/blob/main/inst/docs/Extra_Textual_Content.pdf) will aid in interpreting the results of the linkage process"`. When disseminating research based on linked data, we encourage adherence to reporting guidelines to support critical evaluations of findings and promote research excellence.[@bohensky2011; @gilbert2017; @pratt2020]   
 
-The [Results](#sec-results) section includes figures and tables with descriptive statistics that summarize the performance of the linkage algorithm and the quality of the linked data. To assess the suitability of the data for research purposes, consider the following recommendations:  
+The [**Results**](#sec-results) section includes figures and tables with descriptive statistics that summarize the performance of the linkage algorithm and the quality of the linked data. To assess the suitability of the data for research purposes, consider the following recommendations:  
 
 \setlength{\parskip}{0.5em} 
 `r list_num = 1`
 
-`r list_num`. **Examine the representativeness of the linked sample:** Use the column percentages in @tbl-linked_data_repr to compare record characteristics with their distribution in the source data. Significant differences in these distributions may affect the generalizability of study findings. 
+`r list_num`. **Examine the representativeness of the linked sample:** Use the column percentages in **@tbl-linked_data_repr** to compare record characteristics with their distribution in the source data. Significant differences in these distributions may affect the generalizability of study findings. 
 `r list_num = list_num + 1` 
 
 
-`r list_num`. **Assess potential biases in the linkage process:** Utilize the row percentages in @tbl-linkage_rates to examine the proportion of unlinked records, stratified by sociodemographic and other characteristics. For example, a significantly lower linkage rate among females compared to males may indicate issues with the linkage algorithm or data quality that could introduce selection bias into a research study. Algorithmic biases can lead to an unrepresentative sample, as reflected in @tbl-linkage_rates.
+`r list_num`. **Assess potential biases in the linkage process:** Utilize the row percentages in **@tbl-linkage_rates** to examine the proportion of unlinked records, stratified by sociodemographic and other characteristics. For example, a significantly lower linkage rate among females compared to males may indicate issues with the linkage algorithm or data quality that could introduce selection bias into a research study. Algorithmic biases can lead to an unrepresentative sample, as reflected in **@tbl-linkage_rates**.
 `r list_num = list_num + 1`   
 
 
@@ -362,20 +379,20 @@ The [Results](#sec-results) section includes figures and tables with descriptive
 
 
 `r if(!is.null(performance_measures_table)) "::: {.content-visible}" else "::: {.content-hidden}"`
-`r list_num`. **Evaluate linkage algorithm accuracy:** Review `r if(!is.null(performance_measures_table)) "@tbl-performance_measures_tbl"` and `r if(!is.null(performance_measures_table)) "@fig-performance_measures_chart "` to assess whether the linkage algorithm performed adequately in classifying candidate record pairs as matches or non-matches. Match classification, which involves a tradeoff between match certainty (i.e., precision or PPV) and match sensitivity (i.e., recall), should be assessed in the context of your research objectives.
+`r list_num`. **Evaluate linkage algorithm accuracy:** Review `r if(!is.null(performance_measures_table)) "**@tbl-performance_measures_tbl**"` and `r if(!is.null(performance_measures_table)) "**@fig-performance_measures_chart** "` to assess whether the linkage algorithm performed adequately in classifying candidate record pairs as matches or non-matches. Match classification, which involves a tradeoff between match certainty (i.e., precision or PPV) and match sensitivity (i.e., recall), should be assessed in the context of your research objectives.
 `r if(!is.null(performance_measures_table)) list_num = list_num + 1`
 :::   
 
 
 `r if(!is.null(algorithm_summary_table)) "::: {.content-visible}" else "::: {.content-hidden}"`
-`r list_num`. **Critically review the multi-step linkage algorithm employed:** Analyze the parameters used in each step of the algorithm `r if(!is.null(algorithm_summary_table)) "(@tbl-algorithm_summary)"`, including the matching technique (deterministic or probabilistic), acceptance threshold, and variables considered, to evaluate the confidence that linked records belong to the same individual. For example, exact matches on multiple fields generally reduce the chances of linkage error, whereas relying heavily on approximate string matching may increase noise in the linked data. Similarly, higher acceptance thresholds and variables with strong discriminative power (e.g., last name or personal unique identifiers) tend to reduce linkage errors compared to lower classification cut-offs and variables with weaker discriminative ability (e.g., sex/gender or postal code).
+`r list_num`. **Critically review the multi-step linkage algorithm employed:** Analyze the parameters used in each step of the algorithm, including the matching technique (deterministic or probabilistic), acceptance threshold, and variables considered, to evaluate the confidence that linked records belong to the same individual. For example, exact matches on multiple fields generally reduce the chances of linkage error, whereas relying heavily on approximate string matching may increase noise in the linked data. Similarly, higher acceptance thresholds and variables with strong discriminative power (e.g., last name or personal unique identifiers) tend to reduce linkage errors compared to lower classification cut-offs and variables with weaker discriminative ability (e.g., sex/gender or postal code).
 :::
 
 \setlength{\parskip}{1.5em} 
 {{< pagebreak >}}
 
 ```{r linked data representativeness table page orientation before, results='asis'}
-if (requires_landscape_page(linkage_rate_table)){
+if (requires_landscape_page(linked_data_repr_table)){
   set_page_width("landscape")
 }
 ```
@@ -386,13 +403,13 @@ if (requires_landscape_page(linkage_rate_table)){
 
 ```{r linked data representativeness table, ft.align="left"}
 #| label: tbl-linked_data_repr
-#| tbl-cap: !expr paste0("Characteristics of records in ", params$left_dataset_name, " (N = ", params$num_records_left_dataset, ifelse(params$data_time_period == "", "", ", "), params$data_time_period, ") and those that linked to ",  params$right_dataset_name, ".") 
+#| tbl-cap: !expr paste0("Characteristics of records in ", params$left_dataset_name, " (N = ", params$num_records_left_dataset, ifelse(params$data_time_period == "", "", ", "), params$data_time_period, ") and those that linked to ",  params$right_dataset_name) 
 
 linked_data_repr_table
 ```
 
 ```{r linked data representativeness table page orientation after, results='asis'}
-if (requires_landscape_page(linkage_rate_table)){
+if (requires_landscape_page(linked_data_repr_table)){
   set_page_width("portrait")
 }
 ```
@@ -409,7 +426,7 @@ if (requires_landscape_page(linkage_rate_table)){
 
 ```{r linkage rate table, ft.align="left"}
 #| label: tbl-linkage_rates
-#| tbl-cap: !expr paste0("Stratified linkage rates for records in ", params$left_dataset_name, " (N = ", params$num_records_left_dataset, ifelse(params$data_time_period == "", "", ", "), params$data_time_period, ") that linked to ",  params$right_dataset_name, ".") 
+#| tbl-cap: !expr paste0("Stratified linkage rates for records in ", params$left_dataset_name, " (N = ", params$num_records_left_dataset, ifelse(params$data_time_period == "", "", ", "), params$data_time_period, ") that linked to ",  params$right_dataset_name) 
 
 linkage_rate_table
 ```
@@ -424,7 +441,7 @@ if (requires_landscape_page(linkage_rate_table)){
 
 ```{r linkage rates over time plot}
 #| label: fig-linkage_rate_dist
-#| fig-cap: !expr paste0("Distribution of linkage rates over data acquisition dates for records in ", params$left_dataset_name,".")
+#| fig-cap: !expr paste0("Distribution of linkage rates over data acquisition dates for records in ", params$left_dataset_name)
 #| fig-alt: A bar plot illustrating the distributions of linkage rates over acquisition dates. The y-axis represents the linkage rate percent, and the x-axis represents the acquisition dates.
 if (!is.null(linkage_rates_over_time_plot)){
   linkage_rates_over_time_plot
@@ -442,30 +459,77 @@ if (!is.null(linkage_rates_over_time_plot)){
 `r if(!is.null(algorithm_summary_table)) "::: {.content-visible}" else "::: {.content-hidden}"`
 
 ```{r algorithm summary table page orientation before, results='asis'}
-if (!is.null(algorithm_summary_table)){
-  if (requires_landscape_page(algorithm_summary_table)){
-    set_page_width("landscape")
-  }
+for(table in algorithm_summary_table){
+  if (!is.null(table)){
+    if (requires_landscape_page(table)){
+      set_page_width("landscape")
+      break
+    }
+  } 
 }
 ```
 
-## Linkage Algorithm Summary
+## Summaries of Considered Linkage Algorithms
 
-```{r algorithm summary table, ft.align="left"}
-#| label: tbl-algorithm_summary
-#| tbl-cap: !expr paste0("Summary of the multi-step algorithm to link records in ", params$left_dataset_name, " to those in ", params$right_dataset_name, ".")
+```{r algorithm summary table, ft.align="left", results='asis'}
 
 if (!is.null(algorithm_summary_table)){
-  algorithm_summary_table
+  for(i in 1:length(algorithm_summary_table)){
+    # Get the table
+    table <- algorithm_summary_table[[i]]
+    
+    # Assuming each algorithm has a name stored as names(algorithm_summary_table)
+    algorithm_name <- algorithm_summary_table_names[i]
+    
+    # Table number dynamic generation
+    table_num <- i + 2
+    
+    # Create a dynamic caption
+    dynamic_caption <- paste0(
+      "Table ", table_num, ": Summary of the multi-step algorithm \"", algorithm_name, "\" for",
+      " linking records in ", params$left_dataset_name,
+      " to those in ", params$right_dataset_name
+    )
+    
+    # Output the caption as plain text
+    cat(paste0("\n\n", dynamic_caption))
+    
+    # Print the flextable
+    cat(knitr::knit_print(table))
+  }
+  #algorithm_summary_table
 }
 ```
 
 ```{r algorithm summary table page orientation after, results='asis'}
-if (!is.null(algorithm_summary_table)){
-  if (requires_landscape_page(algorithm_summary_table)){
-    set_page_width("portrait")
-  }
+for(table in algorithm_summary_table){
+  if (!is.null(table)){
+    if (requires_landscape_page(table)){
+      set_page_width("portrait")
+      break
+    }
+  } 
 }
+```
+
+:::
+
+`r if(is.null(algorithm_summary_table) & !is.null(threshold_plots)) "::: {.content-visible}" else "::: {.content-hidden}"`
+
+:::
+
+`r if(!is.null(threshold_plots)) "::: {.content-visible}" else "::: {.content-hidden}"`
+
+## Linkage Threshold Plots
+
+```{r threshold plots, ft.align="left", results='asis'}
+for(i in 1:length(threshold_plots)){
+  plot <- threshold_plots[i]
+  caption <- threshold_plot_captions[i]
+  cat(paste0("![", caption, "](", plot, ")"), "\n\n")
+}
+ # #| tbl-cap: !expr paste0("Summary plot of the weight thresholds to link records in ", params$left_dataset_name, " to those in ", params$right_dataset_name, ".")
+ # knitr::include_graphics(threshold_plots)
 ```
 
 :::
@@ -476,12 +540,17 @@ if (!is.null(performance_measures_table)){
   if (requires_landscape_page(performance_measures_table)){
     set_page_width("landscape")
   }
+  else{
+    set_page_width("portrait")
+  }
+}else{
+  set_page_width("portrait")
 }
 ```
 
-`r if(is.null(algorithm_summary_table) & !is.null(performance_measures_table)) "::: {.content-visible}" else "::: {.content-hidden}"`
+`r if(is.null(threshold_plots) & !is.null(performance_measures_table)) "::: {.content-visible}" else "::: {.content-hidden}"`
 
-## Linkage Performance Measures Summary
+## Classification Performance of Considered Linkage Algorithms
 
 :::
 
@@ -489,7 +558,7 @@ if (!is.null(performance_measures_table)){
 
 ```{r performance measures table, ft.align="left"}
 #| label: tbl-performance_measures_tbl
-#| tbl-cap: !expr paste0("Classification performance for linking records in ", params$left_dataset_name, " to those in ", params$right_dataset_name, ".")
+#| tbl-cap: !expr paste0("Classification performance for linking records in ", params$left_dataset_name, " to those in ", params$right_dataset_name)
 
 if (!is.null(performance_measures_table)){
   performance_measures_table
@@ -507,7 +576,7 @@ if (!is.null(performance_measures_table)){
 
 `r if (!is.null(params$performance_measures_plot_path)) "::: {.content-visible}" else "::: {.content-hidden}"`
 
-![`r params$performance_measures_plot_caption`](`r params$performance_measures_plot_path`){#fig-performance_measures_chart fig-alt="A radar chart displaying the metrics listed in @tbl-performance_measures_tbl." fig-align="center"}
+![`r params$performance_measures_plot_caption`](`r params$performance_measures_plot_path`){#fig-performance_measures_chart fig-alt="A radar chart displaying the metrics listed in @tbl-performance_measures_tbl." fig-align="left"}
 
 :::
 
@@ -533,7 +602,7 @@ if (!is.null(missingness_table)){
 
 ```{r missingness table, ft.align="left"}
 #| label: tbl-missing_counts
-#| tbl-cap: !expr paste0("Missingness of select variables within ", params$left_dataset_name, ".")
+#| tbl-cap: !expr paste0("Missingness of select variables within ", params$left_dataset_name)
 
 if(!is.null(missingness_table)){
   missingness_table

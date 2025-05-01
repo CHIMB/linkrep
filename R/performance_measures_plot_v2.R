@@ -9,10 +9,10 @@
 #' @keywords internal
 #' @noRd
 #'
-performance_measures_plot <- function(data){
+performance_measures_plot_v2 <- function(data, col_index){
 
   PLOT_COLOUR <- "grey65"
-  PLOT_COLOURS <- c("red", "green", "blue", "yellow", "purple", "orange", "pink")
+  PLOT_COLOURS <- c("red", "orange", "yellow", "green", "lightblue", "blue", "violet", "pink", "grey80", "grey70", "grey60", "grey50")
   CIRCLES_COLOUR <- "grey20"
   AXIS_LABELS_COLOUR <- "grey20"
   MIN_DATA_VALUE <- 0
@@ -49,13 +49,12 @@ performance_measures_plot <- function(data){
     data <- rbind(max = rep(MAX_DATA_VALUE, ncol(data)),
                   min = rep(MIN_DATA_VALUE, ncol(data)),
                   data)
-    print(data)
 
     radarchartcirc(data,
                    axistype = 1,
                    seg = 5,
-                   pcol = alpha(PLOT_COLOURS, 0.8),
-                   pfcol = alpha(PLOT_COLOURS, 0.5),
+                   pcol = alpha(PLOT_COLOURS[col_index], 0.8),
+                   pfcol = alpha(PLOT_COLOURS[col_index], 0.5),
                    plty = 1,
                    plwd = 2,
                    cglcol = CIRCLES_COLOUR,
@@ -63,8 +62,9 @@ performance_measures_plot <- function(data){
                    axislabcol = AXIS_LABELS_COLOUR,
                    caxislabels = seq(0, 100, 20),
                    cglwd = 0.8,
-                   vlcex = 0.8,
-                   vlabels = labels)
+                   vlcex = 1.1,
+                   vlabels = labels
+                   )
 
     # legend(x = "bottom", legend = algorithm_names, horiz = T,
     #       bty = "n", pch = 20, col = PLOT_COLOURS, text.col = "black",
