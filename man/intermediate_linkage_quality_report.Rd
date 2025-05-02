@@ -286,6 +286,8 @@ to be suppressed in the output of the linkage quality report.}
 \item{threshold_plots}{A vector of png files that will appear in the report which are plots of different thresholds
 obtained during data linkage.}
 
+\item{threshold_plot_captions}{A vector of captions that will appear under the captions listed in the \code{threshold_plots} parameter.}
+
 \item{report_file_name}{An optional file name which will be assigned to the output report, if no name is supplied, the report title
 is used.}
 }

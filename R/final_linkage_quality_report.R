@@ -75,6 +75,17 @@
 #'  on the linkage algorithm (ex. linking variables on each pass).
 #' @param algorithm_summary_tbl_footnotes A character vector of additional footnotes for
 #' the algorithm summary table. Each element in the vector will be displayed on a new line.
+#' @param considered_algorithm_summary_data A list of data frames, file paths to rds files that contain data frames
+#'  or file paths to csv file. This data contains information on each considered linkage algorithm (ex. linking variables on each pass)
+#'  that wasnt used as the main algorithm in the final report.
+#' @param considered_algorithm_summary_tbl_footnotes A vector of footnotes that belong to its corresponding algorithm. The number
+#'  of algorithms that appear in \code{considered_algorithm_summary_data} should match the number of items in this vector.
+#' @param considered_algorithm_summary_table_names A vector of names that belong to the considered algorithm summaries, used to
+#'  differentiate each table. The number of algorithms that appear in \code{considered_algorithm_summary_data} should match the number of items in this vector.
+#' @param considered_performance_measures_data A data frame, a file path to an rds file that
+#'  contains a data frame or a file path to a csv file. This data contains considered performance
+#'  measures (ex. classification metrics such as sensitivity/recall) of the considered algorithms. Data must be
+#'  in percentages with values between 0 and 100 when using the default quarto template.
 #' @param performance_measures_data A data frame, a file path to an rds file that
 #'  contains a data frame or a file path to a csv file. This data contains performance
 #'  measures (ex. classification metrics such as sensitivity/recall). Data must be
@@ -150,6 +161,7 @@
 #'  to be suppressed in the output of the linkage quality report.
 #' @param threshold_plots A vector of png files that will appear in the report which are plots of different thresholds
 #'  obtained during data linkage.
+#' @param threshold_plot_captions A vector of captions that will appear under the captions listed in the \code{threshold_plots} parameter.
 #' @param report_file_name An optional file name which will be assigned to the output report, if no name is supplied, the report title
 #'  is used.
 #'
