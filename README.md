@@ -1,83 +1,102 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# linkrep
+# Introduction
 
 `linkrep` provides an easy-to-use and extensible architecture for
 generating linkage quality reports in R. It simplifies the process of
 evaluating and reporting on the quality of data linkage.
 
-This package aims to provide a comprehensive tool for data linkers to
-assess the quality of their linkage processes, while also helping data
-providers and researchers understand linkage errors and evaluate
-potential biases.
+This package aims to provide a comprehensive tool for data linkage
+analysts to assess the quality of their linkage processes, while also
+helping data providers and researchers understand linkage errors and
+evaluate potential biases.
 
-Reports generated with `linkrep` can be customized to fit your specific
-needs:
+Reports generated with `linkrep` can be further customized to fit your
+specific needs:
 
 - **Add new elements**: Include additional tables, figures, sections or
-  data as required
+  data as required.
 
 - **Modify content**: Customize written portions, including the Methods
-  section, to better reflect your specific linkage processes
+  section, to better reflect your specific linkage processes.
 
-- **Personalize appearance**: Adjust the report’s background, layout and
-  styles to tailor the report to your needs
+- **Personalize appearance**: Adjust the report’s background, layout,
+  styles, and references to tailor the report to your needs.
 
-## Main Report Elements
+# Installation
+
+## R Studio Installation
+
+To install `linkrep` from GitHub, begin by installing and loading the
+`devtools` package:
+
+``` r
+# install.packages("devtools")
+library(devtools)
+```
+
+Afterwards, you may install the automated data linkage package using
+`install_github()`:
+
+``` r
+devtools::install_github("CHIMB/linkrep")
+
+# You may need to install tinytex:
+# install.packages("tinytex")
+# tinytex::install_tinytex()
+```
+
+## Local Installation
+
+To install `linkrep` locally from GitHub, select the most recent release
+from the right-hand tab on the GitHub repository page. Download the
+<b>Source code (zip)</b> file, then move over to RStudio. You may then
+run the code:
+
+``` r
+path_to_pkg <- file.choose() # Select the unmodified package you downloaded from GitHub.
+devtools::install_local(path_to_pkg)
+
+# You may need to install tinytex:
+# install.packages("tinytex")
+# tinytex::install_tinytex()
+```
+
+# Main Report Elements
 
 **Summary**: Overview of the Methods section and results
 
 **How to Read This Report**: Provides recommendations on how to
-interpret the tables and figures to assess for potential biases
+interpret the tables and figures to assess for potential biases.
 
 **Linkage Rate Summary**: Includes the linkage rate table which
 stratifies linkage rates by sociodemographic factors and other
-characteristics
+characteristics.
 
 **Linkage Algorithm Summary**: If provided, includes tables and figures
-describing the linkage algorithm and its quality
+describing the linkage algorithm and its quality.
+
+**Performance Metrics**: If provided, includes multiple performance
+metrics (0-100) listed in table, visualized using a radar chart.
 
 **Background**: Describes record linkage, how it’s performed, and its
-limitations
+limitations.
 
 **Methods**: Details the linkage process, including pre-processing and
-techniques used
+techniques used.
 
-## Installation
+**Appendix**: Algorithms that were considered for testing, along with
+their performance metrics, can be included at the end of the report.
 
-``` r
-# install.packages("pak")
-pak::pak("CHIMB/linkrep")
-
-# You may need to install tinytex:
-# install.packages("tinytex")
-# tinytex::install_tinytex()
-```
-
-### Local Installation
-
-Navigate to **Releases** on the right-hand side of the GitHub page and
-select the most recent release. Download the **Source code (zip)** file,
-then run the following code to complete installation:
-
-``` r
-# Select the unmodified package you downloaded from GitHub:
-pkg_path <- file.choose()
-devtools::install_local(pkg_path)
-
-# You may need to install tinytex:
-# install.packages("tinytex")
-# tinytex::install_tinytex()
-```
-
-## Additional Information
+# Additional Information & Documentation
 
 For detailed instructions on formatting data for the report and
 customizing features, refer to the [User
 Documentation](https://github.com/CHIMB/linkrep/blob/main/inst/docs/User_Documentation.pdf)
 
-## Authors
+# Authors
 
 - [Elizabeth Stoughton](https://github.com/stoughty111)
+- [Cole Chuchmach](https://github.com/Cole-Chuchmach)
 - [Barret A. Monchka](https://github.com/barretmonchka)
