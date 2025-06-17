@@ -700,6 +700,18 @@ intermediate_linkage_quality_report <- function(main_data_list,
   num_records_left_dataset <- formatC(num_records_left_dataset,
                                       big.mark = thousands_separator,
                                       format = "f", digits = 0)
+  overall_linkage_rates <- c()
+  for(data in main_data_list){
+    linkage_rate <- sum(data[[stratified_linkage_tbls_column_var]] == 1)/nrow(data) * 100
+    overall_linkage_rates <- append(overall_linkage_rates, linkage_rate)
+  }
+
+  overall_linkage_rate_min <- formatC(min(overall_linkage_rates), digits = num_decimal_places,
+                                  big.mark = thousands_separator,
+                                  decimal.mark = decimal_mark, format = "f")
+  overall_linkage_rate_max <- formatC(max(overall_linkage_rates), digits = num_decimal_places,
+                                      big.mark = thousands_separator,
+                                      decimal.mark = decimal_mark, format = "f")
 
   # If the number of records in the right dataset was provided, then format them.
   if (!is.null(num_records_right_dataset)){
@@ -1221,6 +1233,8 @@ intermediate_linkage_quality_report <- function(main_data_list,
     performance_measures_plot_path = performance_measures_plot_path,
     performance_measures_plot_caption = performance_measures_plot_caption,
     missingness_table_path = missingness_table_path,
+    overall_linkage_rate_min = overall_linkage_rate_min,
+    overall_linkage_rate_max = overall_linkage_rate_max,
     report_title = report_title,
     report_subtitle = report_subtitle,
     left_dataset_name = left_dataset_name,
