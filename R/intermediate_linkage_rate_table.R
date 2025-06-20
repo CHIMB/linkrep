@@ -484,10 +484,11 @@ intermediate_linkage_rate_table <- function(main_data_list,
   }
 
   # Get column headers
-  column_headers <- ifelse(display_unlinked_column,
-                           sprintf("**{level}**\n(N = {style_number(n)}, {style_percent(p, digits = %d)}%%)",
-                                   num_decimal_places),
-                           "**{level}**\n(N = {style_number(n)})")
+  #column_headers <- ifelse(display_unlinked_column,
+  #                         sprintf("**{level}**\n(N = {style_number(n)}, {style_percent(p, digits = %d)}%%)",
+  #                                 num_decimal_places),
+  #                         "**{level}**\n(N = {style_number(n)})")
+  column_headers <- sprintf("**{level}**\n(N = {style_number(n)}, {style_percent(p, digits = %d)}%%)", num_decimal_places)
 
   # Apply column headers to the table
   table <- modify_header(
@@ -573,6 +574,13 @@ intermediate_linkage_rate_table <- function(main_data_list,
   } else {
     default_footnote <- paste0("Data are presented as n (", percent_type," %)")
   }
+
+  # If the percent type is row %, then add extra text to footnote
+  if(percent_type == "row"){
+    default_footnote <- paste0(default_footnote, ', where the percentage indicates the row-wise linkage rate')
+  }
+
+  # Append footnote
   footnotes <- append(footnotes, default_footnote)
 
   # If we used a threshold, make a note of the columns that were removed
