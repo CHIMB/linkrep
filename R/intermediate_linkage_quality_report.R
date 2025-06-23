@@ -1039,22 +1039,25 @@ intermediate_linkage_quality_report <- function(main_data_list,
     performance_measures_plot_path <- tempfile(tmpdir = temp_data_output_dir,
                                                fileext = ifelse(output_format == "pdf", ".pdf", ".png"))
     if (output_format == "pdf"){
-      pdf(performance_measures_plot_path, width = 9, height = 9)
 
       # Set up the number of rows
       num_rows <- ceiling(nrow(performance_measures_data) / 3)
 
       # Set up the number of parameters
       if(nrow(performance_measures_data) == 1){
+        pdf(performance_measures_plot_path, width = 9, height = 9)
         num_cols <- 1
       }
       else if (nrow(performance_measures_data) %% 3 == 0){
+        pdf(performance_measures_plot_path, width = 12, height = 12)
         num_cols <- 3
       }
       else if (nrow(performance_measures_data) %% 2 == 0){
+        pdf(performance_measures_plot_path, width = 9, height = 9)
         num_cols <- 2
       }
       else{
+        pdf(performance_measures_plot_path, width = 12, height = 12)
         num_cols <- 3
       }
 
@@ -1105,7 +1108,8 @@ intermediate_linkage_quality_report <- function(main_data_list,
       # Turn off the plotting device (if necessary)
       dev.off()
 
-    } else {
+    }
+    else {
       png(performance_measures_plot_path, units = "in", width = 9, height = 9,
           res = 350)
 
@@ -1173,6 +1177,7 @@ intermediate_linkage_quality_report <- function(main_data_list,
       # Turn off the plotting device (if necessary)
       dev.off()
     }
+
     if (length(perf_meas_plot) > 0){
       unlink(performance_measures_plot_path)
       performance_measures_plot_path <- NULL
