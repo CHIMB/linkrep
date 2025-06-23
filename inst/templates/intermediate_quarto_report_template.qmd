@@ -521,7 +521,7 @@ for(table in algorithm_summary_table){
 
 `r if(!is.null(threshold_plots)) "::: {.content-visible}" else "::: {.content-hidden}"`
 
-## Linkage Threshold Plots
+## Linkage Score Distributions
 
 ```{r threshold plots, ft.align="left", results='asis'}
 for(i in 1:length(threshold_plots)){

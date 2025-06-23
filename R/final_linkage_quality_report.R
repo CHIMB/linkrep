@@ -1549,7 +1549,9 @@ final_linkage_quality_report <- function(main_data,
     R_version = R_version,
     datastan_package_version = datastan_package_version,
     threshold_plots = threshold_plots,
-    threshold_plot_captions = threshold_plot_captions
+    threshold_plot_captions = threshold_plot_captions,
+    num_pairs_non_missing_ground_truth = num_pairs_non_missing_ground_truth,
+    percent_non_missing_ground_truth = percent_non_missing_ground_truth
   ))
 
   # Format final output:
