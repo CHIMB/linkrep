@@ -799,11 +799,12 @@ final_linkage_quality_report <- function(main_data,
 
   percent_non_missing_ground_truth <- NULL
   if (!is.null(num_pairs_non_missing_ground_truth) & !is.null(num_record_pairs)){
-    percent_non_missing_ground_truth <- num_pairs_non_missing_ground_truth / num_record_pairs
+    percent_non_missing_ground_truth <- (num_pairs_non_missing_ground_truth / num_record_pairs)*100
 
     num_pairs_non_missing_ground_truth <- formatC(num_pairs_non_missing_ground_truth,
                                                   big.mark = thousands_separator,
-                                                  format = "f", digits = 0)
+                                                  format = "f",
+                                                  digits = 0)
     percent_non_missing_ground_truth <- formatC(percent_non_missing_ground_truth,
                                                 big.mark = thousands_separator,
                                                 decimal.mark = decimal_mark,
@@ -1551,7 +1552,8 @@ final_linkage_quality_report <- function(main_data,
     threshold_plots = threshold_plots,
     threshold_plot_captions = threshold_plot_captions,
     num_pairs_non_missing_ground_truth = num_pairs_non_missing_ground_truth,
-    percent_non_missing_ground_truth = percent_non_missing_ground_truth
+    percent_non_missing_ground_truth = percent_non_missing_ground_truth,
+    performance_measures_df = performance_measures_data
   ))
 
   # Format final output:

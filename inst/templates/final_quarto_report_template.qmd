@@ -65,6 +65,7 @@ params:
   threshold_plot_captions: null
   num_pairs_non_missing_ground_truth: null
   percent_non_missing_ground_truth: null
+  performance_measures_df: null
 
 header-includes:
 - \renewcommand{\thesection}{\arabic{section}.}
@@ -351,20 +352,24 @@ if (!is.null(abbreviations_data) & !is.null(listed_output_function) & params$out
 # Summary {.unnumbered}
 :::
 
-This report details the methods used to link records from `r params$left_dataset_name` to those in `r params$right_dataset_name` `r ifelse(is.null(params$num_records_right_dataset), "", sprintf("(N = %s)", params$num_records_right_dataset))`, presents the findings from this linkage,  and offers guidance on evaluating the quality of the linkage process. 
+This report details the methods used to link records from `r params$left_dataset_name` to those in `r params$right_dataset_name``r ifelse(is.null(params$num_records_right_dataset), "", sprintf(" (N = %s)", params$num_records_right_dataset))`, presents the findings from this linkage, and offers guidance on evaluating the quality of the linkage process.
 
-We used an iterative approach consisting of both deterministic and probabilistic matching techniques, that linked `r params$num_records_linked` out of `r params$num_records_left_dataset` records from `r params$left_dataset_name` for an overall linkage rate of `r params$overall_linkage_rate`% (see **@tbl-linkage_rates**). 
+We used an iterative approach consisting of both deterministic and probabilistic matching techniques, that linked `r params$num_records_linked` out of `r params$num_records_left_dataset` records from `r params$left_dataset_name` for an overall linkage rate of `r params$overall_linkage_rate`% (see **@tbl-linkage_rates**).
 
-```{r}
-if (all(c("SENS", "PPV") %in% names(performance_measures_table)) && !is.null(num_pairs_non_missing_ground_truth) && !is.null(percent_non_missing_ground_truth)) {
-  sens_val         <- performance_measures_table$SENS
-  ppv_val          <- performance_measures_table$PPV
-  gt_agreement_n   <- num_pairs_non_missing_ground_truth
-  gt_agreement_pct <- percent_non_missing_ground_truth
-  ground_truth_str <- ground_truth
+```{r, results='asis'}
+# Get the performance measures data frame
+performance_measures_df <- params$performance_measures_df
+
+if (!is.null(performance_measures_df) && all(c("sensitivity", "positive_predictive_value") %in% names(performance_measures_df)) && !is.null(params$num_pairs_non_missing_ground_truth) && !is.null(params$percent_non_missing_ground_truth)) {
+  #print
+  sens_val         <- round(performance_measures_df$sensitivity, 1)
+  ppv_val          <- round(performance_measures_df$positive_predictive_value, 1)
+  gt_agreement_n   <- params$num_pairs_non_missing_ground_truth
+  gt_agreement_pct <- params$percent_non_missing_ground_truth
+  ground_truth_str <- params$ground_truth
 
   # Create the string to print
-  performance_string <- paste0('The probabilistic linkage steps attained',  sens_val, '% sensitivity and ', ppv_val, '% positive predictive value (see **@tbl-performance_measures_tbl**), estimated through agreement on ', ground_truth_str, 'among individuals with non-missing values (N=', gt_agreement_n, ', ', gt_agreement_pct, '%).')
+  performance_string <- paste0('The probabilistic linkage steps attained ', sens_val, '% sensitivity and ', ppv_val, '% positive predictive value (see **@tbl-performance_measures_tbl**), estimated through agreement on ', ground_truth_str, ' among individuals with non-missing values (N=', gt_agreement_n, ', ', gt_agreement_pct, '%).')
   
   # Print it
   cat(performance_string)

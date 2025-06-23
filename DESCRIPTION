@@ -1,7 +1,7 @@
 Package: linkrep
 Type: Package
 Title: Data Linkage Quality Reports
-Version: 1.2.1
+Version: 1.3.1
 Authors@R: c(
             person(given="Elizabeth", family="Stoughton", email="stoughte@myumanitoba.ca", role="aut"),
             person(given="Cole", family="Chuchmach", email="chuchma1@myumanitoba.ca", role="aut"),
