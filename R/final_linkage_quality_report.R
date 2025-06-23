@@ -1139,15 +1139,19 @@ final_linkage_quality_report <- function(main_data,
 
       # Set up the number of parameters
       if(nrow(considered_performance_measures_data) == 1){
+        pdf(considered_performance_measures_plot_path, width = 9, height = 9)
         num_cols <- 1
       }
       else if (nrow(considered_performance_measures_data) %% 3 == 0){
+        pdf(considered_performance_measures_plot_path, width = 12, height = 12)
         num_cols <- 3
       }
       else if (nrow(considered_performance_measures_data) %% 2 == 0){
+        pdf(considered_performance_measures_plot_path, width = 9, height = 9)
         num_cols <- 2
       }
       else{
+        pdf(considered_performance_measures_plot_path, width = 12, height = 12)
         num_cols <- 3
       }
 
