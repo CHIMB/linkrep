@@ -95,6 +95,14 @@ For detailed instructions on formatting data for the report and
 customizing features, refer to the [User
 Documentation](https://github.com/CHIMB/linkrep/blob/main/inst/docs/User_Documentation.pdf)
 
+For examples of reports that can be generated using the `linkrep`
+package, download and view the sample [Final
+Report](https://github.com/CHIMB/linkrep/raw/main/inst/docs/Sample%20Final%20Report.pdf)
+and [Sensitivity Analysis
+Report](https://github.com/CHIMB/linkrep/raw/main/inst/docs/Sample%20Sensitivity%20Analysis%20Report.pdf)
+which uses fake/synthetic data to better help showcase the elements that
+make up each report.
+
 # Authors
 
 - [Elizabeth Stoughton](https://github.com/stoughty111)
