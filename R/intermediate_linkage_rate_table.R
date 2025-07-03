@@ -484,17 +484,19 @@ intermediate_linkage_rate_table <- function(main_data_list,
   }
 
   # Get column headers
-  #column_headers <- ifelse(display_unlinked_column,
-  #                         sprintf("**{level}**\n(N = {style_number(n)}, {style_percent(p, digits = %d)}%%)",
-  #                                 num_decimal_places),
-  #                         "**{level}**\n(N = {style_number(n)})")
   column_headers <- sprintf("**{level}**\n(N = {style_number(n)}, {style_percent(p, digits = %d)}%%)", num_decimal_places)
+
+  # Identify all stat columns and get the last one
+  stat_cols <- names(combined_table$table_body)
+  stat_cols <- stat_cols[grepl("^stat_", stat_cols)]
+  overall_col <- stat_cols[length(stat_cols)]
 
   # Apply column headers to the table
   table <- modify_header(
     combined_table,
     label = "",
-    all_stat_cols() ~ column_headers
+    all_stat_cols() ~ column_headers,
+    !!overall_col := "**Overall**\n(N = {style_number(n)})"  # No % for overall column
   )
 
   # tab over the sublevels for pdf output, as it doesn't tab them over automatically
