@@ -155,6 +155,7 @@
 #' @param threshold_plot_captions A vector of captions that will appear under the captions listed in the \code{threshold_plots} parameter.
 #' @param report_file_name An optional file name which will be assigned to the output report, if no name is supplied, the report title
 #'  is used.
+#' @param flow_chart_path A singular string path to a PNG of a flow chart that will appear as the first result in the generated linkage report.
 #'
 #' @details
 #' All tables display the variable labels in their headings before reverting to
@@ -269,7 +270,8 @@ intermediate_linkage_quality_report <- function(main_data_list,
                                          threshold = NULL,
                                          threshold_plots = NULL,
                                          threshold_plot_captions = NULL,
-                                         report_file_name = NULL
+                                         report_file_name = NULL,
+                                         flow_chart_path = NULL
 ){
 
   #-- ERROR HANDLING --#
@@ -297,6 +299,14 @@ intermediate_linkage_quality_report <- function(main_data_list,
     else{
       stop(
         "Invalid argument: Threshold plot captions must be included with plots."
+      )
+    }
+  }
+
+  if(!is.null(flow_chart_path)){
+    if(!is.character(flow_chart_path)){
+      stop(
+        "Invalid argument: Threshold plots must be a vector of file paths."
       )
     }
   }
@@ -1259,7 +1269,8 @@ intermediate_linkage_quality_report <- function(main_data_list,
     R_version = R_version,
     datastan_package_version = datastan_package_version,
     threshold_plots = threshold_plots,
-    threshold_plot_captions = threshold_plot_captions
+    threshold_plot_captions = threshold_plot_captions,
+    flow_chart_path = flow_chart_path
   ))
 
   ### FORMAT FINAL OUTPUT

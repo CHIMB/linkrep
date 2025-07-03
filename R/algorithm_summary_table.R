@@ -52,7 +52,6 @@ algorithm_summary_table <- function(data,
   # Add row separation for easier reading
   thin_line <- fp_border(color = "grey70", width = 1)
   table <- hline(table, part = 'all', border = thin_line)
-  print(table)
 
   return(table)
 }

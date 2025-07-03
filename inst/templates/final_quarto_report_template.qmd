@@ -66,6 +66,7 @@ params:
   num_pairs_non_missing_ground_truth: null
   percent_non_missing_ground_truth: null
   performance_measures_df: null
+  flow_chart_path: null
 
 header-includes:
 - \renewcommand{\thesection}{\arabic{section}.}
@@ -154,6 +155,8 @@ missingness_table <- read_data(params$missingness_table_path, "missingness_table
 threshold_plots <- params$threshold_plots
 
 threshold_plot_captions <- params$threshold_plot_captions
+
+flow_chart_path <- params$flow_chart_path
 
 if (!is.null(params$performance_measures_plot_path)){
   if (!file.exists(params$performance_measures_plot_path)){
@@ -430,6 +433,31 @@ if (requires_landscape_page(linkage_rate_table)){
 ```
 
 # Results {#sec-results}
+
+`r if(!is.null(flow_chart_path)) "::: {.content-visible}" else "::: {.content-hidden}"`
+
+## Study Flow Diagram
+
+```{r study flow diagram, ft.align="left", results='asis'}
+plot <- flow_chart_path
+caption <- paste0('Study flow diagram of data from ', params$left_dataset_name, ' and ', params$right_dataset_name)
+cat(paste0("![", caption, "](", plot, "){width=70%}"), "\n\n")
+```
+
+```{r linked data page orientation before, results='asis'}
+if (!is.null(linked_data_repr_table)){
+  if (requires_landscape_page(linked_data_repr_table)){
+    set_page_width("landscape")
+  }
+  else{
+    set_page_width("portrait")
+  }
+}else{
+  set_page_width("portrait")
+}
+```
+
+:::
 
 ## Linked Data Summary
 

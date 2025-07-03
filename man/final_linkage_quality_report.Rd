@@ -73,7 +73,8 @@ final_linkage_quality_report(
   threshold = NULL,
   threshold_plots = NULL,
   threshold_plot_captions = NULL,
-  report_file_name = NULL
+  report_file_name = NULL,
+  flow_chart_path = NULL
 )
 }
 \arguments{
@@ -305,6 +306,8 @@ obtained during data linkage.}
 
 \item{report_file_name}{An optional file name which will be assigned to the output report, if no name is supplied, the report title
 is used.}
+
+\item{flow_chart_path}{A singular string path to a PNG of a flow chart that will appear as the first result in the generated linkage report.}
 }
 \value{
 Saves either a word or pdf record linkage quality report to the \code{output_dir}.\cr
