@@ -559,10 +559,11 @@ if (!is.null(algorithm_summary_table)){
 for(i in 1:length(threshold_plots)){
   plot <- threshold_plots[i]
   caption <- threshold_plot_captions[i]
+  
+  # Add a header above each plot, then print the plot
+  cat(paste0("### Linkage Score Distribution ", i, "\n"))
   cat(paste0("![", caption, "](", plot, ")"), "\n\n")
 }
- # #| tbl-cap: !expr paste0("Summary plot of the weight thresholds to link records in ", params$left_dataset_name, " to those in ", params$right_dataset_name, ".")
- # knitr::include_graphics(threshold_plots)
 ```
 
 :::
