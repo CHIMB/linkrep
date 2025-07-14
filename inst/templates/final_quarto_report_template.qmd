@@ -426,12 +426,6 @@ The [**Results**](#sec-results) section includes figures and tables with descrip
 
 {{< pagebreak >}}
 
-```{r linked data representativeness table page orientation before, results='asis'}
-if (requires_landscape_page(linkage_rate_table)){
-  set_page_width("landscape")
-}
-```
-
 # Results {#sec-results}
 
 `r if(!is.null(flow_chart_path)) "::: {.content-visible}" else "::: {.content-hidden}"`
@@ -458,6 +452,12 @@ if (!is.null(linked_data_repr_table)){
 ```
 
 :::
+
+```{r linked data representativeness table page orientation before, results='asis'}
+if (requires_landscape_page(linkage_rate_table)){
+  set_page_width("landscape")
+}
+```
 
 ## Linked Data Summary
 
