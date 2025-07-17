@@ -308,6 +308,8 @@ obtained during data linkage.}
 is used.}
 
 \item{flow_chart_path}{A singular string path to a PNG of a flow chart that will appear as the first result in the generated linkage report.}
+
+\item{threshold_plot_titles}{A vector of titles that will appear over the provided threshold plots.}
 }
 \value{
 Saves either a word or pdf record linkage quality report to the \code{output_dir}.\cr

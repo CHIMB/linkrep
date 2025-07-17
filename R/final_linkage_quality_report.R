@@ -162,6 +162,7 @@
 #' @param threshold_plots A vector of png files that will appear in the report which are plots of different thresholds
 #'  obtained during data linkage.
 #' @param threshold_plot_captions A vector of captions that will appear under the captions listed in the \code{threshold_plots} parameter.
+#' @param threshold_plot_titles A vector of titles that will appear over the provided threshold plots.
 #' @param report_file_name An optional file name which will be assigned to the output report, if no name is supplied, the report title
 #'  is used.
 #' @param flow_chart_path A singular string path to a PNG of a flow chart that will appear as the first result in the generated linkage report.
@@ -282,6 +283,7 @@ final_linkage_quality_report <- function(main_data,
                                    threshold = NULL,
                                    threshold_plots = NULL,
                                    threshold_plot_captions = NULL,
+                                   threshold_plot_titles = NULL,
                                    report_file_name = NULL,
                                    flow_chart_path = NULL
 ){
@@ -295,22 +297,42 @@ final_linkage_quality_report <- function(main_data,
         "Invalid argument: Threshold plots must be a vector of file paths."
       )
     }
+
     if(!is.null(threshold_plot_captions)){
       if(!is.character(threshold_plot_captions)){
         stop(
-          "Invalid argument: Threshold plot captions must be a vector of strings"
+          "Invalid argument: Threshold plot captions must be a vector of strings."
         )
       }
 
       if(!(length(threshold_plots) == length(threshold_plot_captions))){
         stop(
-          "Invalid argument: Numbers of threshold plots and captions must match."
+          "Invalid argument: Number of threshold plots and captions must match."
         )
       }
     }
     else{
       stop(
         "Invalid argument: Threshold plot captions must be included with plots."
+      )
+    }
+
+    if(!is.null(threshold_plot_titles)){
+      if(!is.character(threshold_plot_titles)){
+        stop(
+          "Invalid argument: Threshold plot titles must be a vector of strings."
+        )
+      }
+
+      if(!(length(threshold_plots) == length(threshold_plot_titles))){
+        stop(
+          "Invalid argument: Number of threshold plots and titles must match."
+        )
+      }
+    }
+    else{
+      stop(
+        "Invalid argument: Threshold plot titles must be included with plots."
       )
     }
   }
@@ -1565,6 +1587,7 @@ final_linkage_quality_report <- function(main_data,
     datastan_package_version = datastan_package_version,
     threshold_plots = threshold_plots,
     threshold_plot_captions = threshold_plot_captions,
+    threshold_plot_titles = threshold_plot_titles,
     num_pairs_non_missing_ground_truth = num_pairs_non_missing_ground_truth,
     percent_non_missing_ground_truth = percent_non_missing_ground_truth,
     performance_measures_df = performance_measures_data,

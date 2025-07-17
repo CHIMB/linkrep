@@ -63,6 +63,7 @@ params:
   datastan_package_version: null
   threshold_plots: null
   threshold_plot_captions: null
+  threshold_plot_titles: null
   num_pairs_non_missing_ground_truth: null
   percent_non_missing_ground_truth: null
   performance_measures_df: null
@@ -155,6 +156,8 @@ missingness_table <- read_data(params$missingness_table_path, "missingness_table
 threshold_plots <- params$threshold_plots
 
 threshold_plot_captions <- params$threshold_plot_captions
+
+threshold_plot_titles <- params$threshold_plot_titles
 
 flow_chart_path <- params$flow_chart_path
 
@@ -559,9 +562,10 @@ if (!is.null(algorithm_summary_table)){
 for(i in 1:length(threshold_plots)){
   plot <- threshold_plots[i]
   caption <- threshold_plot_captions[i]
+  title <- threshold_plot_titles[i]
   
   # Add a header above each plot, then print the plot
-  cat(paste0("### Linkage Score Distribution ", i, "\n"))
+  cat(paste0("### ", title, "\n"))
   cat(paste0("![", caption, "](", plot, ")"), "\n\n")
 }
 ```
