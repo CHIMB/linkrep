@@ -1321,12 +1321,12 @@ final_linkage_quality_report <- function(main_data,
       left_dataset_name,
       " to those in ",
       right_dataset_name,
-      ". Classification performance was estimated among record pairs with non-missing values for ",
+      ". Classification performance was estimated across all steps of the linkage algorithm using candidate record pairs with non-missing values for ",
       ground_truth,
       ifelse(!is.null(num_pairs_non_missing_ground_truth) & !is.null(percent_non_missing_ground_truth),
              paste0(" (N = ", num_pairs_non_missing_ground_truth, ", ", percent_non_missing_ground_truth, "%)"),
              ""),
-      " and reported as percentages (%). ",
+      "; and results are reported as percentages (%). ",
       concatenated_footnotes)
   }
 
@@ -1506,12 +1506,12 @@ final_linkage_quality_report <- function(main_data,
       left_dataset_name,
       " to those in ",
       right_dataset_name,
-      ". Classification performance was estimated among record pairs with non-missing values for ",
+      ". Classification performance was estimated across all steps of the linkage algorithm using candidate record pairs with non-missing values for ",
       ground_truth,
       ifelse(!is.null(num_pairs_non_missing_ground_truth) & !is.null(percent_non_missing_ground_truth),
              paste0(" (N = ", num_pairs_non_missing_ground_truth, ", ", percent_non_missing_ground_truth, "%)"),
              ""),
-      " and reported as percentages (%). ",
+      "; and results are reported as percentages (%). ",
       concatenated_footnotes)
   }
 

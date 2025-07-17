@@ -46,10 +46,10 @@ performance_measures_table <- function(data,
   BODY_ALIGNMENT <- "center"
 
   # add extra footnote to end of provided footnotes
-  footnotes <- append(footnotes, paste0("Classification performance was estimated among record pairs with non-missing values for ",
+  footnotes <- append(footnotes, paste0("Classification performance was estimated across all steps of the linkage algorithm using candidate record pairs with non-missing values for ",
                                         ground_truth,
                                         ifelse(!is.null(num_record_pairs) & !is.null(percent_record_pairs), paste0(" (N = ", num_record_pairs, ", ", percent_record_pairs, "%)"), ""),
-                                        " and reported as percentages (%)."))
+                                        "; and results are reported as percentages (%)."))
 
   # generate the table
   table <- formatted_flextable(data,
