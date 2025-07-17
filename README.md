@@ -101,7 +101,12 @@ Report](https://github.com/CHIMB/linkrep/raw/main/inst/docs/Sample%20Final%20Rep
 and [Sensitivity Analysis
 Report](https://github.com/CHIMB/linkrep/raw/main/inst/docs/Sample%20Sensitivity%20Analysis%20Report.pdf)
 which uses fake/synthetic data to better help showcase the elements that
-make up each report.
+make up each report. The reports generated here use two synthetic
+datasets, both of which can be downloaded, with the [Left
+Dataset](https://github.com/CHIMB/autolink/raw/main/data/syndataA_final.csv)
+containing 150 records that have a corresponding link to one of the 250
+records in the [Right
+Dataset](https://github.com/CHIMB/autolink/raw/main/data/syndataB_final.csv).
 
 # Authors
 
